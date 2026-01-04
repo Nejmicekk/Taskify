@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="Taskify" uuid="731cf1b4-1aa8-454f-b4c7-46d3fcff8e23">
+    <data-source source="LOCAL" name="Taskify" uuid="309e7757-667c-4f5d-b6a5-8107c6c88a54">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
