@@ -15,3 +15,5 @@ obj/
 # Ostatní nepotřebné věci
 *.log
 .DS_Store
+
+*.DotSettings.user
