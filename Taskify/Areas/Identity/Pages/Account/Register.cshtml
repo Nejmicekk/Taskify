@@ -1,0 +1,79 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Založení účtu";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+}
+
+<div class="container d-flex justify-content-center align-items-center min-vh-100 py-5">
+    
+    <div class="card border-0 shadow-lg" style="width: 100%; max-width: 450px; border-radius: 1rem;">
+        <div class="card-body p-5">
+            
+            <div class="text-center mb-4">
+                <div class="mb-3 text-primary">
+                    <h2 class="d-inline-block align-middle fw-bold ms-2 text-primary">Taskify</h2>
+                </div>
+                <h3 class="fw-bold">Založení účtu</h3>
+                <p class="text-muted">Vítejte! Zadejte údaje pro registraci.</p>
+            </div>
+
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Username" class="form-label fw-bold text-dark">Jméno <span class="text-danger">*</span></label>
+                    <input asp-for="Input.Username" class="form-control bg-light border-1 py-2" autocomplete="username" aria-required="true" placeholder="Jméno" />
+                    <span asp-validation-for="Input.Username" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Email" class="form-label fw-bold text-dark">Email <span class="text-danger">*</span></label>
+                    <input asp-for="Input.Email" class="form-control bg-light border-1 py-2" autocomplete="email" aria-required="true" placeholder="vas@email.cz" />
+                    <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label asp-for="Input.Password" class="form-label fw-bold text-dark">Heslo <span class="text-danger">*</span></label>
+                    <input asp-for="Input.Password" class="form-control bg-light border-1 py-2" autocomplete="new-password" aria-required="true" placeholder="Heslo" />
+                    <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label asp-for="Input.ConfirmPassword" class="form-label fw-bold text-dark">Potvrzení hesla <span class="text-danger">*</span></label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control bg-light border-1 py-2" autocomplete="new-password" aria-required="true" placeholder="Potvrzení hesla" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <button id="registerSubmit" type="submit" class="btn btn-primary w-100 fw-bold py-2 mb-3">Začít</button>
+
+                @{
+                    if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                    {
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <div>
+                                @foreach (var provider in Model.ExternalLogins!)
+                                {
+                                    <button type="submit" class="btn btn-outline-primary w-100 fw-bold py-2 d-flex justify-content-center align-items-center" name="provider" value="@provider.Name" title="Založit účet pomocí @provider.DisplayName">
+                                        Založit účet pomocí Google
+                                    </button>
+                                }
+                            </div>
+                        </form>
+                    }
+                }
+
+                <div class="text-center mt-3">
+                    <span class="text-muted">Máte už účet?</span>
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none fw-bold">Přihlaste se</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

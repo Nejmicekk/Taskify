@@ -1,0 +1,17 @@
+﻿# Ignorovat složky sestavení projektu/runu - trash
+bin/
+obj/
+
+# Ignorovat db
+*.db
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Ignorovat nastavení Rideru 
+.idea/
+*.sln.iml
+
+# Ostatní nepotřebné věci
+*.log
+.DS_Store
