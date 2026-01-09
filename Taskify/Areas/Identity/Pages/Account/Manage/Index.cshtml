@@ -1,30 +1,184 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = "Můj Profil";
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
+<h3 class="mb-4">@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
+
 <div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
-                <label asp-for="Username" class="form-label"></label>
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 24px;">
+                        @Model.Username.Substring(0, 1).ToUpper()
+                    </div>
+                    <div>
+                        <h5 class="mb-0">@Model.Username</h5>
+                        @if (Model.UserRole.Contains("Admin"))
+                        {
+                            <span class="badge bg-danger mt-1">@Model.UserRole</span>
+                        }
+                        else
+                        {
+                            <small class="text-muted">@Model.UserRole</small>
+                        }
+                    </div>
+                </div>
+
+                <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab">Osobní údaje</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pills-security-tab" data-bs-toggle="pill" data-bs-target="#pills-security" type="button" role="tab">Zabezpečení</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="pills-tabContent">
+                    
+                    <div class="tab-pane fade show active" id="pills-profile" role="tabpanel">
+                        <form id="profile-form" method="post">
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" id="edit-btn" class="btn btn-outline-primary btn-sm" onclick="enableEdit()">
+                                    <i class="bi bi-pencil"></i> Upravit profil
+                                </button>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Username" class="form-control" disabled />
+                                <label asp-for="Username" class="form-label">Uživatelské jméno</label>
+                            </div>
+                            
+                            <div class="form-floating mb-3">
+                                <textarea asp-for="Input.Bio" class="form-control" style="height: 100px" disabled id="input-bio"></textarea>
+                                <label asp-for="Input.Bio" class="form-label">Bio</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone" />
+                                <label asp-for="Input.PhoneNumber" class="form-label">Telefon</label>
+                                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <button id="save-btn" type="submit" class="btn btn-primary w-100 d-none">Uložit změny</button>
+                            <button id="cancel-btn" type="button" class="btn btn-secondary w-100 mt-2 d-none" onclick="location.reload()">Zrušit</button>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="pills-security" role="tabpanel">
+                        <form id="change-password-form" method="post" asp-page-handler="ChangePassword">
+                                
+                            <div class="alert alert-light border mb-3">
+                                <small class="text-primary" style=""><i class="bi bi-info-circle"></i> Zde si můžete změnit heslo.</small>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="PasswordInput.OldPassword" class="form-control" autocomplete="current-password" aria-required="true" />
+                                <label asp-for="PasswordInput.OldPassword" class="form-label"></label>
+                                <span asp-validation-for="PasswordInput.OldPassword" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="PasswordInput.NewPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                                <label asp-for="PasswordInput.NewPassword" class="form-label"></label>
+                                <span asp-validation-for="PasswordInput.NewPassword" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="PasswordInput.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                                <label asp-for="PasswordInput.ConfirmPassword" class="form-label"></label>
+                                <span asp-validation-for="PasswordInput.ConfirmPassword" class="text-danger"></span>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Změnit heslo</button>
+                        </form>
+                    </div>
+
+                </div> </div>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Reputace & Statistiky</h5>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Reputace</span>
+                        <span class="fw-bold">@Model.Reputation</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: @Math.Min(Model.Reputation / 10, 100)%;"></div>
+                    </div>
+                    <small class="text-muted">Cíl: 1000 bodů</small>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Úroveň</span>
+                        <span class="fw-bold">Úroveň @Model.Level</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%;"></div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Body</span>
+                        <span class="fw-bold">@Model.Points points</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @(Model.Points % 100)%;"></div>
+                    </div>
+                </div>
+
             </div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number."/>
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Pozor, nastala chyba</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Zavřít"></button>
             </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
-        </form>
+            <div class="modal-body">
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Rozumím</button>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function enableEdit() {
+            document.getElementById('input-bio').disabled = false;
+            document.getElementById('input-phone').disabled = false;
+            document.getElementById('edit-btn').classList.add('d-none');
+            document.getElementById('save-btn').classList.remove('d-none');
+            document.getElementById('cancel-btn').classList.remove('d-none');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var summary = document.querySelector(".validation-summary-errors");
+            
+            if (summary && summary.innerText.trim().length > 0) {
+                var myModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                myModal.show();
+            }
+        });
+    </script>
 }

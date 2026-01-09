@@ -1,0 +1,22 @@
+﻿@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
+    {
+        Layout = parentLayout.ToString();
+    }
+    else
+    {
+        Layout = "/Pages/Shared/_Layout.cshtml";
+    }
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            @RenderBody()
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}
