@@ -13,7 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 
-// 3. Registrace Identity (User + Role + UI + Tokeny)
+// 3. Registrace Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
         // Nastavení hesla (Dev mode)
@@ -29,17 +29,33 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     .AddErrorDescriber<Taskify.Services.CzechIdentityErrorDescriber>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders() // Důležité pro reset hesla atd.
-    .AddDefaultUI();            // Důležité, aby fungovaly i stránky, které jsi nevygeneroval (např. ForgotPassword)
+    .AddDefaultUI();            // Důležité, aby fungovaly i stránky, které jsem automaticky nevygeneroval (např. ForgotPassword)
 
 // 4. Razor Pages
 builder.Services.AddRazorPages(options =>
 {
+    // Toto zamkne celou aplikaci, přístup mají jen přihlášení.
+    // Pro Guesta je potřeba nastavit na konkrétních stránkách [AllowAnonymous]
     options.Conventions.AuthorizeFolder("/");
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 5. SEEDOVÁNÍ ROLÍ
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        await RoleSeeder.SeedRolesAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while creating roles (Seeding)");
+    }
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -47,7 +63,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 
 // Bez 'UseAuthentication' by aplikace nevěděla, že je někdo přihlášený, i kdyby zadal správné heslo.
@@ -56,7 +71,6 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-// Mapování Razor Pages
 app.MapRazorPages()
     .WithStaticAssets();
 
