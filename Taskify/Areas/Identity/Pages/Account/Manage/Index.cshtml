@@ -5,6 +5,9 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+<link rel="stylesheet" href="~/css/Profile/profile.css" asp-append-version="true" />
+
 <h3 class="mb-4">@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
 
@@ -14,19 +17,34 @@
             <div class="card-body p-4">
                 
                 <div class="d-flex align-items-center mb-4">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px; font-size: 24px;">
-                        @Model.Username.Substring(0, 1).ToUpper()
+                    <div class="me-4">
+                        <div class="profile-pic-wrapper shadow-sm" onclick="document.getElementById('upload-photo').click()" title="Změnit profilovou fotku">
+                            
+                            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl)) 
+                            {
+                                <img id="img-preview" src="@Model.ProfilePictureUrl" alt="Profilovka" class="profile-pic-img">
+                            }
+                            else
+                            {
+                                <div id="initials-placeholder" class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 36px;">
+                                    @Model.Username.Substring(0, 1).ToUpper()
+                                </div>
+                                <img id="img-preview" src="#" alt="Náhled" class="profile-pic-img d-none">
+                            }
+
+                            <div class="profile-pic-overlay">
+                                <i class="bi bi-camera-fill"></i>
+                            </div>
+                        </div>
                     </div>
+                    
                     <div>
-                        <h5 class="mb-0">@Model.Username</h5>
-                        @if (Model.UserRole.Contains("Admin"))
-                        {
-                            <span class="badge bg-danger mt-1">@Model.UserRole</span>
-                        }
-                        else
-                        {
-                            <small class="text-muted">@Model.UserRole</small>
-                        }
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="mb-0 fw-bold">@Model.Input.Username</h4>
+                            <span class="badge bg-primary">Úroveň @Model.Level</span>
+                        </div>
+                        @if (Model.UserRole.Contains("Admin")) { <span class="text-danger fw-bold small">@Model.UserRole</span> }
+                        else { <small class="text-muted">@Model.UserRole</small> }
                     </div>
                 </div>
 
@@ -42,7 +60,15 @@
                 <div class="tab-content" id="pills-tabContent">
                     
                     <div class="tab-pane fade show active" id="pills-profile" role="tabpanel">
-                        <form id="profile-form" method="post">
+                        <form id="profile-form" method="post" enctype="multipart/form-data">
+                            
+                            <input type="file" 
+                                   asp-for="Input.ProfilePicture" 
+                                   id="upload-photo" 
+                                   class="d-none" 
+                                   accept="image/*" 
+                                   onchange="previewImage(this)">
+
                             <div class="d-flex justify-content-end mb-3">
                                 <button type="button" id="edit-btn" class="btn btn-outline-primary btn-sm" onclick="enableEdit()">
                                     <i class="bi bi-pencil"></i> Upravit profil
@@ -50,17 +76,22 @@
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input asp-for="Username" class="form-control" disabled />
-                                <label asp-for="Username" class="form-label">Uživatelské jméno</label>
+                                <input asp-for="Input.Username" class="form-control" disabled id="input-username"/>
+                                <label asp-for="Input.Username" class="form-label">Uživatelské jméno</label>
                             </div>
-                            
+
                             <div class="form-floating mb-3">
                                 <textarea asp-for="Input.Bio" class="form-control" style="height: 100px" disabled id="input-bio"></textarea>
                                 <label asp-for="Input.Bio" class="form-label">Bio</label>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone" />
+                                <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
+                                <label asp-for="Input.Email" class="form-label">Email</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone"/>
                                 <label asp-for="Input.PhoneNumber" class="form-label">Telefon</label>
                                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
                             </div>
@@ -98,8 +129,8 @@
                             <button type="submit" class="btn btn-primary w-100">Změnit heslo</button>
                         </form>
                     </div>
-
-                </div> </div>
+                </div> 
+            </div>
         </div>
     </div>
 
@@ -110,33 +141,29 @@
 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-1">
-                        <span>Reputace</span>
+                        <span>Reputace <i class="bi bi-star-fill text-warning ms-1"></i></span>
                         <span class="fw-bold">@Model.Reputation</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: @Math.Min(Model.Reputation / 10, 100)%;"></div>
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Min(Model.Reputation / 10, 100)%;"></div>
                     </div>
                     <small class="text-muted">Cíl: 1000 bodů</small>
                 </div>
 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-1">
-                        <span>Úroveň</span>
-                        <span class="fw-bold">Úroveň @Model.Level</span>
+                        <span>Level <i class="bi bi-arrow-up-circle-fill text-primary ms-1"></i></span>
+                        <span class="fw-bold">@Model.Level</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%;"></div>
+                        @{
+                            // Jednoduchý vizuální výpočet: kolik mám bodů vs. kolik potřebuji na další level
+                            double percentage = 0;
+                            if (Model.NextLevelPoints > 0) percentage = ((double)Model.Points / Model.NextLevelPoints) * 100;
+                        }
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%;"></div>
                     </div>
-                </div>
-
-                <div class="mb-2">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Body</span>
-                        <span class="fw-bold">@Model.Points points</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: @(Model.Points % 100)%;"></div>
-                    </div>
+                    <small class="text-muted">@Model.Points / @Model.NextLevelPoints XP</small>
                 </div>
 
             </div>
@@ -161,24 +188,29 @@
     </div>
 </div>
 
+<div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upravit fotku</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="img-container" style="height: 400px; overflow: hidden;">
+                    <img id="image-to-crop" src="" style="display: block; max-width: 100%;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-primary" id="crop-btn">Použít fotku</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        function enableEdit() {
-            document.getElementById('input-bio').disabled = false;
-            document.getElementById('input-phone').disabled = false;
-            document.getElementById('edit-btn').classList.add('d-none');
-            document.getElementById('save-btn').classList.remove('d-none');
-            document.getElementById('cancel-btn').classList.remove('d-none');
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            var summary = document.querySelector(".validation-summary-errors");
-            
-            if (summary && summary.innerText.trim().length > 0) {
-                var myModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                myModal.show();
-            }
-        });
-    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
 }

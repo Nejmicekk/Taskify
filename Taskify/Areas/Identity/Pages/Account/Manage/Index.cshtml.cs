@@ -17,20 +17,28 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<IndexModel> _logger;
 
         public IndexModel(
             UserManager<User> userManager,
-            SignInManager<User> signInManager)
+            SignInManager<User> signInManager,
+            IWebHostEnvironment webHostEnvironment,
+            ILogger<IndexModel> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
         
         public string Username { get; set; }
         public int Level { get; set; }
         public int Reputation { get; set; }
         public int Points { get; set; }
+        public int NextLevelPoints { get; set; } 
         public string UserRole { get; set; }
+        public string ProfilePictureUrl { get; set; }
         
         [TempData]
         public string StatusMessage { get; set; }
@@ -44,13 +52,22 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         // Třídy pro data formulářů
         public class InputModel
         {
-
+            [Display(Name = "Uživatelské jméno")]
+            public string Username { get; set; }
+            
             [Phone]
-            [Display(Name = "Phone number")]
+            [Display(Name = "Telefonní číslo")]
             public string PhoneNumber { get; set; }
             
             [Display(Name = "O mně (Bio)")]
             public string Bio { get; set; }
+            
+            [EmailAddress]
+            [Display(Name = "Email")]
+            public string Email { get; set; }
+
+            [Display(Name = "Profilová fotka")]
+            public IFormFile ProfilePicture { get; set; }
         }
 
         public class PaswordModel
@@ -77,11 +94,15 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var email = await _userManager.GetEmailAsync(user);
 
             Username = userName;
             Level = user.Level;
             Reputation = user.Reputation;
             Points = user.Points;
+            ProfilePictureUrl = user.ProfilePictureUrl;
+            
+            NextLevelPoints = (int)(100 * Math.Pow(1.3, Level - 1));
             
             var roles = await _userManager.GetRolesAsync(user);
             var mainRole = roles.FirstOrDefault() ?? "Member";
@@ -91,7 +112,9 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             {
                 Input = new InputModel
                 {
+                    Username = userName,
                     PhoneNumber = phoneNumber,
+                    Email = email,
                     Bio = user.Bio
                 };
             }
@@ -119,7 +142,58 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 await LoadAsync(user);
                 return Page();
             }
+            
+            // Změna profilového obrázku
+            if (Input.ProfilePicture != null)
+            {
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "profiles");
+                Directory.CreateDirectory(uploadsFolder); // Vytvoří složku, pokud neexistuje
 
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Input.ProfilePicture.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await Input.ProfilePicture.CopyToAsync(fileStream);
+                }
+                
+                string oldProfilePictureUrl = user.ProfilePictureUrl;
+
+                user.ProfilePictureUrl = "/uploads/profiles/" + uniqueFileName;
+                await _userManager.UpdateAsync(user);
+                
+                if (!string.IsNullOrEmpty(oldProfilePictureUrl))
+                {
+                    string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, oldProfilePictureUrl.TrimStart('/'));
+
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        try
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                            _logger.LogInformation("Stará profilová fotka byla smazána: {Path}", oldFilePath);
+                        }
+                        catch (IOException e)
+                        {
+                            _logger.LogWarning("Nepodařilo se smazat starou profilovku. Soubor: {Path}. Chyba: {Message}", oldFilePath, e.Message);
+                        }
+                    }
+                }
+            }
+            
+            // Změna username
+            var currentUsername = await _userManager.GetUserNameAsync(user);
+            if (Input.Username != currentUsername)
+            {
+                var setUserNameResult = await _userManager.SetUserNameAsync(user, Input.Username);
+                if (!setUserNameResult.Succeeded)
+                {
+                    StatusMessage = "Chyba: Toto uživatelské jméno je již obsazené nebo neplatné.";
+                    return RedirectToPage();
+                }
+            }
+
+            // Změna telefonního čísla
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
@@ -131,6 +205,19 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 }
             }
             
+            // Změna emailu
+            var email = await _userManager.GetEmailAsync(user);
+            if (Input.Email != email)
+            {
+                var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
+                if (!setEmailResult.Succeeded)
+                {
+                    StatusMessage = "Chyba při ukládání emailu.";
+                    return RedirectToPage();
+                }
+            }
+            
+            // Změna bia
             if (user.Bio != Input.Bio)
             {
                 user.Bio = Input.Bio;

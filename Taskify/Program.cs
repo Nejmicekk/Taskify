@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Taskify.Data;
 using Taskify.Models;
 
@@ -63,6 +64,25 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Cesta ke složce uploads
+var uploadsPath = Path.Combine(builder.Environment.WebRootPath, "uploads");
+
+// Pokud neexistuje, tak je vytvořena
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+// Vše co začíná na /uploads se bude hledat fyzicky ve složce uploads a nebude se ptát na manifestu
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
+
+app.UseStaticFiles();
+
 app.UseRouting();
 
 // Bez 'UseAuthentication' by aplikace nevěděla, že je někdo přihlášený, i kdyby zadal správné heslo.

@@ -12,6 +12,9 @@ obj/
 .idea/
 *.sln.iml
 
+# Ignorovat nahrané soubory uživatlelů
+wwwroot/uploads/
+
 # Ostatní nepotřebné věci
 *.log
 .DS_Store
