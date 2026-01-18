@@ -1,49 +1,43 @@
-﻿/* Kontejner pro profilovku - kruhový a ořezává obsah */
-.profile-pic-wrapper {
+﻿.profile-pic-wrapper {
     width: 100px;
     height: 100px;
     position: relative;
     border-radius: 50%;
     overflow: hidden;
     cursor: pointer;
-    border: 3px solid #0d6efd; /* Bootstrap Primary Color */
+    border: 3px solid #0d6efd;
     transition: transform 0.2s;
 }
 
-/* Efekt při kliknutí */
 .profile-pic-wrapper:active {
     transform: scale(0.95);
 }
 
-/* Samotný obrázek */
 .profile-pic-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-/* Overlay vrstva (černá průhledná s ikonou) */
 .profile-pic-overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Ztmavnutí */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 0; /* Defaultně neviditelné */
+    opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-/* Ikonka uvnitř overlaye */
 .profile-pic-overlay i {
     color: white;
     font-size: 24px;
 }
 
-/* Když najedu myší na wrapper, overlay se zviditelní */
 .profile-pic-wrapper:hover .profile-pic-overlay {
     opacity: 1;
 }

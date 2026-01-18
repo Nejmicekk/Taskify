@@ -1,0 +1,162 @@
+﻿@page "/u/{username}"
+@model Taskify.Pages.Users.UserProfileModel
+@{
+    ViewData["Title"] = Model.DisplayedUser != null ? Model.DisplayedUser.UserName : "Uživatel nenalezen";
+    
+    bool isAuth = User.Identity.IsAuthenticated;
+    
+    if (Model.DisplayedUser != null && !isAuth)
+    {
+        ViewData["HideNavbar"] = true;
+        ViewData["HideFooter"] = true;
+    }
+}
+
+<link rel="stylesheet" href="~/css/Profile/profile.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Users/user_profile.css" asp-append-version="true" />
+
+@if (Model.DisplayedUser == null)
+{
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-person-x text-muted" style="font-size: 5rem;"></i>
+                </div>
+                
+                <h2 class="fw-bold mb-3">Uživatel nenalezen</h2>
+                <p class="text-muted lead mb-4">
+                    Bohužel, uživatel s tímto jménem v naší databázi neexistuje. 
+                    Možná jste udělali překlep v adrese?
+                </p>
+
+                <a href="/" class="btn btn-primary px-4 rounded-pill">
+                    <i class="bi bi-house-door-fill me-2"></i> Zpět na úvod
+                </a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container py-4 @(isAuth ? "" : "blur-content")">
+        <div class="row">
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            
+                            <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start mb-4">
+                                <div class="me-md-4 mb-3 mb-md-0">
+                                    <div class="profile-pic-wrapper shadow-sm" style="cursor: default;">
+                                        @if (!string.IsNullOrEmpty(Model.DisplayedUser.ProfilePictureUrl)) 
+                                        {
+                                            <img src="@Model.DisplayedUser.ProfilePictureUrl" alt="Profilovka" class="profile-pic-img">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 36px;">
+                                                @Model.DisplayedUser.UserName.Substring(0, 1).ToUpper()
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                                        <h4 class="mb-0 fw-bold">@Model.DisplayedUser.UserName</h4>
+                                        <span class="badge bg-primary">Úroveň @Model.DisplayedUser.Level</span>
+                                    </div>
+                                    @if (Model.UserRole.Contains("Admin")) { <span class="text-danger fw-bold small">@Model.UserRole</span> }
+                                    else { <small class="text-muted">@Model.UserRole</small> }
+                                </div>
+                                
+                                <div class="mt-3 mt-md-0 ms-md-auto">
+                                    <button type="button"
+                                            class="btn btn-secondary d-flex align-items-center gap-2 px-4 shadow-sm"
+                                            onclick="copyToClipboard(window.location.href, this)">
+                                        <i class="bi bi-share-fill"></i> Sdílet
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold">O mně</label>
+                                <p class="lead fs-6">
+                                    @if(!string.IsNullOrEmpty(Model.DisplayedUser.Bio)) { @Model.DisplayedUser.Bio } else { <span class="text-muted fst-italic">Uživatel o sobě nic nenapsal.</span> }
+                                </p>
+                            </div>
+
+                            @if (Model.IsMe)
+                            {
+                                <div class="mt-4">
+                                    <a href="/Identity/Account/Manage" class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-pencil"></i> Přejít do nastavení profilu
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-4">Statistiky</h5>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Reputace <i class="bi bi-star-fill text-warning ms-1"></i></span>
+                                    <span class="fw-bold">@Model.DisplayedUser.Reputation</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Min(Model.DisplayedUser.Reputation / 10, 100)%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Level</span>
+                                    <span class="fw-bold">@Model.DisplayedUser.Level / @(Model.DisplayedUser.Level + 1)</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    @{
+                                        double percentage = 0;
+                                        if (Model.NextLevelPoints > 0) percentage = ((double)Model.DisplayedUser.Points / Model.NextLevelPoints) * 100;
+                                    }
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%;"></div>
+                                </div>
+                                <small class="text-muted">@Model.DisplayedUser.Points / @Model.NextLevelPoints XP</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.DisplayedUser != null && !isAuth)
+{
+    <div class="login-gate-overlay">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <h3 class="fw-bold mb-2">Chcete vidět profil uživatele @Model.DisplayedUser.UserName?</h3>
+                    <p class="text-muted mb-4">Připojte se k Taskify komunitě, sledujte statistiky ostatních a budujte svou reputaci.</p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <a class="btn btn-primary px-4 py-2 fw-bold" id="login" asp-area="Identity" asp-page="/Account/Login">
+                            Přihlásit se
+                        </a>
+                        <a class="btn btn-outline-secondary px-4 py-2" id="register" asp-area="Identity" asp-page="/Account/Register">
+                            Zaregistrovat se
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

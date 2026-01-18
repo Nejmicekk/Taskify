@@ -29,6 +29,14 @@ function previewImage(input) {
     }
 }
 
+function shareMyProfile(btnElement) {
+    var usernameInput = document.getElementById('input-username');
+    if (usernameInput && usernameInput.value) {
+        var url = window.location.origin + "/u/" + usernameInput.value;
+        copyToClipboard(url, btnElement);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var summary = document.querySelector(".validation-summary-errors");
 
