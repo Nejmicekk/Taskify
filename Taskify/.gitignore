@@ -20,3 +20,5 @@ wwwroot/uploads/
 .DS_Store
 
 *.DotSettings.user
+
+identifier.sqlite
