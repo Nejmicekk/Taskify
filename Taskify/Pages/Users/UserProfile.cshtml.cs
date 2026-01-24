@@ -17,7 +17,7 @@ namespace Taskify.Pages.Users
         }
 
         public User? DisplayedUser { get; set; }
-        public string UserRole { get; set; }
+        public string UserRole { get; set; } = "Taskify Member";
         public int NextLevelPoints { get; set; }
         public bool IsMe { get; set; }
 

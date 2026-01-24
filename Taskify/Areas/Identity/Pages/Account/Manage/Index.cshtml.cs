@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Taskify.Models;
+using Taskify.Constants;
 
 namespace Taskify.Areas.Identity.Pages.Account.Manage
 {
@@ -56,6 +57,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             public string Username { get; set; }
             
             [Phone]
+            [RegularExpression(AppConstants.AppRegex.Phone, ErrorMessage = "Zadejte platné české číslo (např. 777 123 456).")]
             [Display(Name = "Telefonní číslo")]
             public string PhoneNumber { get; set; }
             
@@ -63,6 +65,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             public string Bio { get; set; }
             
             [EmailAddress]
+            [RegularExpression(AppConstants.AppRegex.Email, ErrorMessage = "Zadejte platný formát emailu.")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 

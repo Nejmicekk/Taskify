@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = Model.DisplayedUser != null ? Model.DisplayedUser.UserName : "Uživatel nenalezen";
     
-    bool isAuth = User.Identity.IsAuthenticated;
+    bool isAuth = User.Identity is { IsAuthenticated: true };
     
     if (Model.DisplayedUser != null && !isAuth)
     {
@@ -56,7 +56,7 @@ else
                                         else
                                         {
                                             <div class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 36px;">
-                                                @Model.DisplayedUser.UserName.Substring(0, 1).ToUpper()
+                                                @Model.DisplayedUser.UserName?.Substring(0, 1).ToUpper()
                                             </div>
                                         }
                                     </div>

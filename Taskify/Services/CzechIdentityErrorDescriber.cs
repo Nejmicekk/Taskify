@@ -9,11 +9,11 @@ namespace Taskify.Services
         public override IdentityError PasswordMismatch() { return new IdentityError { Code = nameof(PasswordMismatch), Description = "Heslo je nesprávné." }; }
         public override IdentityError InvalidToken() { return new IdentityError { Code = nameof(InvalidToken), Description = "Neplatný token." }; }
         public override IdentityError LoginAlreadyAssociated() { return new IdentityError { Code = nameof(LoginAlreadyAssociated), Description = "Tento uživatel je již přidán." }; }
-        public override IdentityError InvalidUserName(string userName) { return new IdentityError { Code = nameof(InvalidUserName), Description = $"Uživatelské jméno '{userName}' je neplatné, může obsahovat pouze písmena a číslice." }; }
-        public override IdentityError InvalidEmail(string email) { return new IdentityError { Code = nameof(InvalidEmail), Description = $"Email '{email}' je neplatný." }; }
+        public override IdentityError InvalidUserName(string? userName) { return new IdentityError { Code = nameof(InvalidUserName), Description = $"Uživatelské jméno '{userName}' je neplatné, může obsahovat pouze písmena a číslice." }; }
+        public override IdentityError InvalidEmail(string? email) { return new IdentityError { Code = nameof(InvalidEmail), Description = $"Email '{email}' je neplatný." }; }
         public override IdentityError DuplicateUserName(string userName) { return new IdentityError { Code = nameof(DuplicateUserName), Description = $"Uživatel '{userName}' již existuje." }; }
         public override IdentityError DuplicateEmail(string email) { return new IdentityError { Code = nameof(DuplicateEmail), Description = $"Email '{email}' je již používán." }; }
-        public override IdentityError InvalidRoleName(string role) { return new IdentityError { Code = nameof(InvalidRoleName), Description = $"Role '{role}' je neplatná." }; }
+        public override IdentityError InvalidRoleName(string? role) { return new IdentityError { Code = nameof(InvalidRoleName), Description = $"Role '{role}' je neplatná." }; }
         public override IdentityError DuplicateRoleName(string role) { return new IdentityError { Code = nameof(DuplicateRoleName), Description = $"Role '{role}' již existuje." }; }
         public override IdentityError UserAlreadyHasPassword() { return new IdentityError { Code = nameof(UserAlreadyHasPassword), Description = "Uživatel již má nastavené heslo." }; }
         public override IdentityError UserLockoutNotEnabled() { return new IdentityError { Code = nameof(UserLockoutNotEnabled), Description = "Zamykání účtu není pro tohoto uživatele povoleno." }; }
