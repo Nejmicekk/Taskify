@@ -11,62 +11,93 @@
 <h3 class="mb-4">@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
 
-<div class="row">
-    <div class="col-md-7">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                
-                <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start mb-4">
-                    <div class="me-md-4 mb-3 mb-md-0">
-                        <div class="profile-pic-wrapper shadow-sm" onclick="document.getElementById('upload-photo').click()" title="Změnit profilovou fotku">
-                            
-                            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl)) 
-                            {
-                                <img id="img-preview" src="@Model.ProfilePictureUrl" alt="Profilovka" class="profile-pic-img">
-                            }
-                            else
-                            {
-                                <div id="initials-placeholder" class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 36px;">
-                                    @Model.Username.Substring(0, 1).ToUpper()
-                                </div>
-                                <img id="img-preview" src="#" alt="Náhled" class="profile-pic-img d-none">
-                            }
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+            <div class="me-md-4 mb-3 mb-md-0">
+                <div class="profile-pic-wrapper shadow-sm" onclick="document.getElementById('upload-photo').click()" title="Změnit profilovou fotku">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl)) 
+                    {
+                        <img id="img-preview" src="@Model.ProfilePictureUrl" alt="Profilovka" class="profile-pic-img">
+                    }
+                    else
+                    {
+                        <div id="initials-placeholder" class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 36px;">
+                            @Model.Username.Substring(0, 1).ToUpper()
+                        </div>
+                        <img id="img-preview" src="#" alt="Náhled" class="profile-pic-img d-none">
+                    }
+                    <div class="profile-pic-overlay"><i class="bi bi-camera-fill"></i></div>
+                </div>
+            </div>
+            
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                    <h4 class="mb-0 fw-bold">@Model.Input.Username</h4>
+                    <span class="badge bg-primary">Úroveň @Model.Level</span>
+                </div>
+                @if (Model.UserRole.Contains("Admin")) { <span class="text-danger fw-bold small">@Model.UserRole</span> }
+                else { <small class="text-muted">@Model.UserRole</small> }
+            </div>
+            
+            <div class="mt-3 mt-md-0 ms-md-auto">
+                <button type="button" class="btn btn-secondary d-flex align-items-center gap-2 px-4 shadow-sm" onclick="shareMyProfile(this)">
+                    <i class="bi bi-share-fill"></i> Sdílet
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                            <div class="profile-pic-overlay">
-                                <i class="bi bi-camera-fill"></i>
-                            </div>
-                        </div>
+<div class="row">
+    <div class="col-md-5 order-1 order-md-2 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Reputace & Statistiky</h5>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Reputace <i class="bi bi-star-fill text-warning ms-1"></i></span>
+                        <span class="fw-bold">@Model.Reputation</span>
                     </div>
-                    
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                            <h4 class="mb-0 fw-bold">@Model.Input.Username</h4>
-                            <span class="badge bg-primary">Úroveň @Model.Level</span>
-                        </div>
-                        @if (Model.UserRole.Contains("Admin")) { <span class="text-danger fw-bold small">@Model.UserRole</span> }
-                        else { <small class="text-muted">@Model.UserRole</small> }
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Min(Model.Reputation / 10, 100)%;"></div>
                     </div>
-                    
-                    <div class="mt-3 mt-md-0 ms-md-auto">
-                        <button type="button"
-                                class="btn btn-secondary d-flex align-items-center gap-2 px-4 shadow-sm"
-                                onclick="shareMyProfile(this)">
-                            <i class="bi bi-share-fill"></i> Sdílet
-                        </button>
-                    </div>
+                    <small class="text-muted">Cíl: 1000 bodů</small>
                 </div>
 
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Level <i class="bi bi-arrow-up-circle-fill text-primary ms-1"></i></span>
+                        <span class="fw-bold">@Model.Level</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        @{
+                            double percentage = 0;
+                            if (Model.NextLevelPoints > 0) percentage = ((double)Model.Points / Model.NextLevelPoints) * 100;
+                        }
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%;"></div>
+                    </div>
+                    <small class="text-muted">@Model.Points / @Model.NextLevelPoints XP</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7 order-2 order-md-1 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body p-4">
+                
                 <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab">Osobní údaje</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-security-tab" data-bs-toggle="pill" data-bs-target="#pills-security" type="button" role="tab">Zabezpečení</button>
+                        <button class="nav-link" id="pills-security-tab" data-bs-toggle="pill" data-bs-target="#pills-security" type="button" role="tab" style="margin-left: 5px">Zabezpečení</button>
                     </li>
                 </ul>
 
                 <div class="tab-content" id="pills-tabContent">
-                    
                     <div class="tab-pane fade show active" id="pills-profile" role="tabpanel">
                         <form id="profile-form" method="post" enctype="multipart/form-data">
                             
@@ -96,6 +127,7 @@
                             <div class="form-floating mb-3">
                                 <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
                                 <label asp-for="Input.Email" class="form-label">Email</label>
+                                <span asp-validation-for="Input.Email" class="text-danger"></span>
                             </div>
 
                             <div class="form-floating mb-3">
@@ -137,43 +169,7 @@
                             <button type="submit" class="btn btn-primary w-100">Změnit heslo</button>
                         </form>
                     </div>
-                </div> 
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-5">
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-4">
-                <h5 class="card-title mb-4">Reputace & Statistiky</h5>
-
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Reputace <i class="bi bi-star-fill text-warning ms-1"></i></span>
-                        <span class="fw-bold">@Model.Reputation</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Min(Model.Reputation / 10, 100)%;"></div>
-                    </div>
-                    <small class="text-muted">Cíl: 1000 bodů</small>
                 </div>
-
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Level <i class="bi bi-arrow-up-circle-fill text-primary ms-1"></i></span>
-                        <span class="fw-bold">@Model.Level</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        @{
-                            // Jednoduchý vizuální výpočet: kolik mám bodů vs. kolik potřebuji na další level
-                            double percentage = 0;
-                            if (Model.NextLevelPoints > 0) percentage = ((double)Model.Points / Model.NextLevelPoints) * 100;
-                        }
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%;"></div>
-                    </div>
-                    <small class="text-muted">@Model.Points / @Model.NextLevelPoints XP</small>
-                </div>
-
             </div>
         </div>
     </div>
@@ -218,7 +214,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
 }

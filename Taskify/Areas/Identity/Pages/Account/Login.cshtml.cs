@@ -106,6 +106,11 @@ namespace Taskify.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+            
+            if (returnUrl.Contains("Logout", StringComparison.OrdinalIgnoreCase))
+            {
+                returnUrl = Url.Content("~/");
+            }
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 

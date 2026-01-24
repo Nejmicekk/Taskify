@@ -64,7 +64,8 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             [Display(Name = "O mně (Bio)")]
             public string Bio { get; set; }
             
-            [EmailAddress]
+            [Required(ErrorMessage = "Email je povinný.")]
+            [EmailAddress(ErrorMessage = "Zadejte platný formát emailu.")]
             [RegularExpression(AppConstants.AppRegex.Email, ErrorMessage = "Zadejte platný formát emailu.")]
             [Display(Name = "Email")]
             public string Email { get; set; }

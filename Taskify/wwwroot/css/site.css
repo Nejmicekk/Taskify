@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin-bottom: 0;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -28,4 +28,78 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
+  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: #0b5ed7 !important;
+  border-color: #0a58ca !important;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(13, 110, 253, 0.3);
+}
+
+.btn-outline-primary {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0d6efd !important;
+  border-color: #0d6efd !important;
+  color: white !important;
+  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-pills .nav-link {
+  transition: all 0.2s ease-in-out;
+  transform: translateY(0);
+  border: 1px solid transparent;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  color: white !important;
+  background-color: #0d6efd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+  font-weight: 600;
+}
+
+.nav-pills .nav-link.active:hover {
+  color: white !important;
+  background-color: #0b5ed7;
+  transform: translateY(0);
+  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+}
+
+.nav-pills .nav-link:not(.active):hover {
+  color: #0d6efd !important;
+  background-color: rgba(13, 110, 253, 0.1);
+  border-radius: 8px;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
