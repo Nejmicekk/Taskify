@@ -2,15 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Taskify.Models;
 using Taskify.Constants;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
+using Taskify.Services;
 
 namespace Taskify.Areas.Identity.Pages.Account.Manage
 {
@@ -20,17 +21,20 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         private readonly SignInManager<User> _signInManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<IndexModel> _logger;
+        private readonly IEmailSender _emailSender;
 
         public IndexModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IWebHostEnvironment webHostEnvironment,
-            ILogger<IndexModel> logger)
+            ILogger<IndexModel> logger,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _webHostEnvironment = webHostEnvironment;
             _logger = logger;
+            _emailSender = emailSender;
         }
         
         public string Username { get; set; }
@@ -48,7 +52,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         public InputModel Input { get; set; }
         
         [BindProperty]
-        public PaswordModel PasswordInput { get; set; }
+        public PasswordModel PasswordInput { get; set; }
         
         // Třídy pro data formulářů
         public class InputModel
@@ -72,9 +76,11 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Profilová fotka")]
             public IFormFile ProfilePicture { get; set; }
+            
+            public String ProfilePictureUrl { get; set; }
         }
 
-        public class PaswordModel
+        public class PasswordModel
         {
             [Required(ErrorMessage = "Musíte zadat současné heslo.")]
             [DataType(DataType.Password)]
@@ -111,17 +117,15 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             var roles = await _userManager.GetRolesAsync(user);
             var mainRole = roles.FirstOrDefault() ?? "Member";
             UserRole = $"Taskify {mainRole}";
-
-            if (Input == null)
+            
+            Input = new InputModel
             {
-                Input = new InputModel
-                {
-                    Username = userName,
-                    PhoneNumber = phoneNumber,
-                    Email = email,
-                    Bio = user.Bio
-                };
-            }
+                Username = userName,
+                PhoneNumber = phoneNumber,
+                Email = email,
+                Bio = user.Bio,
+                ProfilePictureUrl = user.ProfilePictureUrl
+            };
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -201,22 +205,10 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
+                var updatePhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
+                if (!updatePhoneResult.Succeeded)
                 {
-                    StatusMessage = "Chyba při ukládání telefoního čísla.";
-                    return RedirectToPage();
-                }
-            }
-            
-            // Změna emailu
-            var email = await _userManager.GetEmailAsync(user);
-            if (Input.Email != email)
-            {
-                var setEmailResult = await _userManager.SetEmailAsync(user, Input.Email);
-                if (!setEmailResult.Succeeded)
-                {
-                    StatusMessage = "Chyba při ukládání emailu.";
+                    StatusMessage = "Chyba při ukládání telefonního čísla.";
                     return RedirectToPage();
                 }
             }
@@ -228,9 +220,53 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 var updateResult = await _userManager.UpdateAsync(user);
                 if (!updateResult.Succeeded)
                 {
-                    StatusMessage = "Chyba při ukládání profilu.";
+                    StatusMessage = "Chyba při ukládání bia.";
                     return RedirectToPage();
                 }
+            }
+            
+            // Změna emailu
+            var email = await _userManager.GetEmailAsync(user);
+            if (Input.Email != email)
+            {
+                if (user.LastEmailChangeDate != null)
+                {
+                    var daysSinceChange = (DateTime.UtcNow - user.LastEmailChangeDate.Value).TotalDays;
+                    var daysLimit = 14;
+
+                    if (daysSinceChange < daysLimit)
+                    {
+                        var daysLeft = Math.Ceiling(daysLimit - daysSinceChange);
+                        StatusMessage = $"Chyba: E-mail lze změnit pouze jednou za {daysLimit} dní. Zkuste to znovu za {daysLeft} dní.";
+                        return RedirectToPage();
+                    }
+                }
+                
+                user = await _userManager.GetUserAsync(User);
+                var userId = await _userManager.GetUserIdAsync(user);
+                var code = await _userManager.GenerateChangeEmailTokenAsync(user, Input.Email);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+    
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmailChange",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId = userId, email = Input.Email, code = code },
+                    protocol: Request.Scheme);
+                
+                string htmlBody = EmailTemplates.GetHtmlTemplate(
+                    title: "Změna e-mailu 📤",
+                    message: "Obdrželi jsme žádost na změnu e-mailu u vašeho účtu Taskify. Pokud jste to nebyli vy, ignorujte tento email.",
+                    buttonText: "Potvrdit nový e-mail",
+                    buttonUrl: callbackUrl
+                );
+                
+                await _emailSender.SendEmailAsync(
+                    Input.Email,
+                    "Potvrzení změny e-mailu",
+                    htmlBody);
+                
+                StatusMessage = "Profil byl aktualizován. Na nový e-mail byl odeslán potvrzovací odkaz.";
+                return RedirectToPage();
             }
 
             await _signInManager.RefreshSignInAsync(user);
@@ -251,6 +287,13 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 await LoadAsync(user);
                 return Page();
             }
+            
+            if (PasswordInput.OldPassword == PasswordInput.NewPassword)
+            {
+                ModelState.AddModelError(string.Empty, "Nové heslo musí být odlišné od starého.");
+                await LoadAsync(user);
+                return Page();
+            }
 
             var changePasswordResult = await _userManager.ChangePasswordAsync(user, PasswordInput.OldPassword, PasswordInput.NewPassword);
             if (!changePasswordResult.Succeeded)
@@ -260,6 +303,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
                 await LoadAsync(user);
+                ViewData["ActiveTab"] = "security";
                 return Page();
             }
 

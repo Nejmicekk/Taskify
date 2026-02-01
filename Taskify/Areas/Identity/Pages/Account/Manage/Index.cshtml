@@ -124,9 +124,10 @@
                                 <label asp-for="Input.Bio" class="form-label">Bio</label>
                             </div>
 
-                            <div class="form-floating mb-3">
+                            <div class="form-floating mb-3 input-group">
                                 <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
                                 <label asp-for="Input.Email" class="form-label">Email</label>
+                                
                                 <span asp-validation-for="Input.Email" class="text-danger"></span>
                             </div>
 
@@ -216,4 +217,23 @@
     <partial name="_ValidationScriptsPartial" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var summary = document.querySelector(".validation-summary-errors");
+            if (summary && summary.innerText.trim().length > 0) {
+                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModal.show();
+            }
+            
+            var activeTab = '@ViewData["ActiveTab"]'; 
+            if (activeTab === 'security') {
+                var securityTabBtn = document.querySelector('#pills-security-tab');
+                if (securityTabBtn) {
+                    var tab = new bootstrap.Tab(securityTabBtn);
+                    tab.show();
+                }
+            }
+        });
+    </script>
 }

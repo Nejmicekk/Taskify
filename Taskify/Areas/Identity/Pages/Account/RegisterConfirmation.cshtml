@@ -1,0 +1,31 @@
+﻿@page
+@model RegisterConfirmationModel
+@{
+    ViewData["Title"] = "Potvrzení registrace";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+}
+
+<div class="d-flex align-items-center justify-content-center text-center" style="min-height: 80vh;">
+    <div class="card shadow-sm p-5 mx-auto" style="max-width: 600px;">
+        
+        <div class="mb-4">
+            <i class="bi bi-envelope-paper-heart-fill text-primary" style="font-size: 4rem;"></i>
+        </div>
+
+        <h2 class="fw-bold mb-3">Zkontrolujte si e-mail 📬</h2>
+        
+        <p class="text-muted lead">
+            Právě jsme odeslali potvrzovací odkaz k registraci na adresu:
+            <br>
+            <strong class="text-dark">@Model.Email</strong>
+        </p>
+
+        <div class="alert alert-light border mt-4 text-start d-inline-block">
+            <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Pokud e-mail nevidíte, zkontrolujte složku <strong>Spam</strong> nebo <strong>Hromadné</strong>.
+            </small>
+        </div>
+    </div>
+</div>

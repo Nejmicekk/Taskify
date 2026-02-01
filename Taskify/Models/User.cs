@@ -19,6 +19,8 @@ public class User : IdentityUser
     public int Reputation { get; set; } = 0;
     public int Level { get; set; } = 1;
     public int Points { get; set; } = 0;
+    
+    public DateTime? LastEmailChangeDate { get; set; }
 
     // -- VAZBY --
     // Seznam úkolů, které uživatel založil

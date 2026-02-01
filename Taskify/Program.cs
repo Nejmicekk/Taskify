@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Taskify.Data;
 using Taskify.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Taskify.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,28 +19,32 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 3. Registrace Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
-        // Nastavení hesla (Dev mode)
         options.Password.RequireDigit = false;
         options.Password.RequiredLength = 4;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
-
-        // Potvrzování emailu vypnuto
-        options.SignIn.RequireConfirmedAccount = false;
+        
+        options.SignIn.RequireConfirmedAccount = true;
+        
+        options.User.RequireUniqueEmail = true;
     })
+    .AddRoles<IdentityRole>()
     .AddErrorDescriber<Taskify.Services.CzechIdentityErrorDescriber>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders() // Důležité pro reset hesla atd.
-    .AddDefaultUI();            // Důležité, aby fungovaly i stránky, které jsem automaticky nevygeneroval (např. ForgotPassword)
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
 
-// 4. Razor Pages
+// 4. Registrace razor pages
 builder.Services.AddRazorPages(options =>
 {
     // Toto zamkne celou aplikaci, přístup mají jen přihlášení.
     // Pro Guesta je potřeba nastavit na konkrétních stránkách [AllowAnonymous]
     options.Conventions.AuthorizeFolder("/");
 });
+
+// 5. Registrace email senderu
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 

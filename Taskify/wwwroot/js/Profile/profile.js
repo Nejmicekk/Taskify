@@ -44,6 +44,21 @@ document.addEventListener("DOMContentLoaded", function() {
         var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
         errorModal.show();
     }
+
+    var modals = document.querySelectorAll('.modal');
+
+    modals.forEach(function(modal) {
+        modal.addEventListener('hidden.bs.modal', function () {
+            var backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(function(backdrop) {
+                backdrop.remove();
+            });
+            
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
+        });
+    });
 });
 
 cropModalElement.addEventListener('shown.bs.modal', function () {
