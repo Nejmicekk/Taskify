@@ -1,0 +1,150 @@
+﻿@page
+@model Taskify.Pages.Tasks.CreateModel
+@{
+    ViewData["Title"] = "Zadat nový úkol";
+
+    var selectedCatName = "";
+    if (Model.Input.CategoryId > 0)
+    {
+        var selectedCat = Model.AllCategories.FirstOrDefault(c => c.Id == Model.Input.CategoryId);
+        if (selectedCat != null) selectedCatName = selectedCat.Name;
+    }
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css">
+
+<link rel="stylesheet" href="~/css/Tasks/create.css" asp-append-version="true">
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h2 class="fw-bold"><i class="bi bi-plus-circle-fill text-primary me-2"></i>@ViewData["Title"]</h2>
+            <p class="text-muted">Vyplňte detaily úkolu a vyberte přesné místo.</p>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="row g-4">
+            
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Title" class="form-control" />
+                            <label asp-for="Input.Title"></label>
+                            <span asp-validation-for="Input.Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-floating mb-3 dropdown" id="categoryDropdownWrapper">
+                            <input type="text" id="categorySearch" class="form-control bg-white" data-bs-toggle="dropdown" data-bs-auto-close="outside" autocomplete="off" value="@selectedCatName">
+                            <label asp-for="Input.CategoryId">Kategorie</label>
+                            <input type="hidden" asp-for="Input.CategoryId" id="hiddenCategoryId">
+                            
+                            <ul class="dropdown-menu w-100 p-0 shadow-lg category-dropdown-menu">
+                                @foreach (var l1 in Model.AllCategories.Where(c => c.LevelNumber == 1).OrderBy(c => c.Name))
+                                {
+                                    <li class="parent-li border-bottom">
+                                        <div class="d-flex align-items-center p-3 category-header bg-light" data-bs-toggle="collapse" data-bs-target="#cat-@l1.Id" aria-expanded="false">
+                                            <i class="bi @l1.IconUrl me-2 fs-5 text-primary"></i> <span class="fw-bold">@l1.Name</span>
+                                            <i class="bi bi-chevron-down ms-auto text-muted chevron-icon"></i>
+                                        </div>
+                                        <ul class="collapse list-unstyled mb-0" id="cat-@l1.Id">
+                                            @foreach (var l2 in Model.AllCategories.Where(c => c.ParentId == l1.Id).OrderBy(c => c.Name))
+                                            {
+                                                var hasL3 = Model.AllCategories.Any(c => c.ParentId == l2.Id);
+                                                if (hasL3)
+                                                {
+                                                    <li class="parent-li border-top">
+                                                        <div class="d-flex align-items-center p-2 ps-4 category-header" data-bs-toggle="collapse" data-bs-target="#cat-@l2.Id" aria-expanded="false">
+                                                            <i class="bi @l2.IconUrl me-2 text-secondary"></i> @l2.Name
+                                                            <i class="bi bi-chevron-down ms-auto text-muted chevron-icon" style="font-size: 0.8rem;"></i>
+                                                        </div>
+                                                        <ul class="collapse list-unstyled mb-0 bg-white" id="cat-@l2.Id">
+                                                            @foreach (var l3 in Model.AllCategories.Where(c => c.ParentId == l2.Id).OrderBy(c => c.Name))
+                                                            {
+                                                                <li class="category-leaf-li" data-search="@l1.Name @l2.Name @l3.Name">
+                                                                    <div class="p-2 ps-5 border-top category-item text-muted" data-id="@l3.Id" data-name="@l3.Name">
+                                                                        <i class="bi @l3.IconUrl me-2"></i> @l3.Name
+                                                                    </div>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="category-leaf-li border-top" data-search="@l1.Name @l2.Name">
+                                                        <div class="p-2 ps-4 category-item text-muted" data-id="@l2.Id" data-name="@l2.Name">
+                                                            <i class="bi @l2.IconUrl me-2 text-secondary"></i> @l2.Name
+                                                        </div>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <span asp-validation-for="Input.CategoryId" class="text-danger small d-block mb-3" style="margin-top: -10px;"></span>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Input.Description" class="form-control" style="height: 120px"></textarea>
+                            <label asp-for="Input.Description"></label>
+                            <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imageUploads" class="form-label">Fotky problému</label>
+                            <input type="file" name="imageUploads" id="imageUploads" class="form-control" accept="image/*" multiple>
+                            <div class="form-text">Můžete vybrat i více fotek najednou.</div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" id="deadline-display" class="form-control bg-white" />
+                            <label for="deadline-display">Termín splnění (volitelné)</label>
+    
+                            <input type="hidden" asp-for="Input.Deadline" id="deadline-picker" />
+                            <span asp-validation-for="Input.Deadline" class="text-danger small"></span>
+                        </div>
+
+                        <input type="hidden" asp-for="Input.LocationLatitude" id="lat-input" />
+                        <input type="hidden" asp-for="Input.LocationLongitude" id="lng-input" />
+                        <input type="hidden" asp-for="Input.FullAddress" id="full-address-input" />
+                        <input type="hidden" asp-for="Input.City" id="city-input" />
+                        <span asp-validation-for="Input.LocationLatitude" class="text-danger small d-block mb-3"></span>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm rounded-3">
+                            <i class="bi bi-send-fill me-2"></i> Zveřejnit úkol
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-3 d-flex flex-column">
+                        <div class="input-group mb-3 shadow-sm rounded-3">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-geo-alt-fill"></i></span>
+                            <input type="text" id="address-search" class="form-control border-start-0 ps-0" 
+                                   placeholder="Zadejte adresu pro hledání..." autocomplete="off">
+                            <button class="btn btn-primary px-4 no-anim" type="button" id="btn-search">Hledat</button>
+                        </div>
+                        <div id="map" class="flex-grow-1 shadow-sm" style="min-height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+    <script src="~/js/Tasks/create.js" asp-append-version="true"></script>
+}

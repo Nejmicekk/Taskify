@@ -49,6 +49,12 @@ body {
   box-shadow: 0 6px 12px rgba(13, 110, 253, 0.3);
 }
 
+.no-anim {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important; 
+}
+
 .btn-outline-primary {
   border-radius: 8px;
   font-weight: 600;

@@ -1,18 +1,25 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace Taskify.Pages;
+using Microsoft.EntityFrameworkCore;
+using Taskify.Data;
+using Taskify.Models;
+using Taskify.Models.Enums;
+using TaskStatus = Taskify.Models.Enums.TaskStatus;
 
 public class IndexModel : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
+    private readonly ApplicationDbContext _context;
+    public IndexModel(ApplicationDbContext context) => _context = context;
 
-    public IndexModel(ILogger<IndexModel> logger)
-    {
-        _logger = logger;
-    }
+    public IList<TaskItem> Tasks { get; set; } = default!;
 
-    public void OnGet()
+    public async Task OnGetAsync()
     {
+        Tasks = await _context.Tasks
+            .Include(t => t.Category)
+            .Include(t => t.Images)
+            .Include(t => t.CreatedBy)
+            .Where(t => t.Status == TaskStatus.Open)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToListAsync();
     }
 }

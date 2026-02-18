@@ -21,10 +21,11 @@ public class TaskItem
     [Required]
     public TaskStatus Status { get; set; } = TaskStatus.Open;
     
-    public double LocationLatitude { get; set; }
-    public double LocationLongitude { get; set; }
+    public AddressInfo Location { get; set; } = new AddressInfo();
     
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public ICollection<TaskImage> Images { get; set; } = new List<TaskImage>();
+    
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? Deadline { get; set; }
 
     // Vazby na kategorie
@@ -39,13 +40,13 @@ public class TaskItem
     public string CreatedById { get; set; } = string.Empty;
     
     [ForeignKey("CreatedById")]
-    [InverseProperty("CreatedTasks")] // Musí odpovídat názvu v User.cs
+    [InverseProperty("CreatedTasks")]
     public User? CreatedBy { get; set; }
 
     // Kdo to plní
     public string? AssignedToId { get; set; }
     
     [ForeignKey("AssignedToId")]
-    [InverseProperty("AssignedTasks")] // Musí odpovídat názvu v User.cs
+    [InverseProperty("AssignedTasks")]
     public User? AssignedTo { get; set; }
 }

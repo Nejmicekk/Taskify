@@ -1,0 +1,47 @@
+﻿.task-scroll-wrapper {
+    display: flex;
+    overflow-x: auto;
+    gap: 1.5rem;
+    padding: 1rem .5rem;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+}
+.task-scroll-wrapper::-webkit-scrollbar { height: 6px; }
+.task-scroll-wrapper::-webkit-scrollbar-thumb { background: #dee2e6; border-radius: 10px; }
+
+.task-card {
+    min-width: 280px;
+    max-width: 280px;
+    border: none;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+.task-card:hover { transform: translateY(-5px); }
+
+#map-container { height: 500px; border-radius: 15px; overflow: hidden; }
+
+.expandable-section {
+    transition: all 0.3s ease-in-out;
+}
+
+.is-expanded-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh !important;
+    z-index: 9999;
+    background: white;
+    padding: 2rem;
+    margin: 0 !important;
+}
+
+.is-expanded-fullscreen .task-scroll-wrapper {
+    flex-wrap: wrap;
+    overflow-y: auto;
+    height: calc(100vh - 100px);
+}
+
+.is-expanded-fullscreen #map-container {
+    height: calc(100vh - 4rem);
+}

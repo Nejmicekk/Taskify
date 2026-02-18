@@ -48,13 +48,14 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
-// 5. SEEDOVÁNÍ ROLÍ
+// 5. SEEDOVÁNÍ
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         await RoleSeeder.SeedRolesAsync(services);
+        await CategorySeeder.SeedCategoriesAsync(services);
     }
     catch (Exception ex)
     {

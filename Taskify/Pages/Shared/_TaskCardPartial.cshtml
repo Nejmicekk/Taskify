@@ -1,0 +1,31 @@
+﻿@model Taskify.Models.TaskItem
+@using System.Linq
+
+<div class="card task-card shadow-sm">
+    <div class="position-relative">
+        <img src="@(Model.Images.FirstOrDefault()?.Url ?? "/img/placeholder-task.jpg")" 
+             class="card-img-top" style="height: 150px; object-fit: cover; border-radius: 15px 15px 0 0;">
+        <div class="position-absolute top-0 end-0 p-2">
+            <span class="badge bg-white text-dark shadow-sm">@Model.Category?.Name</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <h6 class="fw-bold text-truncate">@Model.Title</h6>
+        <div class="d-flex gap-2 mb-3">
+            <span class="badge bg-success-subtle text-success border border-success-subtle">@Model.RewardPoints XP</span>
+            @if ((DateTime.UtcNow - Model.CreatedAt).TotalDays < 3) {
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Novinka</span>
+            }
+        </div>
+        
+        <p class="card-text small text-muted text-truncate mb-3">@Model.Description</p>
+        
+        <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-2">
+            <div class="text-muted small">
+                <i class="bi bi-geo-alt me-1 text-truncate"></i> 
+                @(string.IsNullOrEmpty(Model.Location.City) ? "Lokalita neurčena" : Model.Location.City)
+            </div>
+            <a asp-page="/Tasks/Details" asp-route-id="@Model.Id" class="btn btn-primary btn-sm rounded-pill px-3 no-anim">Detail</a>
+        </div>
+    </div>
+</div>

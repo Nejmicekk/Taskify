@@ -7,8 +7,7 @@ public class Category
 {
     [Key]
     public int Id { get; set; }
-
-    // Pro stromovou strukturu
+    
     public int? ParentId { get; set; }
     
     [ForeignKey("ParentId")]
@@ -24,4 +23,7 @@ public class Category
 
     // Vazba na úkoly
     public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+    
+    [InverseProperty("ParentCategory")]
+    public ICollection<Category> SubCategories { get; set; } = new List<Category>();
 }

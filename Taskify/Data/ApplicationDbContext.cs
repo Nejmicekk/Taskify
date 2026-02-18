@@ -4,7 +4,6 @@ using Taskify.Models;
 
 namespace Taskify.Data;
 
-// Dědíme z IdentityDbContext<User>, aby to umělo pracovat s naším "předělaným" uživatelem
 public class ApplicationDbContext : IdentityDbContext<User>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -12,20 +11,36 @@ public class ApplicationDbContext : IdentityDbContext<User>
     {
     }
     
-    // Tabulka Tasks s objekty TaskItem
     public DbSet<TaskItem> Tasks { get; set; }
-    // Tabulka Categories s objekty Category
     public DbSet<Category> Categories { get; set; }
-
-    // Při každém tvoření nového objektu/modelu se nám automaticky importuje do naší db
+    
+    public DbSet<TaskImage> TaskImages { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
         builder.Entity<TaskItem>().ToTable("Tasks");
         builder.Entity<Category>().ToTable("Categories");
-
-        // Tady by jmse mohli nastavit vazby, kdyby to EF Core nepochopil z modelů.
-        // Protože jsme použili [InverseProperty] a [ForeignKey] přímo v modelech, tak EF Core to pochopí už z toho.
+        
+        // Kdyz se smaze user, tak ukol zustane.
+        builder.Entity<TaskItem>()
+            .HasOne(t => t.CreatedBy)
+            .WithMany(u => u.CreatedTasks)
+            .HasForeignKey(t => t.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        // Kdyz se smaze user, co mel plnit ukol, tak ukol zustane, ale vymeze se prirazeni uzivatele co to plnil - bude ho moct splnit nekdo jiny.
+        builder.Entity<TaskItem>()
+            .HasOne(t => t.AssignedTo)
+            .WithMany(u => u.AssignedTasks)
+            .HasForeignKey(t => t.AssignedToId)
+            .OnDelete(DeleteBehavior.SetNull);
+        
+        builder.Entity<Category>()
+            .HasOne(c => c.ParentCategory)
+            .WithMany(c => c.SubCategories)
+            .HasForeignKey(c => c.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
