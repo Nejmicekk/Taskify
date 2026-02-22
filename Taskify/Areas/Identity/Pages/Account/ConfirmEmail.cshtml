@@ -1,0 +1,36 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Ověření e-mailu";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+}
+
+<div class="d-flex align-items-center justify-content-center text-center" style="min-height: 80vh;">
+    <div class="card shadow-sm p-5 mx-auto" style="max-width: 500px;">
+        
+        @if (Model.StatusMessage != null && (Model.StatusMessage.StartsWith("Error") || Model.StatusMessage.StartsWith("Chyba")))
+        {
+            <i class="bi bi-x-circle-fill text-danger mb-3" style="font-size: 3rem;"></i>
+            <h2 class="mb-3">Něco se pokazilo</h2>
+            <p class="text-muted mb-4">
+                Odkaz pro ověření je neplatný nebo již vypršel.
+            </p>
+            <div class="alert alert-danger">
+                @Model.StatusMessage
+            </div>
+        }
+        else
+        {
+            <i class="bi bi-check-circle-fill text-success mb-3" style="font-size: 3rem;"></i>
+            <h2 class="mb-3">Email ověřen! 🎉</h2>
+            <p class="text-muted mb-4">
+                Děkujeme za potvrzení vašeho emailu. Váš účet je nyní plně aktivní.
+            </p>
+            <a asp-page="/Account/Login" class="btn btn-primary w-100 btn-lg">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Přihlásit se
+            </a>
+        }
+        
+    </div>
+</div>
