@@ -30,4 +30,16 @@
   <Folder Include="wwwroot\uploads\tasks\" />
 </ItemGroup>
 
+<ItemGroup>
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\4\7b8cfb9c-0022-4e8d-87c9-9ebcd0f99114.jpg" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\6\805df8e3-048b-4d36-934d-10aa7385cda6.png" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\20\a5aded3e-85c3-46dc-bb28-166f9e794aa2.png" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\20\b76116a6-08b3-44c4-b308-64eb3ad19e91.png" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\20\c94aca85-eb0d-4739-9863-4d9ed8ce0135.png" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\20\ce306cc2-78ee-4bad-b7ca-ea16ddf9baad.jpg" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\20\d8b03706-6d6c-480a-b241-29fb1dbf3399.png" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\20\fa75843b-1eb7-46e6-823a-bf7f466d0d5d.png" />
+  <_ContentIncludedByDefault Remove="wwwroot\uploads\tasks\22\fd7dd6b6-4034-4544-9a3b-8d7a00cf3b79.png" />
+</ItemGroup>
+
 </Project>

@@ -4,53 +4,204 @@
     ViewData["Title"] = "Úkoly";
 }
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/Tasks/create.css" asp-append-version="true">
 
-<div class="container-fluid pt-3">
-    <div class="card shadow-sm border-0 mb-3">
-        <div class="card-body d-flex gap-3 align-items-center">
-            <div class="flex-grow-1">
-                <input type="text" class="form-control" placeholder="Hledat úkol..." id="searchQuery">
-            </div>
-            <select class="form-select w-auto" id="categoryFilter">
-                <option value="">Všechny kategorie</option>
-                @foreach (var cat in Model.Categories.Where(c => c.LevelNumber == 1)) {
-                    <option value="@cat.Id">@cat.Name</option>
-                }
-            </select>
-            <button class="btn btn-primary px-4" id="btn-apply-filters">Hledat</button>
-        </div>
-    </div>
+<div class="container py-4">
+    <form method="get" id="filterForm" class="mb-5">
+        <div class="card shadow-sm border-0 rounded-pill bg-white w-auto">
+        <div class="card-body p-2">
+            <div class="row g-0 align-items-center">
+                
+                <div class="col-lg-4">
+                    <div class="input-group input-group-lg border-0">
+                        <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="SearchQuery" value="@Model.SearchQuery" 
+                               class="form-control border-0 fs-6" placeholder="Co chcete vyřešit?">
+                    </div>
+                </div>
+                
+                <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
+                
+                <div class="col-lg-3">
+                    <div class="dropdown w-100 h-100">
+                        @{
+                            var currentCatName = Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name ?? "Všechny kategorie";
+                        }
+                        <input type="hidden" name="SelectedCategoryId" id="hiddenCategoryId" value="@Model.SelectedCategoryId">
+                        <input type="text" class="d-none" id="categoryNameDisplay" value="@currentCatName">
+                        
+                        <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6"
+                                type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                            <i class="bi bi-grid text-primary me-2"></i>
+                            <span class="text-truncate category-label-text">@currentCatName</span>
+                            <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
+                        </button>
+                        <ul class="dropdown-menu w-100 shadow-lg mt-2 border-0 rounded-3">
+                            <li class="p-2 border-bottom bg-light category-item cursor-pointer" data-id="" data-name="Všechny kategorie">
+                                <span class="fw-bold ps-2">Zobrazit vše</span>
+                            </li>
+                            @foreach (var l1 in Model.Categories.Where(c => c.LevelNumber == 1).OrderBy(c => c.Name))
+                            {
+                                <li class="parent-li border-bottom">
+                                    <div class="d-flex align-items-center category-header bg-light p-0">
+                                        <div class="p-3 flex-grow-1 category-item cursor-pointer" data-id="@l1.Id" data-name="@l1.Name">
+                                            <i class="bi @l1.IconUrl me-2 fs-5 text-primary"></i>
+                                            <span class="fw-bold">@l1.Name</span>
+                                        </div>
+                                        <div class="p-3 border-start" data-bs-toggle="collapse" data-bs-target="#cat-index-@l1.Id" style="cursor:pointer">
+                                            <i class="bi bi-chevron-down text-muted chevron-icon"></i>
+                                        </div>
+                                    </div>
 
-    <div class="row g-0 border rounded-3 overflow-hidden shadow-sm" style="height: 75vh;">
-        <div class="col-md-4 bg-white overflow-auto h-100 border-end" id="task-list-panel">
-            <div class="p-3">
-                <h5 class="fw-bold mb-3">Nalezené úkoly (<span id="task-count">@Model.Tasks.Count</span>)</h5>
-                <div id="tasks-container">
-                    @foreach (var task in Model.Tasks) {
-                        <div class="mb-3 task-item-wrapper" data-category="@task.CategoryId" data-title="@task.Title.ToLower()">
-                            <partial name="_TaskCardPartial" model="task" />
-                        </div>
-                    }
+                                    <ul class="collapse list-unstyled mb-0" id="cat-index-@l1.Id">
+                                        @foreach (var l2 in Model.Categories.Where(c => c.ParentId == l1.Id).OrderBy(c => c.Name))
+                                        {
+                                            var hasL3 = Model.Categories.Any(c => c.ParentId == l2.Id);
+                                            <li class="parent-li border-top">
+                                                <div class="d-flex align-items-center category-header p-0">
+                                                    <div class="p-2 ps-4 flex-grow-1 category-item cursor-pointer text-muted" data-id="@l2.Id" data-name="@l2.Name">
+                                                        <i class="bi @l2.IconUrl me-2 text-secondary"></i> @l2.Name
+                                                    </div>
+                                                    @if (hasL3)
+                                                    {
+                                                        <div class="p-2 border-start" data-bs-toggle="collapse" data-bs-target="#cat-index-@l2.Id" style="cursor:pointer">
+                                                            <i class="bi bi-chevron-down text-muted chevron-icon" style="font-size: 0.8rem;"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                @if (hasL3)
+                                                {
+                                                    <ul class="collapse list-unstyled mb-0 bg-white" id="cat-index-@l2.Id">
+                                                        @foreach (var l3 in Model.Categories.Where(c => c.ParentId == l2.Id).OrderBy(c => c.Name))
+                                                        {
+                                                            <li class="category-item border-top p-2 ps-5 text-muted cursor-pointer" data-id="@l3.Id" data-name="@l3.Name">
+                                                                <i class="bi @l3.IconUrl me-2"></i> @l3.Name
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
+                
+                <div class="col-lg-3">
+                    <div class="dropdown w-100 h-100">
+                        <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 py-3" 
+                                type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                            <span class="text-truncate">
+                                @(string.IsNullOrEmpty(Model.SelectedRegion) ? "Celá ČR" : Model.SelectedRegion)
+                            </span>
+                            <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
+                        </button>
+
+                        <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
+                            <li>
+                                <a class="dropdown-item px-3 @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" 
+                                   href="?SelectedRegion=&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
+                                    Celá ČR
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider opacity-50"></li>
+                            @foreach (var region in Model.AvailableRegions)
+                            {
+                                <li>
+                                    <a class="dropdown-item px-3 @(Model.SelectedRegion == region ? "active" : "")" 
+                                       href="?SelectedRegion=@region&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
+                                        @region
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-lg-auto ms-auto pe-2">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center shadow-sm border-0 no-anim">
+                        <i class="bi bi-search me-2"></i>
+                        <span class="fw-bold">Hledat</span>
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+</form>
+    
 
-        <div class="col-md-8 h-100">
-            <div id="explore-map" class="h-100" 
-                 data-tasks='@Html.Raw(Json.Serialize(Model.Tasks.Select(t => new {
-                    t.Id,
-                    t.Title,
-                    lat = t.Location.Latitude,
-                    lng = t.Location.Longitude,
-                    catId = t.CategoryId
-                 })))'>
+    <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="tasks-container">
+        @foreach (var task in Model.Tasks) {
+            <div class="col task-item-wrapper" data-category="@task.CategoryId">
+                <div class="card h-100 shadow-sm border-0 rounded-4 p-4 task-card-hover position-relative overflow-hidden">
+                    
+                    <div class="position-absolute top-0 start-0 m-3 z-3">
+                        <span class="badge bg-success shadow-sm px-3 py-2 rounded-pill fw-bold fs-6">
+                            @task.RewardPoints <small class="fw-normal">XP</small>
+                        </span>
+                    </div>
+
+                    <div class="position-relative mb-4" style="height: 220px;">
+                        @{
+                            var images = task.Images?.ToList();
+                            var firstImage = images?.FirstOrDefault()?.Url ?? "/images/placeholder-task.png";
+                        }
+                        <div class="task-image-container h-100 w-100 rounded-4 overflow-hidden shadow-sm">
+                            <img src="@firstImage" 
+                                 class="task-main-img w-100 h-100" 
+                                 alt="@task.Title" 
+                                 style="object-fit: cover; transition: transform 0.5s ease;"
+                                 data-images='@Json.Serialize(images?.Select(i => i.Url))'>
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <h4 class="card-title fw-bold mb-3 text-truncate-2" style="height: 3.6rem; line-height: 1.8rem;">
+                            @task.Title
+                        </h4>
+                        
+                        <div class="d-flex align-items-center mb-2 text-muted small">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                            <span class="fw-medium text-truncate">@task.Location?.City, @task.Location?.Region</span>
+                        </div>
+                        
+                        <p class="card-text text-muted mb-4" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            @task.Description
+                        </p>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-primary fw-bold mb-1">
+                                 <i class="bi @(task.Category?.IconUrl ?? "bi-tag-fill") me-1"></i> @task.Category?.Name
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-clock me-1"></i>
+                                @* Formát bez sekund: dd.MM.yyyy HH:mm *@
+                                @(task.Deadline.HasValue ? task.Deadline.Value.ToString("dd.MM.yyyy HH:mm") : "Bez termínu")
+                            </div>
+                        </div>
+                        
+                        <a asp-page="./Details" asp-route-id="@task.Id" class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm transition-all">
+                            Detail
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
+        }
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="~/js/Tasks/explore.js" asp-append-version="true"></script>
+    <script src="~/js/categories-dropdown.js" asp-append-version="true"></script>
+    <script src="~/js/Tasks/tasks.js" asp-append-version="true"></script>
 }

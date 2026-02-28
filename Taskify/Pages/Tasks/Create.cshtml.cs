@@ -25,7 +25,7 @@ public class CreateModel : PageModel
     [BindProperty]
     public TaskInputModel Input { get; set; } = new();
     
-    public List<Category> AllCategories { get; set; } = new();
+    public List<Category> Categories { get; set; } = new();
 
     public class TaskInputModel
     {
@@ -45,16 +45,24 @@ public class CreateModel : PageModel
         [Display(Name = "Termín splnění (volitelné)")]
         public DateTime? Deadline { get; set; }
         
+        public string? ImageUploadsValidation { get; set; }
+        
         [Required(ErrorMessage = "Musíte vybrat místo na mapě!")]
-        [Range(-90, 90, ErrorMessage = "Neplatná zeměpisná šířka.")]
+        [Range(-90, 90, ErrorMessage = "Neplatná poloha.")]
         public double LocationLatitude { get; set; }
 
         [Required(ErrorMessage = "Musíte vybrat místo na mapě!")]
-        [Range(-180, 180, ErrorMessage = "Neplatná zeměpisná délka.")]
+        [Range(-180, 180, ErrorMessage = "Neplatná poloha.")]
         public double LocationLongitude { get; set; }
         
         public string? FullAddress { get; set; }
+        
+        [Required(ErrorMessage = "Nebyla nalezena adresa. Klikněte prosím znovu do mapy.")]
+        public string? Region { get; set; }
         public string? City { get; set; }
+        public string? Street { get; set; }
+        public string? StreetNumber { get; set; }
+        public string? PostCode { get; set; }
     }
 
     public async Task OnGetAsync()
@@ -64,8 +72,32 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostAsync(List<IFormFile> imageUploads)
     {
+        const int MaxFileCount = 10;
+        const long MaxFileSize = 5 * 1024 * 1024;
+        
         if (!ModelState.IsValid)
         {
+            await LoadCategoriesAsync();
+            return Page();
+        }
+        
+        if (imageUploads == null || imageUploads.Count == 0)
+        {
+            ModelState.AddModelError("Input.ImageUploadsValidation", "Musíte nahrát alespoň jeden obrázek!");
+            await LoadCategoriesAsync();
+            return Page();
+        }
+
+        if (imageUploads.Count > MaxFileCount)
+        {
+            ModelState.AddModelError("Input.ImageUploadsValidation", $"Maximum je {MaxFileCount} fotek!");
+            await LoadCategoriesAsync();
+            return Page();
+        }
+
+        if (imageUploads.Any(f => f.Length > MaxFileSize))
+        {
+            ModelState.AddModelError("Input.ImageUploadsValidation", "Jedna z fotek je moc velká (max 5MB)!");
             await LoadCategoriesAsync();
             return Page();
         }
@@ -85,7 +117,10 @@ public class CreateModel : PageModel
                 Latitude = Input.LocationLatitude,
                 Longitude = Input.LocationLongitude,
                 FullAddress = Input.FullAddress,
-                City = Input.City
+                City = Input.City,
+                Street = Input.Street,
+                StreetNumber = Input.StreetNumber,
+                PostCode = Input.PostCode
             },
             CreatedById = currentUser.Id,
             CreatedAt = DateTime.UtcNow,
@@ -96,41 +131,38 @@ public class CreateModel : PageModel
         _context.Tasks.Add(newTask);
         await _context.SaveChangesAsync();
         
-        if (imageUploads != null && imageUploads.Count > 0)
+        string taskFolderName = newTask.Id.ToString();
+        string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "tasks", taskFolderName);
+        if (!Directory.Exists(uploadPath))
         {
-            string taskFolderName = newTask.Id.ToString();
-            string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "tasks", taskFolderName);
-            if (!Directory.Exists(uploadPath))
-            {
-                Directory.CreateDirectory(uploadPath);
-            }
-            
-            foreach (var file in imageUploads)
-            {
-                if (file.Length > 0)
-                {
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string filePath = Path.Combine(uploadPath, fileName);
-
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-                    
-                    newTask.Images.Add(new TaskImage { 
-                        Url = $"/uploads/tasks/{taskFolderName}/{fileName}" 
-                    });
-                }
-            }
-            await _context.SaveChangesAsync();
+            Directory.CreateDirectory(uploadPath);
         }
+        
+        foreach (var file in imageUploads)
+        {
+            if (file.Length > 0)
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                string filePath = Path.Combine(uploadPath, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                
+                newTask.Images.Add(new TaskImage { 
+                    Url = $"/uploads/tasks/{taskFolderName}/{fileName}" 
+                });
+            }
+        }
+        await _context.SaveChangesAsync();
 
         TempData["StatusMessage"] = "Úkol byl úspěšně vytvořen a zveřejněn na mapě!";
-        return RedirectToPage("/Index");  //potom budeme presmerovavat na index toho ukolu - na vlastni stranku
+        return RedirectToPage("/Index");
     }
 
     private async Task LoadCategoriesAsync()
     {
-        AllCategories = await _context.Categories.ToListAsync();
+        Categories = await _context.Categories.ToListAsync();
     }
 }

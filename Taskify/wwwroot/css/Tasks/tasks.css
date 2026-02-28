@@ -1,0 +1,123 @@
+﻿.dropdown-menu {
+    border: none !important;
+    box-shadow: 0 1rem 3rem rgba(0,0,0,0.15) !important;
+    margin-top: 12px !important;
+    border-radius: 16px !important;
+    z-index: 1060;
+    --bs-dropdown-divider-margin-y: 0px !important;
+    overflow: hidden;
+}
+
+.dropdown-item {
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item.active {
+    background-color: #f0f7ff !important;
+    color: #0d6efd !important;
+    font-weight: 600;
+}
+
+#filterForm .card.rounded-pill {
+    border: 1px solid #e0e0e0 !important;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+}
+
+#filterForm .card.rounded-pill:focus-within {
+    box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.08) !important;
+    border-color: #d0d0d0 !important;
+}
+
+.filter-section {
+    transition: background-color 0.2s ease;
+    border-radius: 50px;
+}
+
+.filter-section:hover {
+    background-color: #f8f9fa;
+}
+
+.filter-divider {
+    border-left: 1px solid #eeeeee;
+    height: 30px;
+    margin: 0 5px;
+}
+
+.filter-bar-card .form-control,
+.filter-bar-card .form-select,
+.filter-bar-card .btn-transparent {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    font-weight: 500;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.btn-transparent:focus,
+.btn-transparent:active {
+    outline: none !important;
+    background-color: transparent !important;
+}
+
+#filterForm .btn-primary {
+    border-radius: 50px !important;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+    transition: all 0.3s ease;
+}
+
+#filterForm .btn-primary:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.3);
+}
+
+.task-card-hover {
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    border: 1px solid transparent !important;
+}
+
+.task-card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 1.5rem 3.5rem rgba(0,0,0,0.12) !important;
+    background-color: #ffffff;
+}
+
+h4.card-title {
+    font-size: 1.25rem;
+    line-height: 1.4;
+    color: #212529;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+#filterForm .card-body {
+    padding: 0.5rem 0.75rem !important;
+}
+
+#filterForm .btn-primary {
+    background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 46px;
+}
+
+#filterForm .btn-primary:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
+}
