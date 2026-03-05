@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
@@ -5,6 +6,7 @@ using Taskify.Models;
 using Taskify.Models.Enums;
 using TaskStatus = Taskify.Models.Enums.TaskStatus;
 
+[AllowAnonymous]
 public class IndexModel : PageModel
 {
     private readonly ApplicationDbContext _context;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
@@ -6,6 +7,7 @@ using Taskify.Models;
 
 namespace Taskify.Pages.Tasks
 {
+    [AllowAnonymous]
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;

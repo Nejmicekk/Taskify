@@ -25,6 +25,26 @@
     color: #0d6efd !important;
 }
 
+.nav-btn-login {
+    color: #212529 !important;
+    font-weight: 500;
+    padding: 0.5rem 1.2rem !important;
+    border-radius: 50px;
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid transparent;
+}
+
+.nav-btn-login:hover {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+    border-color: #0d6efd;
+}
+
 /* --- FOOTER --- */
 .footer-custom {
     background-color: #f3f4f6;

@@ -17,9 +17,12 @@
                 </a>
             </div>
             
-            <div class="task-scroll-wrapper">
+            <div class="task-scroll-wrapper d-flex gap-3 pb-3" style="overflow-x: auto;">
                 @foreach (var task in Model.Tasks.Take(5)) { 
-                    <partial name="_TaskCardPartial" model="task" />
+                    <div class="task-item-dashboard">
+                        <partial name="_TaskCardPartial" model="task" 
+                                 view-data='new ViewDataDictionary(ViewData) { { "ShowDescription", false }, { "IsMini", true } }' />
+                    </div>
                 }
             </div>
         </div>
@@ -29,12 +32,14 @@
         <div class="card shadow-sm border-0 position-relative">
             <div id="map-container" 
                  data-tasks='@Html.Raw(Json.Serialize(Model.Tasks.Select(t => new {
-                                 t.Id,
-                                 t.Title,
-                                 lat = t.Location.Latitude,
-                                 lng = t.Location.Longitude,
-                                 category = t.Category?.Name,
-                                 xp = t.RewardPoints
+                                 id = User.Identity.IsAuthenticated ? t.Id : 0,
+                                 title = User.Identity.IsAuthenticated ? t.Title : "Skrytý úkol - vyžaduje přihlášení",
+                                 lat = User.Identity.IsAuthenticated ? t.Location.Latitude : t.Location.Latitude + (new Random().NextDouble() * 0.002), 
+                                 lng = User.Identity.IsAuthenticated ? t.Location.Longitude : t.Location.Longitude + (new Random().NextDouble() * 0.002),
+                                 category = User.Identity.IsAuthenticated ? t.Category?.Name : "???",
+                                 xp = User.Identity.IsAuthenticated ? t.RewardPoints : 0,
+                                 imageUrl = t.Images?.FirstOrDefault()?.Url ?? "/images/placeholder-task.png",
+                                 isGuest = !User.Identity.IsAuthenticated
                              })))'>
             </div>
             <button class="btn btn-light shadow-sm position-absolute m-3" 
