@@ -32,6 +32,17 @@
         </div>
     </div>
     
+    @if (User.Identity.IsAuthenticated && Model.CreatedById != User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+    {
+        <div class="position-absolute top-0 end-0 m-2 z-3">
+            <button class="report-button" 
+                    onclick="openReportModal(@Model.Id)" 
+                    title="Nahlásit úkol">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </button>
+        </div>
+    }
+    
     <div class="flex-grow-1">
         <h4 class="@titleSize fw-bold mb-2 text-truncate-2" style="line-height: 1.4; height: @(isMini ? "2.8rem" : "3.6rem");">
             @Model.Title
@@ -102,6 +113,40 @@
             }
             <div class="p-1 z-3">
                 <a href="" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold t-link">Detail</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="reportModalLabel">Nahlásit úkol</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <input type="hidden" id="reportTaskId">
+
+                <div class="mb-3">
+                    <label for="reportReason" class="form-label small fw-bold text-muted text-uppercase">Důvod hlášení</label>
+                    <select id="reportReason" class="form-select border-0 bg-light rounded-3 py-2">
+                        <option value="0">Podvod</option>
+                        <option value="1">Urážlivý obsah</option>
+                        <option value="2">Spam</option>
+                        <option value="3">Neaktuální</option>
+                        <option value="4">Jiné</option>
+                    </select>
+                </div>
+
+                <div class="mb-0">
+                    <label for="reportDescription" class="form-label small fw-bold text-muted text-uppercase">Bližší popis (volitelné)</label>
+                    <textarea id="reportDescription" class="form-control border-0 bg-light rounded-3" rows="3" placeholder="Popište nám, co je s úkolem v nepořádku..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" onclick="submitReport()">Odeslat hlášení</button>
             </div>
         </div>
     </div>

@@ -20,8 +20,9 @@
             <div class="task-scroll-wrapper d-flex gap-3 pb-3" style="overflow-x: auto;">
                 @foreach (var task in Model.Tasks.Take(5)) { 
                     <div class="task-item-dashboard">
-                        <partial name="_TaskCardPartial" model="task" 
-                                 view-data='new ViewDataDictionary(ViewData) { { "ShowDescription", false }, { "IsMini", true } }' />
+                        @Html.AntiForgeryToken()
+                        <partial name="_TaskCardPartial" model="task"
+                                 view-data='new ViewDataDictionary(ViewData) { { "ShowDescription", false }, { "IsMini", true } }'/>
                     </div>
                 }
             </div>
@@ -54,4 +55,5 @@
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/Dashboard/dashboard.js" asp-append-version="true"></script>
+    <script src="~/js/Tasks/_taskCard.js" asp-append-version="true"></script>
 }

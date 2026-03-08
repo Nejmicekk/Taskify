@@ -30,4 +30,7 @@ public class User : IdentityUser
     // Seznam úkolů, které uživatel plní (má přiřazené)
     [InverseProperty("AssignedTo")]
     public ICollection<TaskItem> AssignedTasks { get; set; } = new List<TaskItem>();
+    
+    // Co uživatel reportnul
+    public virtual ICollection<Report> SentReports { get; set; } = new List<Report>();
 }
