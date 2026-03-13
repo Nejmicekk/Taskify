@@ -2,7 +2,10 @@
     const mapContainer = document.getElementById('map-container');
     if (!mapContainer) return;
 
-    dashboardMap = L.map('map-container').setView([49.0371, 16.6192], 14);
+    dashboardMap = L.map('map-container').setView([49.8175, 15.4730], 7);
+    
+    dashboardMap.locate({setView: true, maxZoom: 13});
+    
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(dashboardMap);
