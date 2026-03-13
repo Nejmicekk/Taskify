@@ -69,7 +69,7 @@
             </div>
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div id="detailMap" 
-                     style="height: 350px; z-index: 1;"
+                     style="height: 400px; z-index: 1;"
                      data-lat="@Model.TaskItem.Location.Latitude" 
                      data-lng="@Model.TaskItem.Location.Longitude"
                      data-title="@Model.TaskItem.Title">
@@ -246,11 +246,24 @@
                     </button>
                 }
             }
+            
+            @if (!Model.IsMyTask && User.Identity is { IsAuthenticated: true })
+            {
+                <div class="text-center mt-3">
+                    <button class="btn btn-link text-muted small text-decoration-none" 
+                            onclick="openReportModal(@Model.TaskItem.Id)">
+                        <i class="bi bi-flag-fill me-1"></i> Nahlásit problém s tímto úkolem
+                    </button>
+                </div>
+            }
         </div>
     </div>
 </div>
 
+<partial name="_ReportModalPartial" />
+
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/Tasks/detail.js" asp-append-version="true"></script>
+    <script src="~/js/Tasks/report_modal.js" asp-append-version="true"></script>
 }
