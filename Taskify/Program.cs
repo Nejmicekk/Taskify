@@ -88,6 +88,27 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
+// Ohlídání . v desetinných číslech
+var supportedCultures = new[] { 
+    new System.Globalization.CultureInfo("cs-CZ"), 
+    new System.Globalization.CultureInfo("en-US") 
+};
+
+foreach (var c in supportedCultures)
+{
+    c.NumberFormat.NumberDecimalSeparator = ".";
+    c.NumberFormat.CurrencyDecimalSeparator = ".";
+}
+
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("cs-CZ"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
+
+app.UseRequestLocalization(localizationOptions);
+
 app.UseStaticFiles();
 
 app.UseRouting();

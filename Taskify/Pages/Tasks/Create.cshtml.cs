@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
@@ -48,16 +47,13 @@ public class CreateModel : PageModel
         public string? ImageUploadsValidation { get; set; }
         
         [Required(ErrorMessage = "Musíte vybrat místo na mapě!")]
-        [Range(-90, 90, ErrorMessage = "Neplatná poloha.")]
-        public double LocationLatitude { get; set; }
+        public string LocationLatitude { get; set; }
 
         [Required(ErrorMessage = "Musíte vybrat místo na mapě!")]
-        [Range(-180, 180, ErrorMessage = "Neplatná poloha.")]
-        public double LocationLongitude { get; set; }
+        public string LocationLongitude { get; set; }
         
         public string? FullAddress { get; set; }
         
-        [Required(ErrorMessage = "Nebyla nalezena adresa. Klikněte prosím znovu do mapy.")]
         public string? Region { get; set; }
         public string? City { get; set; }
         public string? Street { get; set; }
@@ -72,9 +68,55 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostAsync(List<IFormFile> imageUploads)
     {
+        string rawLat = Input.LocationLatitude?.Trim() ?? "";
+        string rawLng = Input.LocationLongitude?.Trim() ?? "";
+
+        double lat = 0;
+        double lng = 0;
+        bool isLatOk = false;
+        bool isLngOk = false;
+        
+        if (!string.IsNullOrEmpty(rawLat) && !string.IsNullOrEmpty(rawLng))
+        {
+            isLatOk = double.TryParse(rawLat.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lat);
+            isLngOk = double.TryParse(rawLng.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out lng);
+            
+            if (!isLatOk)
+            {
+                isLatOk = double.TryParse(rawLat.Replace('.', ','), out lat);
+            }
+            if (!isLngOk)
+            {
+                isLngOk = double.TryParse(rawLng.Replace('.', ','), out lng);
+            }
+        }
+        
+        if (!isLatOk || lat < -90 || lat > 90)
+        {
+            ModelState.AddModelError("Input.LocationLatitude", "Neplatná šířka (lat).");
+        }
+        if (!isLngOk || lng < -180 || lng > 180)
+        {
+            ModelState.AddModelError("Input.LocationLongitude", "Neplatná délka (lng).");
+        }
+        
         const int MaxFileCount = 10;
         const long MaxFileSize = 5 * 1024 * 1024;
-        
+        Console.WriteLine();
+        Console.WriteLine();
+
+        foreach (var keyValuePair in ModelState)
+        {
+            Console.WriteLine($"{keyValuePair.Key}:");
+            foreach (var valueError in keyValuePair.Value.Errors)
+            {
+                Console.WriteLine(valueError.ErrorMessage);
+            }
+        }
+
+        Console.WriteLine();
+        Console.WriteLine();
+
         if (!ModelState.IsValid)
         {
             await LoadCategoriesAsync();
@@ -114,8 +156,8 @@ public class CreateModel : PageModel
             Deadline = Input.Deadline,
             Location = new AddressInfo
             {
-                Latitude = Input.LocationLatitude,
-                Longitude = Input.LocationLongitude,
+                Latitude = lat,
+                Longitude = lng,
                 FullAddress = Input.FullAddress,
                 City = Input.City,
                 Street = Input.Street,
