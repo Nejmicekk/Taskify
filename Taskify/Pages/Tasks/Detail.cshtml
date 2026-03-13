@@ -1,0 +1,256 @@
+@page "{id:int}"
+@model Taskify.Pages.Tasks.DetailsModel
+@{
+    ViewData["Title"] = Model.TaskItem.Title;
+    var images = Model.TaskItem.Images.ToList();
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/Tasks/detail.css" asp-append-version="true">
+
+<div class="container mt-4 mb-5">
+    <div class="row g-5">
+        
+        <div class="col-lg-7">
+            
+            <div class="d-lg-none mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h1 class="h3 fw-bold mb-0 pe-2">@Model.TaskItem.Title</h1>
+                    <span class="badge @Model.StatusBadgeClass shadow-sm px-3 py-2 rounded-pill flex-shrink-0">
+                        @Model.StatusBadgeText
+                    </span>
+                </div>
+            </div>
+
+            <div id="taskGallery" class="carousel slide shadow-sm rounded-4 overflow-hidden bg-black position-relative" data-bs-ride="false">
+                <div class="position-absolute top-0 end-0 m-3 z-3">
+                    <span class="badge bg-light text-success border border-success shadow px-3 py-2 rounded-pill fs-6 fw-bold">
+                        <i class="bi bi-star-fill me-1"></i> @Model.TaskItem.RewardPoints XP
+                    </span>
+                </div>
+
+                <div class="carousel-inner h-100" style="height: 400px">
+                    @if (images.Any())
+                    {
+                        for (int i = 0; i < images.Count; i++)
+                        {
+                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                <img src="@images[i].Url" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="Obrázek úkolu">
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="carousel-item active">
+                            <img src="/images/placeholder-task.png" class="d-block w-100" style="height: 500px; object-fit: cover;" alt="Placeholder">
+                        </div>
+                    }
+                </div>
+
+                @if (images.Count > 1)
+                {
+                    <button class="carousel-control-prev" type="button" data-bs-target="#taskGallery" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon p-3 bg-dark rounded-circle" aria-hidden="true"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#taskGallery" data-bs-slide="next">
+                        <span class="carousel-control-next-icon p-3 bg-dark rounded-circle" aria-hidden="true"></span>
+                    </button>
+                    
+                    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-2">
+                        <span class="badge bg-dark bg-opacity-50 px-3 py-1 rounded-pill small">
+                            <span id="carousel-index">1</span> / @images.Count
+                        </span>
+                    </div>
+                }
+            </div>
+            
+            <div class="d-flex align-items-center mb-3 mt-4">
+                <h5 class="fw-bold mb-0">Přesná lokalita úkolu</h5>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div id="detailMap" 
+                     style="height: 350px; z-index: 1;"
+                     data-lat="@Model.TaskItem.Location.Latitude" 
+                     data-lng="@Model.TaskItem.Location.Longitude"
+                     data-title="@Model.TaskItem.Title">
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="col-lg-5">
+            
+            <div class="d-none d-lg-block mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h1 class="h2 fw-bold mb-0 pe-2">@Model.TaskItem.Title</h1>
+                    <span class="badge @Model.StatusBadgeClass shadow-sm px-3 py-2 rounded-pill flex-shrink-0">
+                        @Model.StatusBadgeText
+                    </span>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Podrobnosti úkolu</h5>
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                        <span class="small fw-bold text-muted text-uppercase">Lokalita</span>
+                    </div>
+                    <p class="mb-0 fw-bold text-dark">
+                        @($"{Model.TaskItem.Location.Street} {Model.TaskItem.Location.StreetNumber}, {Model.TaskItem.Location.City}, {Model.TaskItem.Location.PostCode}")
+                    </p>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-calendar-plus text-primary me-2"></i>
+                                <span class="small fw-bold text-muted text-uppercase">Vytvořeno</span>
+                            </div>
+                            <span class="text-dark fw-bold d-block">@Model.TimeAgo</span>
+                            <span class="text-muted small">@Model.TaskItem.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-clock-history text-warning me-2"></i>
+                                <span class="small fw-bold text-muted text-uppercase">Termín splnění</span>
+                            </div>
+                            @if (Model.TaskItem.Deadline.HasValue)
+                            {
+                                <span class="text-dark fw-bold d-block">@Model.TimeLeft</span>
+                                <span class="text-muted small">@Model.TaskItem.Deadline.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                            }
+                            else
+                            {
+                                <span class="text-dark fw-bold d-block">Není určen</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Zapojení lidé</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-person-fill text-info me-2"></i>
+                                <span class="small fw-bold text-muted text-uppercase">Autor úkolu</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;" class="me-2 shadow-sm">
+                                    @if (!string.IsNullOrEmpty(Model.TaskItem.CreatedBy.ProfilePictureUrl))
+                                    {
+                                        <img src="@Model.TaskItem.CreatedBy.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
+                                    }
+                                    else
+                                    {
+                                        @(Model.TaskItem.CreatedBy.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                    }
+                                </div>
+                                <span class="small fw-bold">
+                                    <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" class="text-decoration-none text-dark hover-primary">
+                                        @Model.TaskItem.CreatedBy.UserName
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-person-arms-up text-success me-2"></i>
+                                <span class="small fw-bold text-muted text-uppercase">Dobrovolník</span>
+                            </div>
+                            @if (Model.TaskItem.AssignedTo != null)
+                            {
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #198754; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;" class="me-2 shadow-sm">
+                                        @if (!string.IsNullOrEmpty(Model.TaskItem.AssignedTo.ProfilePictureUrl))
+                                        {
+                                            <img src="@Model.TaskItem.AssignedTo.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
+                                        }
+                                        else
+                                        {
+                                            @(Model.TaskItem.AssignedTo.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                        }
+                                    </div>
+                                    <span class="small fw-bold">
+                                        <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" class="text-decoration-none text-dark hover-primary">
+                                            @Model.TaskItem.AssignedTo.UserName
+                                        </a>
+                                    </span>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="text-muted small italic">Očekává dobrovolníka</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Kategorie</h5>
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <i class="bi @(Model.TaskItem.Category?.IconUrl ?? "bi-tag") me-2 fs-5 text-primary"></i>
+                    <span class="fw-bold">@Model.TaskItem.Category?.Name</span>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-2">Popis problému</h5>
+            <div class="card border-0 bg-light rounded-4 mb-4 p-3">
+                <p class="text-dark mb-0" style="line-height: 1.6;">@Model.TaskItem.Description</p>
+            </div>
+
+            @if (Model.IsMyTask)
+            {
+                if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
+                {
+                    <a asp-page="/Tasks/Edit" asp-route-id="@Model.TaskItem.Id" class="btn btn-warning w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark">
+                        <i class="bi bi-pencil-square me-2"></i> Upravit úkol
+                    </a>
+                }
+                else
+                {
+                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
+                        <i class="bi bi-lock-fill me-2"></i> Úkol už se řeší (nelze upravit)
+                    </button>
+                }
+            }
+            else
+            {
+                if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
+                {
+                    <form method="post" class="mt-auto">
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-check2-circle me-2"></i> Přijmout úkol
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
+                        <i class="bi bi-person-check-fill me-2"></i> Úkol už má řešitele
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/Tasks/detail.js" asp-append-version="true"></script>
+}

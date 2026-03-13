@@ -102,20 +102,6 @@ public class CreateModel : PageModel
         
         const int MaxFileCount = 10;
         const long MaxFileSize = 5 * 1024 * 1024;
-        Console.WriteLine();
-        Console.WriteLine();
-
-        foreach (var keyValuePair in ModelState)
-        {
-            Console.WriteLine($"{keyValuePair.Key}:");
-            foreach (var valueError in keyValuePair.Value.Errors)
-            {
-                Console.WriteLine(valueError.ErrorMessage);
-            }
-        }
-
-        Console.WriteLine();
-        Console.WriteLine();
 
         if (!ModelState.IsValid)
         {
