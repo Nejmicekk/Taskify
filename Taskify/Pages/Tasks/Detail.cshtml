@@ -218,7 +218,7 @@
             {
                 if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
                 {
-                    <a asp-page="/Tasks/Edit" asp-route-id="@Model.TaskItem.Id" class="btn btn-warning w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark">
+                    <a asp-page="/Tasks/Edit" asp-route-id="@Model.TaskItem.Id" asp-route-returnUrl="@HttpContext.Request.Query["returnUrl"]" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark">
                         <i class="bi bi-pencil-square me-2"></i> Upravit úkol
                     </a>
                 }

@@ -197,7 +197,7 @@ namespace Taskify.Pages.Tasks
 
             await _context.SaveChangesAsync();
             
-            TempData["SuccessMessage"] = $"Úkol úspěšně uzavřen! Dobrovolníkovi bylo připsáno {taskItem.RewardPoints} bodů a oběma se zvýšila reputace.";
+            TempData["StatusMessage"] = $"Úkol úspěšně uzavřen!";
             return RedirectToPage(new { id });
         }
     }

@@ -1,0 +1,153 @@
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using Taskify.Data;
+using Taskify.Models;
+
+namespace Taskify.Pages.Tasks;
+
+[Authorize]
+public class EditModel : PageModel
+{
+    private readonly ApplicationDbContext _context;
+    private readonly UserManager<User> _userManager;
+
+    public EditModel(ApplicationDbContext context, UserManager<User> userManager)
+    {
+        _context = context;
+        _userManager = userManager;
+    }
+
+    [BindProperty]
+    public EditInputModel Input { get; set; } = new();
+    
+    public List<Category> Categories { get; set; } = new();
+    
+    public TaskItem DisplayTask { get; set; } = null!;
+    public string? ReturnUrl { get; set; }
+    
+
+    public class EditInputModel
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Nadpis je povinný.")]
+        [StringLength(100, ErrorMessage = "Nadpis může mít maximálně 100 znaků.")]
+        [Display(Name = "Název úkolu")]
+        public string Title { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Popis je povinný, aby ostatní věděli, co přesně dělat.")]
+        [Display(Name = "Popis problému")]
+        public string Description { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vyberte kategorii.")]
+        [Display(Name = "Kategorie")]
+        public int CategoryId { get; set; }
+
+        [Display(Name = "Termín splnění (volitelné)")]
+        public DateTime? Deadline { get; set; }
+    }
+
+    public async Task<IActionResult> OnGetAsync(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+        
+        var taskItem = await _context.Tasks
+            .Include(t => t.Images)
+            .Include(t => t.Location)
+            .FirstOrDefaultAsync(t => t.Id == id);
+            
+        if (taskItem == null) return NotFound();
+
+        if (taskItem.CreatedById != user.Id) return Forbid();
+        if (taskItem.Status != Models.Enums.TaskStatus.Open)
+        {
+            TempData["ErrorMessage"] = "Tento úkol již nelze upravovat, protože na něm někdo pracuje nebo je uzavřen.";
+            return RedirectToPage("/Tasks/Detail", new { id = taskItem.Id });
+        }
+        
+        DisplayTask = taskItem;
+
+        Input = new EditInputModel
+        {
+            Id = taskItem.Id,
+            Title = taskItem.Title,
+            Description = taskItem.Description,
+            CategoryId = taskItem.CategoryId,
+            Deadline = taskItem.Deadline
+        };
+
+        await LoadCategoriesAsync();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        if (!ModelState.IsValid)
+        {
+            DisplayTask = await _context.Tasks
+                .Include(t => t.Images)
+                .Include(t => t.Location)
+                .FirstOrDefaultAsync(t => t.Id == Input.Id);
+                
+            await LoadCategoriesAsync();
+            return Page();
+        }
+
+        var taskToUpdate = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == Input.Id);
+        if (taskToUpdate == null) return NotFound();
+
+        if (taskToUpdate.CreatedById != user.Id || taskToUpdate.Status != Models.Enums.TaskStatus.Open)
+        {
+            return Forbid();
+        }
+
+        taskToUpdate.Title = Input.Title;
+        taskToUpdate.Description = Input.Description;
+        taskToUpdate.CategoryId = Input.CategoryId;
+        taskToUpdate.Deadline = Input.Deadline;
+
+        await _context.SaveChangesAsync();
+        TempData["StatusMessage"] = "Úkol byl úspěšně upraven!";
+        
+        return RedirectToPage("/Tasks/Detail", new { id = Input.Id });
+    }
+    
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return NotFound();
+
+        var taskToDelete = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+        if (taskToDelete == null) return NotFound();
+        
+        if (taskToDelete.CreatedById != user.Id || taskToDelete.Status != Models.Enums.TaskStatus.Open)
+        {
+            return Forbid();
+        }
+        
+        taskToDelete.Status = Models.Enums.TaskStatus.Archived;
+        await _context.SaveChangesAsync();
+        
+        TempData["StatusMessage"] = "Úkol byl úspěšně a trvale smazán.";
+
+        if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
+        {
+            return LocalRedirect(ReturnUrl);
+        }
+        
+        return RedirectToPage("/Tasks/Index");
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        Categories = await _context.Categories.ToListAsync();
+    }
+}
