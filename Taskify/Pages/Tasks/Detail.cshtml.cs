@@ -22,6 +22,8 @@ namespace Taskify.Pages.Tasks
         public string TimeAgo { get; set; } = string.Empty;
         public string TimeLeft { get; set; } = string.Empty;
         public bool IsMyTask { get; set; } = false;
+        public bool IsExpired { get; set; } = false;
+        public string CurrentUserId { get; set; } = string.Empty;
         
         public string StatusBadgeText { get; set; } = string.Empty;
         public string StatusBadgeClass { get; set; } = string.Empty;
@@ -43,9 +45,13 @@ namespace Taskify.Pages.Tasks
             TaskItem = taskitem;
             
             var currentUserId = _userManager.GetUserId(User);
-            if (currentUserId != null && currentUserId == TaskItem.CreatedById)
+            if (currentUserId != null)
             {
-                IsMyTask = true;
+                CurrentUserId = currentUserId;
+                if (currentUserId == TaskItem.CreatedById)
+                {
+                    IsMyTask = true;
+                }
             }
             
             switch (TaskItem.Status)
@@ -57,6 +63,10 @@ namespace Taskify.Pages.Tasks
                 case Models.Enums.TaskStatus.InProgress:
                     StatusBadgeText = "Řeší se";
                     StatusBadgeClass = "bg-warning text-dark";
+                    break;
+                case Models.Enums.TaskStatus.WaitingForReview:
+                    StatusBadgeText = "Čeká na schválení";
+                    StatusBadgeClass = "bg-info text-dark"; 
                     break;
                 case Models.Enums.TaskStatus.Completed:
                     StatusBadgeText = "Hotovo";
@@ -95,11 +105,100 @@ namespace Taskify.Pages.Tasks
                 }
                 else
                 {
+                    IsExpired = true;
                     TimeLeft = "Termín vypršel";
                 }
             }
 
             return Page();
+        }
+        
+        // uživatel přijme úkol
+        public async Task<IActionResult> OnPostAcceptAsync(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            
+            // bezpečnostní pojistka
+            if (taskItem.Deadline.HasValue && taskItem.Deadline.Value <= DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = "Tento úkol je již po termínu.";
+                return RedirectToPage(new { id });
+            }
+
+            if (taskItem.CreatedById == user.Id || taskItem.Status != Models.Enums.TaskStatus.Open) return BadRequest();
+
+            taskItem.Status = Models.Enums.TaskStatus.InProgress;
+            taskItem.AssignedToId = user.Id;
+
+            await _context.SaveChangesAsync();
+            TempData["StatusMessage"] = "Úspěšně jsi přijal úkol! Pusť se do toho.";
+            return RedirectToPage(new { id });
+        }
+
+        // uživatel označí úkol jako dokončený
+        public async Task<IActionResult> OnPostFinishAsync(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            
+            if (taskItem.AssignedToId != user.Id || taskItem.Status != Models.Enums.TaskStatus.InProgress) return BadRequest();
+
+            taskItem.Status = Models.Enums.TaskStatus.WaitingForReview;
+
+            await _context.SaveChangesAsync();
+            TempData["StatusMessage"] = "Skvělá práce! Nyní počkej, až autor řešení schválí.";
+            return RedirectToPage(new { id });
+        }
+
+        // autor úkolu schválí, že byl správně splněn
+        public async Task<IActionResult> OnPostApproveAsync(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            
+            var taskItem = await _context.Tasks
+                .Include(t => t.AssignedTo)
+                .Include(t => t.CreatedBy) 
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            
+            if (taskItem.CreatedById != user.Id || taskItem.Status != Models.Enums.TaskStatus.WaitingForReview) return BadRequest();
+
+            taskItem.Status = Models.Enums.TaskStatus.Completed;
+            
+            if (taskItem.AssignedTo != null)
+            {
+                taskItem.AssignedTo.Points += taskItem.RewardPoints;
+                taskItem.AssignedTo.Reputation += 20;
+                
+                int currentLvl = taskItem.AssignedTo.Level;
+                
+                double pointsNeededForNext = 100 * Math.Pow(1.5, currentLvl - 1);
+                
+                while (taskItem.AssignedTo.Points >= pointsNeededForNext)
+                {
+                    currentLvl++;
+                    
+                    pointsNeededForNext = 100 * Math.Pow(1.5, currentLvl - 1);
+                }
+                
+                taskItem.AssignedTo.Level = currentLvl;
+            }
+            
+            if (taskItem.CreatedBy != null)
+            {
+                taskItem.CreatedBy.Reputation += 10;
+            }
+
+            await _context.SaveChangesAsync();
+            
+            TempData["SuccessMessage"] = $"Úkol úspěšně uzavřen! Dobrovolníkovi bylo připsáno {taskItem.RewardPoints} bodů a oběma se zvýšila reputace.";
+            return RedirectToPage(new { id });
         }
     }
 }

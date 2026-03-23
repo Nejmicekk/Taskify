@@ -58,7 +58,7 @@ namespace Taskify.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset hesla",
+                    "Taskify - Změna hesla",
                     htmlBody);
 
                 return RedirectToPage("./ForgotPasswordConfirmation");

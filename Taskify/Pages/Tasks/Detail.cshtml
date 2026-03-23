@@ -222,27 +222,82 @@
                         <i class="bi bi-pencil-square me-2"></i> Upravit úkol
                     </a>
                 }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.InProgress)
+                {
+                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
+                        <i class="bi bi-hourglass-split me-2"></i> Dobrovolník na úkolu pracuje
+                    </button>
+                }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.WaitingForReview)
+                {
+                    <form method="post" asp-page-handler="Approve" asp-route-id="@Model.TaskItem.Id" class="mt-auto">
+                        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-check-circle-fill me-2"></i> Schválit vyřešení
+                        </button>
+                    </form>
+                }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.Completed)
+                {
+                    <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto opacity-75" disabled>
+                        <i class="bi bi-trophy-fill me-2"></i> Úkol je úspěšně uzavřen
+                    </button>
+                }
                 else
                 {
                     <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
-                        <i class="bi bi-lock-fill me-2"></i> Úkol už se řeší (nelze upravit)
+                        <i class="bi bi-archive-fill me-2"></i> Úkol je archivován
                     </button>
                 }
             }
             else
             {
-                if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
+                if (Model.TaskItem.Status == Models.Enums.TaskStatus.Completed)
                 {
-                    <form method="post" class="mt-auto">
-                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
-                            <i class="bi bi-check2-circle me-2"></i> Přijmout úkol
+                    <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto opacity-75" disabled>
+                        <i class="bi bi-trophy-fill me-2"></i> Úkol je úspěšně dokončen
+                    </button>
+                }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.Archived)
+                {
+                    <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
+                        <i class="bi bi-archive-fill me-2"></i> Úkol je archivován
+                    </button>
+                }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.InProgress && Model.TaskItem.AssignedToId == Model.CurrentUserId)
+                {
+                    <form method="post" asp-page-handler="Finish" asp-route-id="@Model.TaskItem.Id" class="mt-auto">
+                        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-check2-all me-2"></i> Označit úkol jako splněný
                         </button>
                     </form>
+                }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
+                {
+                    if (Model.IsExpired)
+                    {
+                        <button class="btn btn-danger w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
+                            <i class="bi bi-calendar-x-fill me-2"></i> Termín úkolu vypršel
+                        </button>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="Accept" asp-route-id="@Model.TaskItem.Id" class="mt-auto">
+                            <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm">
+                                <i class="bi bi-check2-circle me-2"></i> Přijmout úkol
+                            </button>
+                        </form>
+                    }
+                }
+                else if (Model.TaskItem.Status == Models.Enums.TaskStatus.WaitingForReview && Model.TaskItem.AssignedToId == Model.CurrentUserId)
+                {
+                    <button class="btn btn-info w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark" disabled>
+                        <i class="bi bi-clock-history me-2"></i> Čeká na schválení autorem
+                    </button>
                 }
                 else
                 {
                     <button class="btn btn-secondary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
-                        <i class="bi bi-person-check-fill me-2"></i> Úkol už má řešitele
+                        <i class="bi bi-person-check-fill me-2"></i> Úkol už řeší někdo jiný
                     </button>
                 }
             }

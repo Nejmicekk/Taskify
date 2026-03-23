@@ -10,10 +10,13 @@ public enum TaskStatus
 
     // 2. Někdo na úkolu pracuje
     InProgress = 2,
+    
+    // 3. Dobrovolník má hotovo, čeká se, až to autor úkolu schválí
+    WaitingForReview = 3,
 
     // 3. Hotovo
-    Completed = 3,
+    Completed = 4,
     
     // 4. Zrušeno/archivováno
-    Archived = 4
+    Archived = 5
 }
