@@ -63,8 +63,11 @@ public class EditModel : PageModel
             
         if (taskItem == null) return NotFound();
 
-        if (taskItem.CreatedById != user.Id) return Forbid();
-        if (taskItem.Status != Models.Enums.TaskStatus.Open)
+        bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+        if (taskItem.CreatedById != user.Id && !isAdmin) return Forbid();
+        
+        if (!isAdmin && taskItem.Status != Models.Enums.TaskStatus.Open)
         {
             TempData["ErrorMessage"] = "Tento úkol již nelze upravovat, protože na něm někdo pracuje nebo je uzavřen.";
             return RedirectToPage("/Tasks/Detail", new { id = taskItem.Id });
@@ -104,7 +107,14 @@ public class EditModel : PageModel
         var taskToUpdate = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == Input.Id);
         if (taskToUpdate == null) return NotFound();
 
-        if (taskToUpdate.CreatedById != user.Id || taskToUpdate.Status != Models.Enums.TaskStatus.Open)
+        bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+        if (taskToUpdate.CreatedById != user.Id && !isAdmin)
+        {
+            return Forbid();
+        }
+
+        if (!isAdmin && taskToUpdate.Status != Models.Enums.TaskStatus.Open)
         {
             return Forbid();
         }
@@ -128,7 +138,14 @@ public class EditModel : PageModel
         var taskToDelete = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
         if (taskToDelete == null) return NotFound();
         
-        if (taskToDelete.CreatedById != user.Id || taskToDelete.Status != Models.Enums.TaskStatus.Open)
+        bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+
+        if (taskToDelete.CreatedById != user.Id && !isAdmin)
+        {
+            return Forbid();
+        }
+
+        if (!isAdmin && taskToDelete.Status != Models.Enums.TaskStatus.Open)
         {
             return Forbid();
         }

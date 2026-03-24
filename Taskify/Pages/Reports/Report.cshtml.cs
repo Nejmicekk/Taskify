@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
+using Taskify.Models.Enums;
 
 namespace Taskify.Pages.Reports
 {

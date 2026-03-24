@@ -1,0 +1,3 @@
+.hover-primary:hover span { color: var(--bs-primary); }
+.btn-transparent:hover { background-color: rgba(0,0,0,0.02); }
+.table thead th { border-bottom: 0; }

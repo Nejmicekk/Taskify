@@ -1,13 +1,6 @@
-﻿namespace Taskify.Models;
+﻿using Taskify.Models.Enums;
 
-public enum ReportReason
-{
-    Podvod,
-    UrážlivýObsah,
-    Spam,
-    Neaktuální,
-    Jiné
-}
+namespace Taskify.Models;
 
 public class Report
 {
@@ -22,6 +15,8 @@ public class Report
     public ReportReason Reason { get; set; }
     
     public string? Description { get; set; }
+    
+    public string? AdminNote { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public bool IsResolved { get; set; } = false;

@@ -1,0 +1,92 @@
+@page
+@model Taskify.Pages.Admin.AdminDashboardModel
+@{
+    ViewData["Title"] = "Administrace";
+}
+
+<link rel="stylesheet" href="~/css/Admin/AdminDashboard.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Administrační panel</h1>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="display-5 fw-bold @(Model.UnresolvedReportsCount > 0 ? "text-danger" : "text-success") mb-2">
+                        @Model.UnresolvedReportsCount
+                    </div>
+                    <div class="text-muted text-uppercase small fw-bold">Nevyřešené reporty</div>
+                    <i class="bi bi-flag-fill @(Model.UnresolvedReportsCount > 0 ? "text-danger" : "text-success") opacity-25" style="font-size: 3rem; position: absolute; top: 10px; right: 20px;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="display-5 fw-bold text-primary mb-2">@Model.TotalTasksCount</div>
+                    <div class="text-muted text-uppercase small fw-bold">Celkem úkolů</div>
+                    <i class="bi bi-list-task text-primary opacity-25" style="font-size: 3rem; position: absolute; top: 10px; right: 20px;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="display-5 fw-bold text-success mb-2">@Model.TotalUsersCount</div>
+                    <div class="text-muted text-uppercase small fw-bold">Uživatelé</div>
+                    <i class="bi bi-people-fill text-success opacity-25" style="font-size: 3rem; position: absolute; top: 10px; right: 20px;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="fw-bold mb-4">Správa aplikace</h3>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a asp-page="/Admin/Reports/Index" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 hover-lift h-100 no-anim">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-flag-fill text-danger fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">Reporty</h5>
+                            <p class="text-muted small mb-0">Správa nahlášených úkolů</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a asp-page="/Admin/Tasks/Index" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 hover-lift h-100 no-anim">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-list-task text-primary fs-3"></i>
+                        </div>
+                        <div>
+                            <h5 class="fw-bold mb-1 text-dark">Úkoly</h5>
+                            <p class="text-muted small mb-0">Správa všech úkolů v systému</p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 opacity-75 bg-light">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-people-fill text-success fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1 text-dark text-muted">Uživatelé</h5>
+                        <p class="text-muted small mb-0">Již brzy v dalším updatu</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,153 @@
+@page "{id:int}"
+@model Taskify.Pages.Admin.Reports.DetailModel
+@{
+    ViewData["Title"] = "Detail reportu";
+}
+
+<link rel="stylesheet" href="~/css/Admin/Reports/Detail.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-page="/Admin/AdminDashboard" class="text-decoration-none text-muted">Administrace</a></li>
+            <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Reporty</a></li>
+            <li class="breadcrumb-item active fw-bold text-dark">Detail</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Detail hlášení</h1>
+        @if (Model.Report.IsResolved)
+        {
+            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-4 py-2"><i class="bi bi-check-circle me-1"></i>VYŘEŠENO</span>
+        }
+        else
+        {
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle rounded-pill px-4 py-2"><i class="bi bi-exclamation-triangle me-1"></i>ČEKÁ NA VYŘÍZENÍ</span>
+        }
+    </div>
+
+    <form method="post">
+        <div class="row g-4">
+            <!-- LEVÝ SLOUPEC: INFO O REPORTU -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
+                    <div class="card-header bg-danger bg-opacity-10 border-0 py-3 px-4">
+                        <h5 class="fw-bold mb-0 text-danger"><i class="bi bi-info-circle-fill me-2"></i>Informace o hlášení</h5>
+                    </div>
+                    <div class="card-body px-4 pb-4 pt-4">
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted text-uppercase d-block mb-2">Důvod hlášení</label>
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-2 rounded-pill fs-6">
+                                @(Model.Report.Reason switch {
+                                    Taskify.Models.Enums.ReportReason.Podvod => "Podvod",
+                                    Taskify.Models.Enums.ReportReason.UrážlivýObsah => "Urážlivý obsah",
+                                    Taskify.Models.Enums.ReportReason.Spam => "Spam",
+                                    Taskify.Models.Enums.ReportReason.Neaktuální => "Neaktuální",
+                                    Taskify.Models.Enums.ReportReason.Jiné => "Jiné",
+                                    _ => Model.Report.Reason.ToString()
+                                })
+                            </span>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted text-uppercase d-block mb-2">Popis od uživatele</label>
+                            <div class="bg-light p-3 rounded-4 border italic text-dark">
+                                "@(string.IsNullOrEmpty(Model.Report.Description) ? "Uživatel neuvedl podrobnější popis." : Model.Report.Description)"
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="small fw-bold text-muted text-uppercase d-block mb-2">Nahlásil</label>
+                            <a href="/u/@Model.Report.Reporter?.UserName" class="text-decoration-none d-flex align-items-center bg-light p-2 rounded-pill border pe-3 d-inline-flex hover-primary-bg">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #ddd;" class="me-2 border shadow-sm">
+                                    @if (!string.IsNullOrEmpty(Model.Report.Reporter?.ProfilePictureUrl)) {
+                                        <img src="@Model.Report.Reporter.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
+                                    } else {
+                                        <i class="bi bi-person-fill text-white fs-5 d-flex justify-content-center align-items-center h-100"></i>
+                                    }
+                                </div>
+                                <span class="fw-bold text-dark me-2">@Model.Report.Reporter?.UserName</span>
+                                <span class="ms-auto text-muted small">@Model.Report.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                    <div class="card-header bg-dark bg-opacity-10 border-0 py-3 px-4">
+                        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-journal-text me-2"></i>Poznámka administrátora</h5>
+                    </div>
+                    <div class="card-body px-4 pb-4 pt-4">
+                        <textarea asp-for="AdminNote" class="form-control rounded-4 border-light-subtle shadow-sm bg-light" rows="4" placeholder="Zadejte důvod rozhodnutí..."></textarea>
+                        <div class="text-muted small mt-3 d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-2 text-primary"></i>
+                            <span>Tato poznámka slouží k interní evidenci.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRAVÝ SLOUPEC: EDITACE ÚKOLU -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden">
+                    <div class="card-header bg-primary bg-opacity-10 border-0 py-3 px-4 d-flex align-items-center justify-content-between">
+                        <h5 class="fw-bold mb-0 text-primary"><i class="bi bi-pencil-square me-2"></i>Správa obsahu úkolu</h5>
+                        <a href="/Tasks/Detail/@Model.Report.TaskItemId" target="_blank" class="btn btn-sm btn-white border shadow-sm rounded-pill px-3 fw-bold text-muted">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> Zobrazit náhled
+                        </a>
+                    </div>
+                    <div class="card-body p-4 p-lg-4">
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Název úkolu</label>
+                            <input asp-for="TaskTitle" class="form-control form-control-lg border-light-subtle shadow-sm rounded-3 fw-bold bg-light" placeholder="Upravte název úkolu..." />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted small text-uppercase">Popis úkolu</label>
+                            <textarea asp-for="TaskDescription" class="form-control border-light-subtle shadow-sm rounded-3 bg-light" style="height: 380px" placeholder="Upravte popis úkolu..."></textarea>
+                        </div>
+
+                        <div class="d-flex align-items-center bg-light p-3 rounded-4 border mb-5 shadow-sm">
+                            <div class="bg-primary bg-opacity-10 p-2 rounded-circle me-3">
+                                <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark small">Režim opravy obsahu</div>
+                                <div class="text-muted small" style="font-size: 0.8rem;">Upravte nevhodný text. Po kliknutí na "Opravit a schválit" se změny okamžitě promítnou.</div>
+                            </div>
+                        </div>
+
+                        <!-- TLAČÍTKA -->
+                        @if (!Model.Report.IsResolved)
+                        {
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <button type="submit" asp-page-handler="Dismiss" asp-route-id="@Model.Report.Id" class="btn btn-light w-100 py-3 rounded-pill fw-bold border text-muted hover-shadow">
+                                        <i class="bi bi-x-circle me-2"></i> Zamítnout
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" asp-page-handler="Archive" asp-route-id="@Model.Report.Id" class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold hover-shadow">
+                                        <i class="bi bi-archive me-2"></i> Archivovat
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" asp-page-handler="UpdateAndApprove" asp-route-id="@Model.Report.Id" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm text-dark hover-shadow">
+                                        <i class="bi bi-check2-circle me-2"></i> Opravit a schválit
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="bg-success bg-opacity-10 text-success p-4 rounded-4 text-center border border-success-subtle">
+                                <i class="bi bi-check-circle-fill fs-3 d-block mb-2"></i>
+                                <span class="fw-bold">Tento report byl již vyřešen.</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
