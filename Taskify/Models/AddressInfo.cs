@@ -55,6 +55,7 @@ public class AddressInfo
             var _ when p3 >= 700 && p3 <= 749 => "Moravskoslezský kraj",
             var _ when p3 >= 750 && p3 <= 769 => "Zlínský kraj",
             var _ when p3 >= 770 && p3 <= 799 => "Olomoucký kraj",
+            _ => "Neurčeno"
         };
     }
 }

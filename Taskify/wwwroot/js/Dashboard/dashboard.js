@@ -30,7 +30,7 @@
             link.href = "/Identity/Account/Login";
             link.classList.replace('btn-primary', 'btn-primary');
         } else {
-            link.href = `/Tasks/Details/${t.id}`;
+            link.href = `/Tasks/Detail/${t.id}`;
         }
 
         L.marker([t.lat, t.lng]).addTo(dashboardMap).bindPopup(wrapper, {
