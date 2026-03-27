@@ -1,175 +1,142 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Můj Profil";
-    ViewData["ActivePage"] = ManageNavPages.Index;
+    ViewData["Title"] = "Nastavení účtu";
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
 <link rel="stylesheet" href="~/css/Profile/profile.css" asp-append-version="true" />
 
-<h3 class="mb-4">@ViewData["Title"]</h3>
+<nav aria-label="breadcrumb" class="mt-4 mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/u/@Model.Username" class="text-decoration-none text-muted">Profil</a></li>
+        <li class="breadcrumb-item active fw-bold text-dark">Nastavení účtu</li>
+    </ol>
+</nav>
 
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-body p-4">
-        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
-            <div class="me-md-4 mb-3 mb-md-0">
-                <div class="profile-pic-wrapper shadow-sm" onclick="document.getElementById('upload-photo').click()" title="Změnit profilovou fotku">
-                    @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl)) 
-                    {
-                        <img id="img-preview" src="@Model.ProfilePictureUrl" alt="Profilovka" class="profile-pic-img">
-                    }
-                    else
-                    {
-                        <div id="initials-placeholder" class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 36px;">
-                            @Model.Username.Substring(0, 1).ToUpper()
+<h2 class="fw-bold mb-4">@ViewData["Title"]</h2>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">Osobní údaje</h5>
+                    <button type="button" id="edit-btn" class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="enableEdit()">
+                        <i class="bi bi-pencil me-2"></i>Upravit
+                    </button>
+                </div>
+
+                <form id="profile-form" method="post" enctype="multipart/form-data">
+                    <input type="file" asp-for="Input.ProfilePicture" id="upload-photo" class="d-none" accept="image/*" onchange="previewImage(this)">
+
+                    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                        <div class="profile-pic-wrapper shadow-sm border me-3" onclick="document.getElementById('upload-photo').click()" title="Změnit profilovou fotku">
+                            @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl)) 
+                            {
+                                <img id="img-preview" src="@Model.ProfilePictureUrl" alt="Profilovka" class="profile-pic-img">
+                            }
+                            else
+                            {
+                                <div id="initials-placeholder" class="bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 24px;">
+                                    @(Model.Username?.Substring(0, 1).ToUpper() ?? "U")
+                                </div>
+                                <img id="img-preview" src="#" alt="Náhled" class="profile-pic-img d-none">
+                            }
+                            <div class="profile-pic-overlay"><i class="bi bi-camera-fill"></i></div>
                         </div>
-                        <img id="img-preview" src="#" alt="Náhled" class="profile-pic-img d-none">
-                    }
-                    <div class="profile-pic-overlay"><i class="bi bi-camera-fill"></i></div>
-                </div>
+                        <div>
+                            <div class="fw-bold">Profilová fotografie</div>
+                            <small class="text-muted">Klikněte na fotku pro změnu</small>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Username" class="form-control" disabled id="input-username"/>
+                        <label asp-for="Input.Username">Uživatelské jméno</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea asp-for="Input.Bio" class="form-control" style="height: 120px" disabled id="input-bio"></textarea>
+                        <label asp-for="Input.Bio">O mně (Bio)</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
+                        <label asp-for="Input.Email">E-mailová adresa</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone"/>
+                        <label asp-for="Input.PhoneNumber">Telefonní číslo</label>
+                    </div>
+
+                    <div id="save-actions" class="d-none">
+                        <button id="save-btn" type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">Uložit změny</button>
+                        <button type="button" class="btn btn-link text-muted w-100 mt-2 text-decoration-none" onclick="location.reload()">Zrušit</button>
+                    </div>
+                </form>
             </div>
-            
-            <div class="flex-grow-1">
-                <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                    <h4 class="mb-0 fw-bold">@Model.Input.Username</h4>
-                    <span class="badge bg-primary">Úroveň @Model.Level</span>
-                </div>
-                @if (Model.UserRole.Contains("Admin")) { <span class="text-danger fw-bold small">@Model.UserRole</span> }
-                else { <small class="text-muted">@Model.UserRole</small> }
+        </div>
+    </div>
+    
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-bold mb-4">Zabezpečení & Heslo</h5>
+                <form id="change-password-form" method="post" asp-page-handler="ChangePassword">
+                    <div class="form-floating mb-3">
+                        <input asp-for="PasswordInput.OldPassword" class="form-control rounded-3" autocomplete="current-password" placeholder="Staré heslo" />
+                        <label asp-for="PasswordInput.OldPassword">Současné heslo</label>
+                        <span asp-validation-for="PasswordInput.OldPassword" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="PasswordInput.NewPassword" class="form-control rounded-3" autocomplete="new-password" placeholder="Nové heslo" />
+                        <label asp-for="PasswordInput.NewPassword">Nové heslo</label>
+                        <span asp-validation-for="PasswordInput.NewPassword" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input asp-for="PasswordInput.ConfirmPassword" class="form-control rounded-3" autocomplete="new-password" placeholder="Potvrzení hesla" />
+                        <label asp-for="PasswordInput.ConfirmPassword">Potvrzení nového hesla</label>
+                        <span asp-validation-for="PasswordInput.ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
+                        <i class="bi bi-key me-2"></i>Aktualizovat heslo
+                    </button>
+                </form>
             </div>
-            
-            <div class="mt-3 mt-md-0 ms-md-auto">
-                <button type="button" class="btn btn-secondary d-flex align-items-center gap-2 px-4 shadow-sm" onclick="shareMyProfile(this)">
-                    <i class="bi bi-share-fill"></i> Sdílet
+        </div>
+        
+        <div class="card shadow-sm border-0 rounded-4 border-start border-warning border-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold text-warning mb-3">Zablokovat účet</h6>
+                <p class="small text-muted mb-4">Tato akce vás okamžitě odhlásí a zablokuje váš účet. Pro opětovné aktivování kontaktujte administrátora.</p>
+                <button type="button" class="btn btn-outline-warning btn-sm rounded-pill w-100 py-2" data-bs-toggle="modal" data-bs-target="#lockAccountModal">
+                    <i class="bi bi-lock me-2"></i>Zablokovat přístup
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-5 order-1 order-md-2 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body p-4">
-                <h5 class="card-title mb-4">Reputace & Statistiky</h5>
-
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Reputace <i class="bi bi-star-fill text-warning ms-1"></i></span>
-                        <span class="fw-bold">@Model.Reputation</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Min(Model.Reputation / 10, 100)%;"></div>
-                    </div>
-                    <small class="text-muted">Cíl: 1000 bodů</small>
-                </div>
-
-                <div class="mb-0">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Level <i class="bi bi-arrow-up-circle-fill text-primary ms-1"></i></span>
-                        <span class="fw-bold">@Model.Level</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        @{
-                            double percentage = 0;
-                            if (Model.NextLevelPoints > 0) percentage = ((double)Model.Points / Model.NextLevelPoints) * 100;
-                        }
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: @percentage%;"></div>
-                    </div>
-                    <small class="text-muted">@Model.Points / @Model.NextLevelPoints XP</small>
-                </div>
+<div class="modal fade" id="lockAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 py-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Zablokovat účet?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
             </div>
-        </div>
-    </div>
-
-    <div class="col-md-7 order-2 order-md-1 mb-4">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body p-4">
-                
-                <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab">Osobní údaje</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-security-tab" data-bs-toggle="pill" data-bs-target="#pills-security" type="button" role="tab" style="margin-left: 5px">Zabezpečení</button>
-                    </li>
-                </ul>
-
-                <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade show active" id="pills-profile" role="tabpanel">
-                        <form id="profile-form" method="post" enctype="multipart/form-data">
-                            
-                            <input type="file" 
-                                   asp-for="Input.ProfilePicture" 
-                                   id="upload-photo" 
-                                   class="d-none" 
-                                   accept="image/*" 
-                                   onchange="previewImage(this)">
-
-                            <div class="d-flex justify-content-end mb-3">
-                                <button type="button" id="edit-btn" class="btn btn-outline-primary btn-sm" onclick="enableEdit()">
-                                    <i class="bi bi-pencil"></i> Upravit profil
-                                </button>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.Username" class="form-control" disabled id="input-username"/>
-                                <label asp-for="Input.Username" class="form-label">Uživatelské jméno</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <textarea asp-for="Input.Bio" class="form-control" style="height: 100px" disabled id="input-bio"></textarea>
-                                <label asp-for="Input.Bio" class="form-label">Bio</label>
-                            </div>
-
-                            <div class="form-floating mb-3 input-group">
-                                <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
-                                <label asp-for="Input.Email" class="form-label">Email</label>
-                                
-                                <span asp-validation-for="Input.Email" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone"/>
-                                <label asp-for="Input.PhoneNumber" class="form-label">Telefon</label>
-                                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-                            </div>
-
-                            <button id="save-btn" type="submit" class="btn btn-primary w-100 d-none">Uložit změny</button>
-                            <button id="cancel-btn" type="button" class="btn btn-secondary w-100 mt-2 d-none" onclick="location.reload()">Zrušit</button>
-                        </form>
-                    </div>
-
-                    <div class="tab-pane fade" id="pills-security" role="tabpanel">
-                        <form id="change-password-form" method="post" asp-page-handler="ChangePassword">
-                                
-                            <div class="alert alert-light border mb-3">
-                                <small class="text-primary" style=""><i class="bi bi-info-circle"></i> Zde si můžete změnit heslo.</small>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input asp-for="PasswordInput.OldPassword" class="form-control" autocomplete="current-password" aria-required="true" />
-                                <label asp-for="PasswordInput.OldPassword" class="form-label"></label>
-                                <span asp-validation-for="PasswordInput.OldPassword" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input asp-for="PasswordInput.NewPassword" class="form-control" autocomplete="new-password" aria-required="true" />
-                                <label asp-for="PasswordInput.NewPassword" class="form-label"></label>
-                                <span asp-validation-for="PasswordInput.NewPassword" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input asp-for="PasswordInput.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
-                                <label asp-for="PasswordInput.ConfirmPassword" class="form-label"></label>
-                                <span asp-validation-for="PasswordInput.ConfirmPassword" class="text-danger"></span>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary w-100">Změnit heslo</button>
-                        </form>
-                    </div>
-                </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-0">Opravdu si přejete svůj účet zablokovat? Budete okamžitě odhlášeni a pro opětovný přístup budete muset kontaktovat podporu/administrátora.</p>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Zrušit</button>
+                <form method="post" asp-page-handler="LockAccount">
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Ano, zablokovat</button>
+                </form>
             </div>
         </div>
     </div>
@@ -177,16 +144,13 @@
 
 <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill"></i> Pozor, nastala chyba</h5>
+        <div class="modal-content border-danger rounded-4">
+            <div class="modal-header bg-danger text-white border-0 py-3 rounded-top-4">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i> Nastala chyba</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Zavřít"></button>
             </div>
-            <div class="modal-body">
-                <div asp-validation-summary="All" class="text-danger"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Rozumím</button>
+            <div class="modal-body p-4">
+                <div asp-validation-summary="All" class="text-danger fw-bold"></div>
             </div>
         </div>
     </div>
@@ -194,19 +158,19 @@
 
 <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Upravit fotku</h5>
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Upravit fotku</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
             </div>
             <div class="modal-body p-0">
-                <div class="img-container" style="height: 400px; overflow: hidden;">
+                <div class="img-container" style="height: 400px; background-color: #f8f9fa;">
                     <img id="image-to-crop" src="" style="display: block; max-width: 100%;">
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zrušit</button>
-                <button type="button" class="btn btn-primary" id="crop-btn">Použít fotku</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Zrušit</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" id="crop-btn">Uložit</button>
             </div>
         </div>
     </div>
@@ -216,23 +180,4 @@
     <partial name="_ValidationScriptsPartial" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var summary = document.querySelector(".validation-summary-errors");
-            if (summary && summary.innerText.trim().length > 0) {
-                var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                errorModal.show();
-            }
-            
-            var activeTab = '@ViewData["ActiveTab"]';
-            if (activeTab === 'security') {
-                var securityTabBtn = document.querySelector('#pills-security-tab');
-                if (securityTabBtn) {
-                    var tab = new bootstrap.Tab(securityTabBtn);
-                    tab.show();
-                }
-            }
-        });
-    </script>
 }

@@ -2,14 +2,19 @@
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
+<ul class="nav nav-pills flex-column gap-2">
+    <li class="nav-item mb-2">
+        <a class="nav-link bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 fw-bold" href="/u/@User.Identity?.Name">
+            <i class="bi bi-arrow-left me-2"></i>Veřejný profil
+        </a>
+    </li>
+    <li class="nav-item"><a class="nav-link rounded-pill px-3 @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profilové údaje</a></li>
+    <li class="nav-item"><a class="nav-link rounded-pill px-3 @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
+    <li class="nav-item"><a class="nav-link rounded-pill px-3 @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Heslo</a></li>
     @if (hasExternalLogins)
     {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
+        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link rounded-pill px-3 @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">Externí přihlášení</a></li>
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+    <li class="nav-item"><a class="nav-link rounded-pill px-3 @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">2FA ověření</a></li>
+    <li class="nav-item"><a class="nav-link rounded-pill px-3 @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Osobní data</a></li>
 </ul>

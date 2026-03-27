@@ -54,7 +54,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public PasswordModel PasswordInput { get; set; }
         
-        // Třídy pro data formulářů
         public class InputModel
         {
             [Display(Name = "Uživatelské jméno")]
@@ -98,8 +97,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             [Compare("NewPassword", ErrorMessage = "Nové heslo a potvrzení se neshodují.")]
             public string ConfirmPassword { get; set; }
         }
-
-        // Načtení dat
+        
         private async Task LoadAsync(User user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
@@ -112,7 +110,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             Points = user.Points;
             ProfilePictureUrl = user.ProfilePictureUrl;
             
-            NextLevelPoints = (int)(100 * Math.Pow(1.3, Level - 1));
+            NextLevelPoints = (int)(100 * Math.Pow(1.1, Level - 1));
             
             var roles = await _userManager.GetRolesAsync(user);
             var mainRole = roles.FirstOrDefault() ?? "Member";
@@ -133,16 +131,30 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound($"Nebylo možné načíst uživatele s ID '{_userManager.GetUserId(User)}'.");
 
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return RedirectToPage("/Users/UserProfile", new { area = "", username = user.UserName });
+            }
+
             await LoadAsync(user);
             return Page();
         }
-
-        // 1. Handler - uložení profilu
+        
         public async Task<IActionResult> OnPostAsync()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound($"Nebylo možné načíst uživatele s ID '{_userManager.GetUserId(User)}'.");
             
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return RedirectToPage("/Users/UserProfile", new { area = "", username = user.UserName });
+            }
+            
+            if (string.IsNullOrEmpty(Input.Username)) Input.Username = user.UserName;
+            if (string.IsNullOrEmpty(Input.Email)) Input.Email = user.Email;
+            if (Input.Bio == null) Input.Bio = user.Bio;
+            if (string.IsNullOrEmpty(Input.PhoneNumber)) Input.PhoneNumber = user.PhoneNumber;
+
             ModelState.Clear();
             
             if (!TryValidateModel(Input, nameof(Input)))
@@ -151,11 +163,10 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
             
-            // Změna profilového obrázku
             if (Input.ProfilePicture != null)
             {
                 string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "profiles");
-                Directory.CreateDirectory(uploadsFolder); // Vytvoří složku, pokud neexistuje
+                Directory.CreateDirectory(uploadsFolder);
 
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + Input.ProfilePicture.FileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -189,7 +200,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 }
             }
             
-            // Změna username
             var currentUsername = await _userManager.GetUserNameAsync(user);
             if (Input.Username != currentUsername)
             {
@@ -200,8 +210,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                     return RedirectToPage();
                 }
             }
-
-            // Změna telefonního čísla
+            
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             if (Input.PhoneNumber != phoneNumber)
             {
@@ -213,7 +222,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 }
             }
             
-            // Změna bia
             if (user.Bio != Input.Bio)
             {
                 user.Bio = Input.Bio;
@@ -225,7 +233,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 }
             }
             
-            // Změna emailu
             var email = await _userManager.GetEmailAsync(user);
             if (Input.Email != email)
             {
@@ -274,7 +281,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             return RedirectToPage();
         }
         
-        //2. Handler - změna hesla
         public async Task<IActionResult> OnPostChangePasswordAsync()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -310,6 +316,18 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Heslo bylo úspěšně změněno.";
             return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostLockAccountAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+            
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            
+            await _signInManager.SignOutAsync();
+            
+            return RedirectToPage("/Index");
         }
     }
 }

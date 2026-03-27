@@ -121,7 +121,6 @@ namespace Taskify.Pages.Tasks
 
             if (user == null || taskItem == null) return NotFound();
             
-            // bezpečnostní pojistka
             if (taskItem.Deadline.HasValue && taskItem.Deadline.Value <= DateTime.UtcNow)
             {
                 TempData["ErrorMessage"] = "Tento úkol je již po termínu.";
@@ -178,13 +177,13 @@ namespace Taskify.Pages.Tasks
                 
                 int currentLvl = taskItem.AssignedTo.Level;
                 
-                double pointsNeededForNext = 100 * Math.Pow(1.5, currentLvl - 1);
+                double pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
                 
                 while (taskItem.AssignedTo.Points >= pointsNeededForNext)
                 {
                     currentLvl++;
                     
-                    pointsNeededForNext = 100 * Math.Pow(1.5, currentLvl - 1);
+                    pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
                 }
                 
                 taskItem.AssignedTo.Level = currentLvl;

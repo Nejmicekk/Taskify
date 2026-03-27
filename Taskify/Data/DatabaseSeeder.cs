@@ -36,6 +36,10 @@ public static class DatabaseSeeder
                 var firstName = faker.Name.FirstName();
                 var lastName = faker.Name.LastName();
                 var userName = faker.Internet.UserName(firstName, lastName) + faker.Random.Int(1000, 9999);
+                int randomLevel = faker.Random.Int(1, 20);
+                int minPoints = (randomLevel == 1) ? 0 : (int)(100 * Math.Pow(1.1, randomLevel - 2));
+                int maxPoints = (int)(100 * Math.Pow(1.1, randomLevel - 1)) - 1;
+                
                 var user = new User
                 {
                     Name = $"{firstName} {lastName}",
@@ -44,8 +48,8 @@ public static class DatabaseSeeder
                     EmailConfirmed = true,
                     Bio = faker.Lorem.Sentence(),
                     Reputation = faker.Random.Int(0, 1000),
-                    Level = faker.Random.Int(1, 20),
-                    Points = faker.Random.Int(0, 5000),
+                    Level = randomLevel,
+                    Points = faker.Random.Int(minPoints, Math.Max(minPoints, maxPoints)),
                     ProfilePictureUrl = $"https://i.pravatar.cc/150?u={userName}"
                 };
                 user.PasswordHash = passwordHasher.HashPassword(user, "Heslo123!");

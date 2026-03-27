@@ -28,6 +28,7 @@
 </ItemGroup>
 
 <ItemGroup>
+  <Folder Include="Pages\Admin\Users\" />
   <Folder Include="wwwroot\uploads\tasks\" />
 </ItemGroup>
 

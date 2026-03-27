@@ -7,11 +7,10 @@ function enableEdit() {
     document.getElementById('input-bio').disabled = false;
     document.getElementById('input-phone').disabled = false;
     document.getElementById('input-email').disabled = false;
-    document.getElementById('input-username').disabled = false;
 
     document.getElementById('edit-btn').classList.add('d-none');
-    document.getElementById('save-btn').classList.remove('d-none');
-    document.getElementById('cancel-btn').classList.remove('d-none');
+    var saveActions = document.getElementById('save-actions');
+    if (saveActions) saveActions.classList.remove('d-none');
 }
 
 function previewImage(input) {
@@ -29,12 +28,20 @@ function previewImage(input) {
     }
 }
 
-function shareMyProfile(btnElement) {
-    var usernameInput = document.getElementById('input-username');
-    if (usernameInput && usernameInput.value) {
-        var url = window.location.origin + "/u/" + usernameInput.value;
-        copyToClipboard(url, btnElement);
-    }
+function copyProfileLink(btn) {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check2 me-2"></i>Zkopírováno!';
+        btn.classList.replace('btn-light', 'btn-success');
+        btn.classList.add('text-white');
+
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.replace('btn-success', 'btn-light');
+            btn.classList.remove('text-white');
+        }, 2000);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -110,5 +117,13 @@ document.getElementById('crop-btn').addEventListener('click', function () {
             cropModal.hide();
             enableEdit();
         });
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    var summary = document.querySelector(".validation-summary-errors");
+    if (summary && summary.innerText.trim().length > 0) {
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
     }
 });

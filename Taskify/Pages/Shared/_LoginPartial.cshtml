@@ -7,12 +7,13 @@
     @if (SignInManager.IsSignedIn(User))
     {
         var user = await UserManager.GetUserAsync(User);
+        bool isAdmin = User.IsInRole("Admin");
     
         <li class="nav-item dropdown d-flex align-items-center">
         
-            <a class="nav-link text-dark d-flex align-items-center gap-2" asp-area="Identity" asp-page="/Account/Manage/Index" title="Můj profil">
+            <a class="nav-link text-dark d-flex align-items-center gap-2" href="/u/@User.Identity?.Name" title="Můj profil">
             
-                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: @(isAdmin ? "#dc3545" : "#0d6efd"); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
                     @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
                     {
                         <img src="@user.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
@@ -23,7 +24,9 @@
                     }
                 </div>
             
-                <span class="fw-bold">@User.Identity?.Name</span>
+                <span class="fw-bold @(isAdmin ? "text-danger" : "")">
+                    @User.Identity?.Name
+                </span>
             </a>
 
             @if (User.IsInRole("Admin"))
