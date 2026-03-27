@@ -4,7 +4,7 @@
     ViewData["Title"] = "Správa reportů";
 }
 
-<link rel="stylesheet" href="~/css/Admin/Reports/Index.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Users/Index.css" asp-append-version="true" />
 
 <div class="container mt-4">
     <nav aria-label="breadcrumb">
@@ -17,63 +17,35 @@
     <h1 class="fw-bold mb-4">Správa hlášení</h1>
     
     <form method="get" id="filterForm" class="mb-5">
-        <div class="card shadow-sm border-0 rounded-pill bg-white w-auto">
-            <div class="card-body p-2">
-                <div class="row g-0 align-items-center">
-                    
-                    <div class="col-lg-4">
-                        <div class="dropdown w-100 h-100">
-                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6"
-                                    type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-info-circle text-primary me-2"></i>
-                                <span class="text-truncate">
-                                    @(Model.StatusFilter switch {
-                                        "resolved" => "Vyřešené",
-                                        "all" => "Vše",
-                                        _ => "Čekající"
-                                    })
-                                </span>
-                                <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
-                            </button>
-                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100">
-                                <li><a class="dropdown-item px-3 @(Model.StatusFilter == "unresolved" ? "active" : "")" href="?StatusFilter=unresolved&SelectedReason=@Model.SelectedReason">Čekající</a></li>
-                                <li><a class="dropdown-item px-3 @(Model.StatusFilter == "resolved" ? "active" : "")" href="?StatusFilter=resolved&SelectedReason=@Model.SelectedReason">Vyřešené</a></li>
-                                <li><a class="dropdown-item px-3 @(Model.StatusFilter == "all" ? "active" : "")" href="?StatusFilter=all&SelectedReason=@Model.SelectedReason">Vše</a></li>
-                            </ul>
-                            <input type="hidden" name="StatusFilter" value="@Model.StatusFilter" />
-                        </div>
-                    </div>
-                    
-                    <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
-
-                    <div class="col-lg-5">
-                        <div class="dropdown w-100 h-100">
-                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6"
-                                    type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-tag-fill text-warning me-2"></i>
-                                <span class="text-truncate">
-                                    @(Model.SelectedReason.HasValue ? Model.GetReasonLabel(Model.SelectedReason.Value) : "Všechny důvody")
-                                </span>
-                                <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
-                            </button>
-                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
-                                <li><a class="dropdown-item px-3 @(!Model.SelectedReason.HasValue ? "active" : "")" href="?StatusFilter=@Model.StatusFilter&SelectedReason=">Všechny důvody</a></li>
-                                <li><hr class="dropdown-divider opacity-50"></li>
-                                @foreach (var reason in Enum.GetValues<Taskify.Models.Enums.ReportReason>())
-                                {
-                                    <li>
-                                        <a class="dropdown-item px-3 @(Model.SelectedReason == reason ? "active" : "")" 
-                                           href="?StatusFilter=@Model.StatusFilter&SelectedReason=@reason">
-                                            @Model.GetReasonLabel(reason)
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                            <input type="hidden" name="SelectedReason" value="@Model.SelectedReason" />
-                        </div>
-                    </div>
-                    
+        <div class="card shadow-sm border-0 rounded-4 bg-white p-3">
+            <div class="row g-3 align-items-center">
+                
+                @* Filtr Stav *@
+                <div class="col-md-6 col-lg-3">
+                    <select name="StatusFilter" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
+                        <option value="unresolved" selected="@(Model.StatusFilter == "unresolved")">Čekající</option>
+                        <option value="resolved" selected="@(Model.StatusFilter == "resolved")">Vyřešené</option>
+                        <option value="all" selected="@(Model.StatusFilter == "all")">Vše</option>
+                    </select>
                 </div>
+
+                @* Filtr Důvod *@
+                <div class="col-md-6 col-lg-3">
+                    <select name="SelectedReason" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
+                        <option value="" selected="@(!Model.SelectedReason.HasValue)">Všechny důvody</option>
+                        @foreach (var reason in Enum.GetValues<Taskify.Models.Enums.ReportReason>())
+                        {
+                            <option value="@reason" selected="@(Model.SelectedReason == reason)">@Model.GetReasonLabel(reason)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-1 ms-auto text-end">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm w-100">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+                
             </div>
         </div>
     </form>
@@ -119,7 +91,7 @@
                                 </td>
                                 <td>
                                     <a href="/u/@report.Reporter?.UserName" class="text-decoration-none text-dark d-flex align-items-center hover-primary">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2 shadow-sm">
                                             @if (!string.IsNullOrEmpty(report.Reporter?.ProfilePictureUrl)) {
                                                 <img src="@report.Reporter.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
                                             }

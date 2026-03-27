@@ -1,0 +1,187 @@
+@page
+@model Taskify.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Správa uživatelů";
+}
+
+<link rel="stylesheet" href="~/css/Admin/Users/Index.css" asp-append-version="true" />
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-page="/Admin/AdminDashboard" class="text-decoration-none text-muted">Administrace</a></li>
+            <li class="breadcrumb-item active fw-bold text-dark">Uživatelé</li>
+        </ol>
+    </nav>
+
+    <h1 class="fw-bold mb-4">Správa uživatelů</h1>
+    
+    <form method="get" id="filterForm" class="mb-5">
+        <div class="card shadow-sm border-0 rounded-4 bg-white p-3">
+            <div class="row g-3 align-items-center">
+                @* Vyhledávání *@
+                <div class="col-lg-4">
+                    <div class="input-group bg-light rounded-pill px-3 py-1">
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" name="SearchTerm" value="@Model.SearchTerm" 
+                               class="form-control bg-transparent border-0 shadow-none" 
+                               placeholder="Hledat uživatele...">
+                    </div>
+                </div>
+
+                @* Filtr Role *@
+                <div class="col-md-4 col-lg-2">
+                    <select name="RoleFilter" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
+                        <option value="all" selected="@(Model.RoleFilter == "all")">Všechny role</option>
+                        <option value="admin" selected="@(Model.RoleFilter == "admin")">Administrátoři</option>
+                        <option value="user" selected="@(Model.RoleFilter == "user")">Uživatelé</option>
+                    </select>
+                </div>
+
+                @* Filtr Stav *@
+                <div class="col-md-4 col-lg-2">
+                    <select name="StatusFilter" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
+                        <option value="all" selected="@(Model.StatusFilter == "all")">Všechny stavy</option>
+                        <option value="active" selected="@(Model.StatusFilter == "active")">Aktivní</option>
+                        <option value="locked" selected="@(Model.StatusFilter == "locked")">Zamčení</option>
+                    </select>
+                </div>
+
+                @* Řazení *@
+                <div class="col-md-4 col-lg-3">
+                    <select name="SortOrder" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
+                        <option value="default" selected="@(Model.SortOrder == "default")">Řadit dle jména</option>
+                        <option value="rep_desc" selected="@(Model.SortOrder == "rep_desc")">Nejvyšší reputace</option>
+                        <option value="rep_asc" selected="@(Model.SortOrder == "rep_asc")">Nejnižší reputace</option>
+                        <option value="lvl_desc" selected="@(Model.SortOrder == "lvl_desc")">Nejvyšší level</option>
+                        <option value="lvl_asc" selected="@(Model.SortOrder == "lvl_asc")">Nejnižší level</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-1 text-end d-none d-lg-block">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm w-100">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+    @if (!Model.Users.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+            <i class="bi bi-people text-muted display-1 opacity-25"></i>
+            <h4 class="mt-3 text-muted">Žádní uživatelé neodpovídají filtrům!</h4>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-0">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Uživatel</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">E-mail</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted text-center">Reputace</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted text-center">Level</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted text-center">Role</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted text-center">Stav</th>
+                            <th class="py-3 text-end pe-4 text-uppercase small fw-bold text-muted">Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr class="border-bottom">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <a href="/u/@user.UserName" class="text-decoration-none">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background-color: #f8f9fa;" class="me-3 shadow-sm border hover-opacity">
+                                                @if (!string.IsNullOrEmpty(user.ProfilePictureUrl)) {
+                                                    <img src="@user.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
+                                                } else {
+                                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary fw-bold">
+                                                        @(user.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                                    </div>
+                                                }
+                                            </div>
+                                        </a>
+                                        <div>
+                                            <div class="fw-bold text-dark">@user.Name</div>
+                                            <a href="/u/@user.UserName" class="small text-muted text-decoration-none">@@@user.UserName</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="small text-muted">@user.Email</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle rounded-pill px-3">
+                                        <i class="bi bi-star-fill me-1"></i>@user.Reputation
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle rounded-pill px-3">
+                                        Lvl @user.Level
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    @if (user.IsAdmin)
+                                    {
+                                        <span class="badge bg-danger rounded-pill px-3">Admin</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary rounded-pill px-3">Uživatel</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (user.IsLockedOut)
+                                    {
+                                        <span class="badge bg-dark rounded-pill px-3" title="Účet je uzamčen">
+                                            <i class="bi bi-lock-fill me-1"></i>Zamčen
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3" title="Účet je aktivní">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Aktivní
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2">
+                                            <li>
+                                                <form method="post" asp-page-handler="ToggleAdmin" asp-route-userId="@user.Id">
+                                                    <button type="submit" class="dropdown-item rounded-2 py-2">
+                                                        <i class="bi @(user.IsAdmin ? "bi-person-dash" : "bi-person-up") me-2 text-primary"></i>
+                                                        @(user.IsAdmin ? "Odebrat Admina" : "Jmenovat Adminem")
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="post" asp-page-handler="ToggleLock" asp-route-userId="@user.Id">
+                                                    <button type="submit" class="dropdown-item rounded-2 py-2">
+                                                        <i class="bi @(user.IsLockedOut ? "bi-unlock" : "bi-lock") me-2 text-warning"></i>
+                                                        @(user.IsLockedOut ? "Odemknout účet" : "Zablokovat přístup")
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

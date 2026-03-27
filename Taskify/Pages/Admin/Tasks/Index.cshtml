@@ -4,7 +4,7 @@
     ViewData["Title"] = "Správa úkolů";
 }
 
-<link rel="stylesheet" href="~/css/Admin/Tasks/Index.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/Admin/Users/Index.css" asp-append-version="true" />
 
 <div class="container mt-4">
     <nav aria-label="breadcrumb">
@@ -14,146 +14,127 @@
         </ol>
     </nav>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="fw-bold">Správa úkolů</h1>
-        <span class="badge bg-primary rounded-pill px-3 py-2">Celkem: @Model.Tasks.Count</span>
-    </div>
+    <h1 class="fw-bold mb-4">Správa úkolů</h1>
     
     <form method="get" id="filterForm" class="mb-5">
-        <div class="card shadow-sm border-0 rounded-pill bg-white w-auto">
-            <div class="card-body p-2">
-                <div class="row g-0 align-items-center">
-                    
-                    <div class="col-lg-4">
-                        <div class="input-group border-0">
-                            <span class="input-group-text bg-transparent border-0 text-muted ps-3">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" name="SearchQuery" value="@Model.SearchQuery" 
-                                   class="form-control border-0 fs-6 shadow-none" placeholder="Hledat v úkolech...">
-                        </div>
-                    </div>
-
-                    <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
-                    
-                    <div class="col-lg-4">
-                        <div class="dropdown w-100 h-100">
-                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 shadow-none"
-                                    type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-info-circle text-primary me-2"></i>
-                                <span class="text-truncate">
-                                    @(Model.StatusFilter.HasValue ? Model.GetStatusLabel(Model.StatusFilter.Value) : "Všechny stavy")
-                                </span>
-                                <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
-                            </button>
-                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100">
-                                <li><a class="dropdown-item px-3 @(!Model.StatusFilter.HasValue ? "active" : "")" href="?SearchQuery=@Model.SearchQuery&StatusFilter=">Všechny stavy</a></li>
-                                <li><hr class="dropdown-divider opacity-50"></li>
-                                @foreach (var status in Enum.GetValues<Taskify.Models.Enums.TaskStatus>())
-                                {
-                                    <li>
-                                        <a class="dropdown-item px-3 @(Model.StatusFilter == status ? "active" : "")" 
-                                           href="?SearchQuery=@Model.SearchQuery&StatusFilter=@status">
-                                            @Model.GetStatusLabel(status)
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                            <input type="hidden" name="StatusFilter" value="@Model.StatusFilter" />
-                        </div>
+        <div class="card shadow-sm border-0 rounded-4 bg-white p-3">
+            <div class="row g-3 align-items-center">
+                
+                @* Vyhledávání *@
+                <div class="col-lg-4">
+                    <div class="input-group bg-light rounded-pill px-3 py-1">
+                        <span class="input-group-text bg-transparent border-0">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" name="SearchQuery" value="@Model.SearchQuery" 
+                               class="form-control bg-transparent border-0 shadow-none" 
+                               placeholder="Hledat v názvu nebo popisu...">
                     </div>
                 </div>
+
+                @* Filtr Stav *@
+                <div class="col-md-6 col-lg-3">
+                    <select name="StatusFilter" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
+                        <option value="" selected="@(!Model.StatusFilter.HasValue)">Všechny stavy</option>
+                        @foreach (var status in Enum.GetValues<Taskify.Models.Enums.TaskStatus>())
+                        {
+                            <option value="@status" selected="@(Model.StatusFilter == status)">@Model.GetStatusLabel(status)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-1 ms-auto text-end">
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm w-100">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                </div>
+                
             </div>
         </div>
     </form>
     
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light border-0">
-                    <tr>
-                        <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">ID / Datum</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Název a Lokalita</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Autor</th>
-                        <th class="py-3 text-uppercase small fw-bold text-muted">Stav</th>
-                        <th class="py-3 text-end pe-4 text-uppercase small fw-bold text-muted">Akce</th>
-                    </tr>
-                </thead>
-                <tbody class="border-top-0">
-                    @foreach (var task in Model.Tasks)
-                    {
-                        <tr class="border-bottom">
-                            <td class="ps-4">
-                                <div class="fw-bold text-dark">#@task.Id</div>
-                                <div class="small text-muted">@task.CreatedAt.ToString("dd.MM.yyyy")</div>
-                            </td>
-                            <td>
-                                <div class="fw-bold text-dark">@task.Title</div>
-                                <div class="small text-muted">
-                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                    @task.Location.City, @task.Location.Street
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2">
-                                        @if (!string.IsNullOrEmpty(task.CreatedBy?.ProfilePictureUrl)) {
-                                            <img src="@task.CreatedBy.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
-                                        }
-                                    </div>
-                                    <span class="small fw-bold">@task.CreatedBy?.UserName</span>
-                                </div>
-                            </td>
-                            <td>
-                                @{
-                                    var statusClass = task.Status switch {
+    @if (!Model.Tasks.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+            <i class="bi bi-list-task text-muted display-1 opacity-25"></i>
+            <h4 class="mt-3 text-muted">Žádné úkoly neodpovídají filtrům!</h4>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-0">
+                        <tr>
+                            <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Úkol</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Kategorie</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted">Autor</th>
+                            <th class="py-3 text-center text-uppercase small fw-bold text-muted">Stav</th>
+                            <th class="py-3 text-end pe-4 text-uppercase small fw-bold text-muted">Akce</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach (var task in Model.Tasks)
+                        {
+                            <tr class="border-bottom">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">@task.Title</div>
+                                    <span class="small text-muted">ID: @task.Id • @task.CreatedAt.ToString("dd.MM.yyyy")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3">
+                                        @task.Category?.Name
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/u/@task.CreatedBy?.UserName" class="text-decoration-none text-dark d-flex align-items-center">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2 shadow-sm">
+                                            @if (!string.IsNullOrEmpty(task.CreatedBy?.ProfilePictureUrl)) {
+                                                <img src="@task.CreatedBy.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
+                                            }
+                                        </div>
+                                        <span class="small fw-bold">@task.CreatedBy?.UserName</span>
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge rounded-pill px-3 py-1 @(task.Status switch {
                                         Taskify.Models.Enums.TaskStatus.Open => "bg-success",
                                         Taskify.Models.Enums.TaskStatus.InProgress => "bg-primary",
-                                        Taskify.Models.Enums.TaskStatus.Completed => "bg-info",
+                                        Taskify.Models.Enums.TaskStatus.Completed => "bg-dark",
                                         Taskify.Models.Enums.TaskStatus.Archived => "bg-secondary",
-                                        _ => "bg-warning"
-                                    };
-                                }
-                                <span class="badge @statusClass bg-opacity-10 text-@statusClass.Replace("bg-", "") border border-@statusClass.Replace("bg-", "")-subtle rounded-pill px-2 py-1 small">
-                                    @Model.GetStatusLabel(task.Status)
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a asp-page="/Tasks/Edit" asp-route-id="@task.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
-                                        <i class="bi bi-pencil me-1"></i> Upravit
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" 
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal-@task.Id">
-                                        <i class="bi bi-trash me-1"></i>
-                                    </button>
-                                </div>
-
-                                <!-- DELETE MODAL FOR EACH TASK -->
-                                <div class="modal fade text-start" id="deleteModal-@task.Id" tabindex="-1">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow-lg rounded-4">
-                                            <div class="modal-header border-0 pb-0">
-                                                <h5 class="modal-title fw-bold text-danger">Smazat úkol #@task.Id</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body py-4">
-                                                Opravdu chcete smazat úkol <strong>@task.Title</strong>? Tato akce je nevratná.
-                                            </div>
-                                            <div class="modal-footer border-0 pt-0">
-                                                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Zrušit</button>
-                                                <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id">
-                                                    <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">Smazat</button>
+                                        _ => "bg-warning text-dark"
+                                    })">
+                                        @Model.GetStatusLabel(task.Status)
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2">
+                                            <li>
+                                                <a href="/Tasks/Detail/@task.Id" class="dropdown-item rounded-2 py-2">
+                                                    <i class="bi bi-eye me-2 text-primary"></i>Zobrazit detail
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider opacity-50"></li>
+                                            <li>
+                                                <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id" onsubmit="return confirm('Opravdu chcete tento úkol smazat? Tato akce je nevratná.');">
+                                                    <button type="submit" class="dropdown-item rounded-2 py-2 text-danger">
+                                                        <i class="bi bi-trash3 me-2"></i>Smazat úkol
+                                                    </button>
                                                 </form>
-                                            </div>
-                                        </div>
+                                            </li>
+                                        </ul>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    }
 </div>
