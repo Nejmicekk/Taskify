@@ -199,5 +199,19 @@ namespace Taskify.Pages.Tasks
             TempData["StatusMessage"] = $"Úkol úspěšně uzavřen!";
             return RedirectToPage(new { id });
         }
+
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            if (!User.IsInRole("Admin")) return Forbid();
+
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+            if (taskItem == null) return NotFound();
+
+            _context.Tasks.Remove(taskItem);
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Úkol byl úspěšně odstraněn administrátorem.";
+            return RedirectToPage("/Tasks/Index");
+        }
     }
 }

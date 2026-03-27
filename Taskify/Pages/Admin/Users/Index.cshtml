@@ -84,11 +84,11 @@
                     <thead class="bg-light border-0">
                         <tr>
                             <th class="ps-4 py-3 text-uppercase small fw-bold text-muted">Uživatel</th>
-                            <th class="py-3 text-uppercase small fw-bold text-muted">E-mail</th>
                             <th class="py-3 text-uppercase small fw-bold text-muted text-center">Reputace</th>
                             <th class="py-3 text-uppercase small fw-bold text-muted text-center">Level</th>
                             <th class="py-3 text-uppercase small fw-bold text-muted text-center">Role</th>
                             <th class="py-3 text-uppercase small fw-bold text-muted text-center">Stav</th>
+                            <th class="py-3 text-uppercase small fw-bold text-muted text-center">Konec blokace</th>
                             <th class="py-3 text-end pe-4 text-uppercase small fw-bold text-muted">Akce</th>
                         </tr>
                     </thead>
@@ -114,9 +114,6 @@
                                             <a href="/u/@user.UserName" class="small text-muted text-decoration-none">@@@user.UserName</a>
                                         </div>
                                     </div>
-                                </td>
-                                <td>
-                                    <span class="small text-muted">@user.Email</span>
                                 </td>
                                 <td class="text-center">
                                     <span class="badge bg-warning bg-opacity-10 text-warning border border-warning-subtle rounded-pill px-3">
@@ -152,30 +149,55 @@
                                         </span>
                                     }
                                 </td>
+                                <td class="text-center">
+                                    @if (user.IsLockedOut && user.LockoutEnd.HasValue)
+                                    {
+                                        if (user.LockoutEnd == DateTimeOffset.MaxValue)
+                                        {
+                                            <span class="small text-danger fw-bold">Trvale</span>
+                                        }
+                                        else
+                                        {
+                                            var timeLeft = user.LockoutEnd.Value - DateTimeOffset.UtcNow;
+                                            int daysLeft = (int)Math.Ceiling(timeLeft.TotalDays);
+                                            <div class="small">
+                                                <div class="fw-bold">@user.LockoutEnd.Value.ToString("dd.MM.yyyy HH:mm")</div>
+                                                <div class="text-muted">(za @daysLeft @(daysLeft == 1 ? "den" : (daysLeft < 5 ? "dny" : "dní")))</div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">---</span>
+                                    }
+                                </td>
                                 <td class="text-end pe-4">
-                                    <div class="dropdown">
-                                        <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2">
-                                            <li>
-                                                <form method="post" asp-page-handler="ToggleAdmin" asp-route-userId="@user.Id">
-                                                    <button type="submit" class="dropdown-item rounded-2 py-2">
-                                                        <i class="bi @(user.IsAdmin ? "bi-person-dash" : "bi-person-up") me-2 text-primary"></i>
-                                                        @(user.IsAdmin ? "Odebrat Admina" : "Jmenovat Adminem")
-                                                    </button>
-                                                </form>
-                                            </li>
-                                            <li>
-                                                <form method="post" asp-page-handler="ToggleLock" asp-route-userId="@user.Id">
-                                                    <button type="submit" class="dropdown-item rounded-2 py-2">
-                                                        <i class="bi @(user.IsLockedOut ? "bi-unlock" : "bi-lock") me-2 text-warning"></i>
-                                                        @(user.IsLockedOut ? "Odemknout účet" : "Zablokovat přístup")
-                                                    </button>
-                                                </form>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    @if (user.UserName != User.Identity?.Name)
+                                    {
+                                        <div class="dropdown">
+                                            <button class="btn btn-light btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-2">
+                                                <li>
+                                                    @if (user.IsLockedOut)
+                                                    {
+                                                        <form method="post" asp-page-handler="ToggleLock" asp-route-userId="@user.Id">
+                                                            <button type="submit" class="dropdown-item rounded-2 py-2">
+                                                                <i class="bi bi-unlock me-2 text-success"></i>Odblokovat účet
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button" class="dropdown-item rounded-2 py-2 text-danger" onclick="openLockModal('@user.Id')">
+                                                            <i class="bi bi-lock me-2"></i>Zablokovat účet
+                                                        </button>
+                                                    }
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -185,3 +207,6 @@
         </div>
     }
 </div>
+
+@* Načtení společného modalu *@
+<partial name="_LockUserModal" />

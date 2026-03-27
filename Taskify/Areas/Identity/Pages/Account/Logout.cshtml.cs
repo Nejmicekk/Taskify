@@ -28,14 +28,7 @@ namespace Taskify.Areas.Identity.Pages.Account
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("Uživatel byl odhlášen.");
-            if (returnUrl != null)
-            {
-                return LocalRedirect("/");
-            }
-            else
-            {
-                return RedirectToPage();
-            }
+            return LocalRedirect("/");
         }
         
         public async Task<IActionResult> OnGet()

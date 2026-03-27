@@ -3,42 +3,42 @@
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 
-<ul class="navbar-nav">
+<ul class="navbar-nav align-items-center">
     @if (SignInManager.IsSignedIn(User))
     {
         var user = await UserManager.GetUserAsync(User);
         bool isAdmin = User.IsInRole("Admin");
     
-        <li class="nav-item dropdown d-flex align-items-center">
-        
-            <a class="nav-link text-dark d-flex align-items-center gap-2" href="/u/@User.Identity?.Name" title="Můj profil">
-            
-                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: @(isAdmin ? "#dc3545" : "#0d6efd"); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
-                    @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
-                    {
-                        <img src="@user.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
-                    }
-                    else
-                    {
-                        @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
-                    }
-                </div>
-            
-                <span class="fw-bold @(isAdmin ? "text-danger" : "")">
-                    @User.Identity?.Name
-                </span>
-            </a>
-
-            @if (User.IsInRole("Admin"))
+        <li class="nav-item d-flex align-items-center">
+            @if (isAdmin)
             {
-                <a class="nav-link text-danger ms-2" asp-page="/Admin/AdminDashboard" title="Administrace">
-                    <i class="bi bi-shield-lock-fill"></i>
+                <a class="nav-link text-danger d-flex align-items-center gap-2 fw-bold px-3 py-1 rounded-pill bg-danger bg-opacity-10 border border-danger border-opacity-25" 
+                   asp-page="/Admin/AdminDashboard" title="Přejít do administrace">
+                    <i class="bi bi-shield-lock-fill fs-5"></i>
+                    <span>Administrace</span>
                 </a>
             }
-
-            <form class="form-inline logout-form" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-primary p-0 d-flex align-items-center gap-2">
-                    <i class="bi bi-box-arrow-right"></i> Odhlásit se
+            else
+            {
+                <a class="nav-link text-dark d-flex align-items-center gap-2" href="/u/@User.Identity?.Name" title="Můj profil">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
+                        @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
+                        {
+                            <img src="@user.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
+                        }
+                        else
+                        {
+                            @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                        }
+                    </div>
+                    <span class="fw-bold">@User.Identity?.Name</span>
+                </a>
+            }
+            
+            <form class="form-inline logout-form ms-3" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                <button type="submit" class="btn btn-link text-muted p-0 d-flex align-items-center gap-2 text-decoration-none">
+                    <i class="bi bi-box-arrow-right fs-5"></i>
+                    <span>Odhlásit se</span>
                 </button>
             </form>
         </li>
@@ -46,10 +46,10 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-btn-login" asp-area="Identity" asp-page="/Account/Register">Registrovat</a>
+            <a class="nav-btn-login text-decoration-none" asp-area="Identity" asp-page="/Account/Register">Registrovat</a>
         </li>
         <li class="nav-item">
-            <a class="nav-btn-login ms-2 px-3 btn-sm rounded-pill " asp-area="Identity" asp-page="/Account/Login">Přihlásit se</a>
+            <a class="nav-btn-login ms-2 px-3 btn-sm rounded-pill text-decoration-none" asp-area="Identity" asp-page="/Account/Login">Přihlásit se</a>
         </li>
     }
 </ul>

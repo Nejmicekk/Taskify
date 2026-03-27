@@ -44,6 +44,7 @@ public class IndexModel : PageModel
         public string? ProfilePictureUrl { get; set; }
         public bool IsAdmin { get; set; }
         public bool IsLockedOut { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
         public int Reputation { get; set; }
         public int Level { get; set; }
     }
@@ -51,8 +52,7 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         var usersQuery = _userManager.Users.AsQueryable();
-
-        // 1. Vyhledávání
+        
         if (!string.IsNullOrWhiteSpace(SearchTerm))
         {
             usersQuery = usersQuery.Where(u => 
@@ -60,8 +60,7 @@ public class IndexModel : PageModel
                 (u.Email != null && u.Email.Contains(SearchTerm)) ||
                 u.Name.Contains(SearchTerm));
         }
-
-        // 2. Načtení všech (IdentityUserManager nepodporuje komplexní joiny na role v EF bez manuálního SQL)
+        
         var allUsers = await usersQuery.ToListAsync();
         var now = DateTimeOffset.UtcNow;
         
@@ -72,7 +71,6 @@ public class IndexModel : PageModel
             bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             bool isLocked = user.LockoutEnd != null && user.LockoutEnd > now;
             
-            // Filtrace v paměti (spolehlivější pro Identity a SQLite)
             if (RoleFilter == "admin" && !isAdmin) continue;
             if (RoleFilter == "user" && isAdmin) continue;
             
@@ -88,12 +86,12 @@ public class IndexModel : PageModel
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 IsAdmin = isAdmin,
                 IsLockedOut = isLocked,
+                LockoutEnd = user.LockoutEnd,
                 Reputation = user.Reputation,
                 Level = user.Level
             });
         }
-
-        // 3. Řazení
+        
         Users = SortOrder switch
         {
             "rep_desc" => viewModels.OrderByDescending(u => u.Reputation).ToList(),
@@ -102,35 +100,9 @@ public class IndexModel : PageModel
             "lvl_asc" => viewModels.OrderBy(u => u.Level).ToList(),
             _ => viewModels.OrderBy(u => u.UserName).ToList()
         };
-    }
-
-    public async Task<IActionResult> OnPostToggleAdminAsync(string userId)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null) return NotFound();
-
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (currentUser?.Id == userId)
-        {
-            TempData["ErrorMessage"] = "Nemůžete odebrat administrátorská práva sami sobě.";
-            return RedirectToPage();
         }
 
-        if (await _userManager.IsInRoleAsync(user, "Admin"))
-        {
-            await _userManager.RemoveFromRoleAsync(user, "Admin");
-            TempData["StatusMessage"] = $"Role Admin byla odebrána uživateli {user.UserName}.";
-        }
-        else
-        {
-            await _userManager.AddToRoleAsync(user, "Admin");
-            TempData["StatusMessage"] = $"Uživatel {user.UserName} byl jmenován administrátorem.";
-        }
-
-        return RedirectToPage();
-    }
-
-    public async Task<IActionResult> OnPostToggleLockAsync(string userId)
+        public async Task<IActionResult> OnPostToggleLockAsync(string userId, int? days)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return NotFound();
@@ -142,18 +114,19 @@ public class IndexModel : PageModel
             return RedirectToPage();
         }
 
-        var isLocked = await _userManager.IsLockedOutAsync(user);
-
-        if (isLocked)
+        if (days.HasValue)
         {
-            await _userManager.SetLockoutEndDateAsync(user, null);
-            TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl odemčen.";
+            DateTimeOffset? lockoutEnd = days.Value == 0 ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays(days.Value);
+            await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+            await UnassignTasksFromUser(userId);
+            
+            string timeMsg = days.Value == 0 ? "trvale" : $"na {days.Value} dní";
+            TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl zablokován {timeMsg}.";
         }
         else
         {
-            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
-            await UnassignTasksFromUser(userId);
-            TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl zablokován a jeho úkoly, na kterých pracoval jsou opět aktivní pro další uživatele.";
+            await _userManager.SetLockoutEndDateAsync(user, null);
+            TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl odemčen.";
         }
 
         return RedirectToPage();

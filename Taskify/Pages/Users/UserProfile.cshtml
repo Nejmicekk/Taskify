@@ -72,6 +72,21 @@ else
                             {
                                 <span class="text-danger fw-bold"><i class="bi bi-shield-fill-check"></i> Autorizovaný administrátor</span>
                             }
+                            
+                            @if (Model.IsLockedOut && Model.LockoutEnd.HasValue)
+                            {
+                                <span class="text-danger fw-bold ms-md-2 border-start ps-md-3">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    ZABLOKOVÁN 
+                                    @if (Model.LockoutEnd == DateTimeOffset.MaxValue) {
+                                        <span>(Trvale)</span>
+                                    } else {
+                                        var timeLeft = Model.LockoutEnd.Value - DateTimeOffset.UtcNow;
+                                        int daysLeft = (int)Math.Ceiling(timeLeft.TotalDays);
+                                        <span>do @Model.LockoutEnd.Value.ToString("dd.MM.yyyy HH:mm") (za @daysLeft @(daysLeft == 1 ? "den" : (daysLeft < 5 ? "dny" : "dní")))</span>
+                                    }
+                                </span>
+                            }
                         </div>
 
                         <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
@@ -84,6 +99,26 @@ else
                                 <button type="button" class="btn btn-light rounded-pill px-4 shadow-sm border" onclick="copyProfileLink(this)">
                                     <i class="bi bi-share me-2"></i>Sdílet profil
                                 </button>
+                            }
+
+                            @if (User.IsInRole("Admin") && !Model.IsMe)
+                            {
+                                <div class="vr mx-2 d-none d-md-block"></div>
+                                @if (Model.IsLockedOut)
+                                {
+                                    <form method="post" asp-page-handler="ToggleLock" asp-route-userId="@Model.DisplayedUser.Id" class="d-inline">
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">
+                                            <i class="bi bi-unlock me-2"></i>Odblokovat uživatele
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-outline-danger rounded-pill px-4 shadow-sm" 
+                                            onclick="openLockModal('@Model.DisplayedUser.Id')">
+                                        <i class="bi bi-lock me-2"></i>Zablokovat přístup
+                                    </button>
+                                }
                             }
                         </div>
                     </div>
@@ -165,3 +200,5 @@ else
 @section Scripts {
     <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
 }
+
+<partial name="_LockUserModal" />
