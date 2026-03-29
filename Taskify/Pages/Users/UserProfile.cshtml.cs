@@ -67,7 +67,7 @@ namespace Taskify.Pages.Users
                 .Include(t => t.Location)
                 .Where(t => t.CreatedById == DisplayedUser.Id)
                 .OrderByDescending(t => t.CreatedAt)
-                .Take(5)
+                .Take(3)
                 .ToListAsync();
             
             if (IsMe)
@@ -78,7 +78,7 @@ namespace Taskify.Pages.Users
                     .Include(t => t.Location)
                     .Where(t => t.AssignedToId == DisplayedUser.Id && t.Status != Models.Enums.TaskStatus.Completed)
                     .OrderBy(t => t.Deadline ?? DateTime.MaxValue)
-                    .Take(5)
+                    .Take(3)
                     .ToListAsync();
             }
 
