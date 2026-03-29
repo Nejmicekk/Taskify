@@ -153,14 +153,15 @@
                                     }
                                     else
                                     {
-                                        @(Model.TaskItem.CreatedBy.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                        @(Model.TaskItem.CreatedBy.Name?.Substring(0, 1).ToUpper() ?? "U")
                                     }
                                 </div>
-                                <span class="small fw-bold">
-                                    <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" class="text-decoration-none text-dark hover-primary">
-                                        @Model.TaskItem.CreatedBy.UserName
+                                <div class="d-flex flex-column text-truncate">
+                                    <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" class="text-decoration-none text-dark fw-bold hover-primary lh-sm small">
+                                        @Model.TaskItem.CreatedBy.Name
                                     </a>
-                                </span>
+                                    <small class="text-muted" style="font-size: 0.7rem;">@@@Model.TaskItem.CreatedBy.UserName</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -182,14 +183,15 @@
                                         }
                                         else
                                         {
-                                            @(Model.TaskItem.AssignedTo.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                            @(Model.TaskItem.AssignedTo.Name?.Substring(0, 1).ToUpper() ?? "U")
                                         }
                                     </div>
-                                    <span class="small fw-bold">
-                                        <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" class="text-decoration-none text-dark hover-primary">
-                                            @Model.TaskItem.AssignedTo.UserName
+                                    <div class="d-flex flex-column text-truncate">
+                                        <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" class="text-decoration-none text-dark fw-bold hover-primary lh-sm small">
+                                            @Model.TaskItem.AssignedTo.Name
                                         </a>
-                                    </span>
+                                        <small class="text-muted" style="font-size: 0.7rem;">@@@Model.TaskItem.AssignedTo.UserName</small>
+                                    </div>
                                 </div>
                             }
                             else

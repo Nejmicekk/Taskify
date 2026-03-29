@@ -4,6 +4,7 @@ var cropModalElement = document.getElementById('cropModal');
 var cropModal = new bootstrap.Modal(cropModalElement);
 
 function enableEdit() {
+    document.getElementById('input-name').disabled = false;
     document.getElementById('input-bio').disabled = false;
     document.getElementById('input-phone').disabled = false;
     document.getElementById('input-email').disabled = false;

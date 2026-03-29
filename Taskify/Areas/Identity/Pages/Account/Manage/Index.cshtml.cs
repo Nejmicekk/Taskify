@@ -53,6 +53,11 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         
         public class InputModel
         {
+            [Required(ErrorMessage = "Zobrazované jméno je povinné.")]
+            [StringLength(100, ErrorMessage = "Zobrazované jméno může mít maximálně 100 znaků.")]
+            [Display(Name = "Zobrazované jméno")]
+            public string Name { get; set; }
+
             [Display(Name = "Uživatelské jméno")]
             public string Username { get; set; }
             
@@ -96,6 +101,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             
             Input = new InputModel
             {
+                Name = user.Name,
                 Username = userName,
                 PhoneNumber = phoneNumber,
                 Email = email,
@@ -129,6 +135,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             }
             
             if (string.IsNullOrEmpty(Input.Username)) Input.Username = user.UserName;
+            if (string.IsNullOrEmpty(Input.Name)) Input.Name = user.Name;
             if (string.IsNullOrEmpty(Input.Email)) Input.Email = user.Email;
             if (Input.Bio == null) Input.Bio = user.Bio;
             if (string.IsNullOrEmpty(Input.PhoneNumber)) Input.PhoneNumber = user.PhoneNumber;
@@ -196,6 +203,17 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 if (!updatePhoneResult.Succeeded)
                 {
                     StatusMessage = "Chyba při ukládání telefonního čísla.";
+                    return RedirectToPage();
+                }
+            }
+
+            if (user.Name != Input.Name)
+            {
+                user.Name = Input.Name;
+                var updateResult = await _userManager.UpdateAsync(user);
+                if (!updateResult.Succeeded)
+                {
+                    StatusMessage = "Chyba při ukládání zobrazovaného jména.";
                     return RedirectToPage();
                 }
             }

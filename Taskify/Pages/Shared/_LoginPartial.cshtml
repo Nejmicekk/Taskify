@@ -20,7 +20,7 @@
             }
             else
             {
-                <a class="nav-link text-dark d-flex align-items-center gap-2" href="/u/@User.Identity?.Name" title="Můj profil">
+                <a class="nav-link text-dark d-flex align-items-center gap-2" href="/u/@user?.UserName" title="Můj profil">
                     <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
                         @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
                         {
@@ -28,10 +28,10 @@
                         }
                         else
                         {
-                            @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                            @(user?.Name?.Substring(0, 1).ToUpper() ?? "U")
                         }
                     </div>
-                    <span class="fw-bold">@User.Identity?.Name</span>
+                    <span class="fw-bold">@user?.Name</span>
                 </a>
             }
             

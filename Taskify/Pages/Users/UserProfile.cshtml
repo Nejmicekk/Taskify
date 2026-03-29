@@ -1,7 +1,7 @@
 @page "/u/{username}"
 @model Taskify.Pages.Users.UserProfileModel
 @{
-    ViewData["Title"] = Model.DisplayedUser != null ? Model.DisplayedUser.UserName : "Uživatel nenalezen";
+    ViewData["Title"] = Model.DisplayedUser != null ? Model.DisplayedUser.Name : "Uživatel nenalezen";
     
     bool isAuth = User.Identity is { IsAuthenticated: true };
     
@@ -39,15 +39,15 @@ else
                             {
                                 bool isAdmin = Model.UserRole.Contains("Admin");
                                 <div class="profile-avatar @(isAdmin ? "bg-danger" : "bg-primary") text-white d-flex align-items-center justify-content-center" style="font-size: 3rem; font-weight: bold;">
-                                    @(Model.DisplayedUser.UserName?.Substring(0, 1).ToUpper() ?? "U")
+                                    @(Model.DisplayedUser.Name?.Substring(0, 1).ToUpper() ?? "U")
                                 </div>
                             }
                         </div>
                     </div>
                     
                     <div class="col-md text-center text-md-start">
-                        <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-2">
-                            <h2 class="fw-bold mb-0">@Model.DisplayedUser.UserName</h2>
+                        <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-1">
+                            <h2 class="fw-bold mb-0">@Model.DisplayedUser.Name</h2>
                             @if (Model.UserRole.Contains("Admin"))
                             {
                                 <span class="badge badge-admin rounded-pill px-3 py-2 shadow-sm">
@@ -60,6 +60,9 @@ else
                                     <i class="bi bi-award-fill me-1"></i> Úroveň @Model.DisplayedUser.Level
                                 </span>
                             }
+                        </div>
+                        <div class="text-muted mb-3 d-flex justify-content-center justify-content-md-start">
+                            <span class="small fw-bold">@@@Model.DisplayedUser.UserName</span>
                         </div>
                         
                         <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 text-muted mb-4">
@@ -219,7 +222,7 @@ else
             <div class="d-flex justify-content-between align-items-end mb-4 px-2">
                 <div>
                     <h3 class="fw-bold mb-1">Vytvořené úkoly</h3>
-                    <p class="text-muted mb-0">Poslední vytvořené úkoly uživatele @Model.DisplayedUser.UserName</p>
+                    <p class="text-muted mb-0">Poslední vytvořené úkoly uživatele @Model.DisplayedUser.Name</p>
                 </div>
                 @if (Model.CreatedTasks.Count > 0)
                 {
@@ -259,7 +262,7 @@ else
             <div class="mb-4">
                 <i class="bi bi-lock-fill text-primary" style="font-size: 4rem;"></i>
             </div>
-            <h3 class="fw-bold mb-3">Chcete vidět profil uživatele @Model.DisplayedUser.UserName?</h3>
+            <h3 class="fw-bold mb-3">Chcete vidět profil uživatele @Model.DisplayedUser.Name?</h3>
             <p class="text-muted mb-4">Připojte se k Taskify komunitě, sledujte statistiky ostatních a budujte svou vlastní reputaci!</p>
             <div class="d-grid gap-3">
                 <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary rounded-pill py-3 fw-bold">Přihlásit se</a>
