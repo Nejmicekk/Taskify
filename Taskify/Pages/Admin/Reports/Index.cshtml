@@ -19,8 +19,7 @@
     <form method="get" id="filterForm" class="mb-5">
         <div class="card shadow-sm border-0 rounded-4 bg-white p-3">
             <div class="row g-3 align-items-center">
-                
-                @* Filtr Stav *@
+
                 <div class="col-md-6 col-lg-3">
                     <select name="StatusFilter" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
                         <option value="unresolved" selected="@(Model.StatusFilter == "unresolved")">Čekající</option>
@@ -28,8 +27,7 @@
                         <option value="all" selected="@(Model.StatusFilter == "all")">Vše</option>
                     </select>
                 </div>
-
-                @* Filtr Důvod *@
+                
                 <div class="col-md-6 col-lg-3">
                     <select name="SelectedReason" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
                         <option value="" selected="@(!Model.SelectedReason.HasValue)">Všechny důvody</option>
@@ -91,12 +89,15 @@
                                 </td>
                                 <td>
                                     <a href="/u/@report.Reporter?.UserName" class="text-decoration-none text-dark d-flex align-items-center hover-primary">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2 shadow-sm">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2 shadow-sm hover-lift">
                                             @if (!string.IsNullOrEmpty(report.Reporter?.ProfilePictureUrl)) {
                                                 <img src="@report.Reporter.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
                                             }
                                         </div>
-                                        <span class="small fw-bold">@report.Reporter?.UserName</span>
+                                        <div class="d-flex flex-column lh-1">
+                                            <span class="small fw-bold text-dark">@report.Reporter?.Name</span>
+                                            <small class="text-muted" style="font-size: 0.65rem;">@@@report.Reporter?.UserName</small>
+                                        </div>
                                     </a>
                                 </td>
                                 <td class="text-center">

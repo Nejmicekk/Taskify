@@ -20,7 +20,6 @@
         <div class="card shadow-sm border-0 rounded-4 bg-white p-3">
             <div class="row g-3 align-items-center">
                 
-                @* Vyhledávání *@
                 <div class="col-lg-4">
                     <div class="input-group bg-light rounded-pill px-3 py-1">
                         <span class="input-group-text bg-transparent border-0">
@@ -31,8 +30,7 @@
                                placeholder="Hledat v názvu nebo popisu...">
                     </div>
                 </div>
-
-                @* Filtr Stav *@
+                
                 <div class="col-md-6 col-lg-3">
                     <select name="StatusFilter" class="form-select border-0 bg-light rounded-pill shadow-none px-4" onchange="this.form.submit()">
                         <option value="" selected="@(!Model.StatusFilter.HasValue)">Všechny stavy</option>
@@ -88,13 +86,16 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="/u/@task.CreatedBy?.UserName" class="text-decoration-none text-dark d-flex align-items-center">
-                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2 shadow-sm">
+                                    <a href="/u/@task.CreatedBy?.UserName" class="text-decoration-none text-dark d-flex align-items-center hover-primary">
+                                        <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; background-color: #eee;" class="me-2 shadow-sm hover-lift">
                                             @if (!string.IsNullOrEmpty(task.CreatedBy?.ProfilePictureUrl)) {
                                                 <img src="@task.CreatedBy.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
                                             }
                                         </div>
-                                        <span class="small fw-bold">@task.CreatedBy?.UserName</span>
+                                        <div class="d-flex flex-column lh-1">
+                                            <span class="small fw-bold text-dark">@task.CreatedBy?.Name</span>
+                                            <small class="text-muted" style="font-size: 0.65rem;">@@@task.CreatedBy?.UserName</small>
+                                        </div>
                                     </a>
                                 </td>
                                 <td class="text-center">

@@ -58,14 +58,19 @@
                         <div class="mb-0">
                             <label class="small fw-bold text-muted text-uppercase d-block mb-2">Nahlásil</label>
                             <a href="/u/@Model.Report.Reporter?.UserName" class="text-decoration-none d-flex align-items-center bg-light p-2 rounded-pill border pe-3 d-inline-flex hover-primary-bg">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #ddd;" class="me-2 border shadow-sm">
+                                <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #ddd;" class="me-2 border shadow-sm hover-lift">
                                     @if (!string.IsNullOrEmpty(Model.Report.Reporter?.ProfilePictureUrl)) {
                                         <img src="@Model.Report.Reporter.ProfilePictureUrl" class="w-100 h-100 object-fit-cover" />
                                     } else {
-                                        <i class="bi bi-person-fill text-white fs-5 d-flex justify-content-center align-items-center h-100"></i>
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary text-white fw-bold">
+                                            @(Model.Report.Reporter?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                        </div>
                                     }
                                 </div>
-                                <span class="fw-bold text-dark me-2">@Model.Report.Reporter?.UserName</span>
+                                <div class="d-flex flex-column lh-1 me-2">
+                                    <span class="fw-bold text-dark small">@Model.Report.Reporter?.Name</span>
+                                    <small class="text-muted" style="font-size: 0.65rem;">@@@Model.Report.Reporter?.UserName</small>
+                                </div>
                                 <span class="ms-auto text-muted small">@Model.Report.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
                             </a>
                         </div>
