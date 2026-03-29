@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Taskify.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Taskify.Pages.Users
 {
@@ -10,10 +11,12 @@ namespace Taskify.Pages.Users
     public class UserProfileModel : PageModel
     {
         private readonly UserManager<User> _userManager;
+        private readonly Data.ApplicationDbContext _context;
 
-        public UserProfileModel(UserManager<User> userManager)
+        public UserProfileModel(UserManager<User> userManager, Data.ApplicationDbContext context)
         {
             _userManager = userManager;
+            _context = context;
         }
 
         public User? DisplayedUser { get; set; }
@@ -22,10 +25,14 @@ namespace Taskify.Pages.Users
         public bool IsMe { get; set; }
         public bool IsLockedOut { get; set; }
         public DateTimeOffset? LockoutEnd { get; set; }
+        
+        public IList<TaskItem> CreatedTasks { get; set; } = new List<TaskItem>();
+        public IList<TaskItem> AssignedTasks { get; set; } = new List<TaskItem>();
 
         public async Task<IActionResult> OnGetAsync(string username)
         {
-            DisplayedUser = await _userManager.FindByNameAsync(username);
+            DisplayedUser = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.UserName == username);
 
             if (DisplayedUser == null)
             {
@@ -53,6 +60,27 @@ namespace Taskify.Pages.Users
             }
 
             IsMe = currentUser != null && currentUser.Id == DisplayedUser.Id;
+            
+            CreatedTasks = await _context.Tasks
+                .Include(t => t.Category)
+                .Include(t => t.Images)
+                .Include(t => t.Location)
+                .Where(t => t.CreatedById == DisplayedUser.Id)
+                .OrderByDescending(t => t.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+            
+            if (IsMe)
+            {
+                AssignedTasks = await _context.Tasks
+                    .Include(t => t.Category)
+                    .Include(t => t.Images)
+                    .Include(t => t.Location)
+                    .Where(t => t.AssignedToId == DisplayedUser.Id && t.Status != Models.Enums.TaskStatus.Completed)
+                    .OrderBy(t => t.Deadline ?? DateTime.MaxValue)
+                    .Take(5)
+                    .ToListAsync();
+            }
 
             return Page();
         }

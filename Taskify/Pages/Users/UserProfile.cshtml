@@ -26,7 +26,6 @@
 else
 {
     <div class="container py-4 @(isAuth ? "" : "blur-content")">
-        @* Horní profilová karta *@
         <div class="card profile-header-card shadow-sm mb-4">
             <div class="card-body p-4 p-md-5">
                 <div class="row align-items-center">
@@ -93,7 +92,7 @@ else
                             @if (Model.IsMe && !Model.UserRole.Contains("Admin"))
                             {
                                 <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-edit-profile">
-                                    <i class="bi bi-pencil-square me-2"></i>Upravit profil
+                                    <i class="bi bi-pencil-square me-2"></i>Nastavení účtu
                                 </a>
                                 
                                 <button type="button" class="btn btn-light rounded-pill px-4 shadow-sm border" onclick="copyProfileLink(this)">
@@ -126,8 +125,7 @@ else
             </div>
         </div>
 
-        <div class="row g-4">
-            @* Levý sloupec - Bio a informace *@
+        <div class="row g-4 mb-5">
             <div class="col-lg-7">
                 <div class="card stat-card shadow-sm h-100 no-anim">
                     <div class="card-body p-4">
@@ -176,6 +174,80 @@ else
                     </div>
                 </div>
             </div>
+        </div>
+        
+        @if (Model.IsMe)
+        {
+            <div class="mb-5 pb-5">
+                <div class="d-flex justify-content-between align-items-end mb-4 px-2">
+                    <div>
+                        <h3 class="fw-bold mb-1 text-primary">Úkoly, které řešíte</h3>
+                        <p class="text-muted mb-0">Přehled vašich aktivních úkolů, které máte splnit.</p>
+                    </div>
+                    @if (Model.AssignedTasks.Count > 0)
+                    {
+                        <a asp-page="/Tasks/Index" asp-route-AssignedToId="@Model.DisplayedUser.Id" asp-route-FromProfile="@Model.DisplayedUser.UserName" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                            Zobrazit vše <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                    }
+                </div>
+
+                @if (Model.AssignedTasks.Count == 0)
+                {
+                    <div class="card border-0 bg-custom-info-light rounded-4 p-5 text-center shadow-sm border border-info-subtle">
+                        <i class="bi bi-lightning-charge text-info display-4 mb-3"></i>
+                        <h5 class="fw-bold text-info">Momentálně nemáte žádný úkol</h5>
+                        <p class="text-muted">Najděte si úkol v okolí a začněte pomáhat!</p>
+                        <a asp-page="/Tasks/Index" class="btn btn-primary rounded-pill px-4 mt-2 fw-bold shadow-sm">Hledat úkoly</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        @foreach (var task in Model.AssignedTasks)
+                        {
+                            <div class="col">
+                                <partial name="_TaskCardPartial" model="task" view-data='@new ViewDataDictionary(ViewData) { { "IsMini", true } }' />
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-end mb-4 px-2">
+                <div>
+                    <h3 class="fw-bold mb-1">Vytvořené úkoly</h3>
+                    <p class="text-muted mb-0">Poslední vytvořené úkoly uživatele @Model.DisplayedUser.UserName</p>
+                </div>
+                @if (Model.CreatedTasks.Count > 0)
+                {
+                    <a asp-page="/Tasks/Index" asp-route-CreatedById="@Model.DisplayedUser.Id" asp-route-FromProfile="@Model.DisplayedUser.UserName" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                        Zobrazit vše <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                }
+            </div>
+
+            @if (Model.CreatedTasks.Count == 0)
+            {
+                <div class="card border-0 bg-light rounded-4 p-5 text-center shadow-sm">
+                    <i class="bi bi-clipboard-x text-muted display-4 mb-3"></i>
+                    <h5 class="fw-bold">Zatím žádné vytvořené úkoly</h5>
+                    <p class="text-muted">Uživatel zatím nezaložil žádnou pomoc.</p>
+                </div>
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var task in Model.CreatedTasks)
+                    {
+                        <div class="col">
+                            <partial name="_TaskCardPartial" model="task" view-data='@new ViewDataDictionary(ViewData) { { "IsMini", true } }' />
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 }

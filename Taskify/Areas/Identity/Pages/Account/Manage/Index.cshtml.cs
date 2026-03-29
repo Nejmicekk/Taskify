@@ -51,9 +51,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public InputModel Input { get; set; }
         
-        [BindProperty]
-        public PasswordModel PasswordInput { get; set; }
-        
         public class InputModel
         {
             [Display(Name = "Uživatelské jméno")]
@@ -79,25 +76,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             public String ProfilePictureUrl { get; set; }
         }
 
-        public class PasswordModel
-        {
-            [Required(ErrorMessage = "Musíte zadat současné heslo.")]
-            [DataType(DataType.Password)]
-            [Display(Name = "Současné heslo")]
-            public string OldPassword { get; set; }
-
-            [Required(ErrorMessage = "Musíte zadat nové heslo.")]
-            [StringLength(100, MinimumLength = 4, ErrorMessage = "{0} musí mít alespoň {2} znaky.")]
-            [DataType(DataType.Password)]
-            [Display(Name = "Nové heslo")]
-            public string NewPassword { get; set; }
-
-            [DataType(DataType.Password)]
-            [Display(Name = "Potvrzení hesla")]
-            [Compare("NewPassword", ErrorMessage = "Nové heslo a potvrzení se neshodují.")]
-            public string ConfirmPassword { get; set; }
-        }
-        
         private async Task LoadAsync(User user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
@@ -279,55 +257,6 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Váš profil byl aktualizován!";
             return RedirectToPage();
-        }
-        
-        public async Task<IActionResult> OnPostChangePasswordAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return NotFound($"Nebylo možné načíst uživatele s ID '{_userManager.GetUserId(User)}'.");
-            
-            ModelState.Clear();
-            
-            if (!TryValidateModel(PasswordInput, nameof(PasswordInput)))
-            {
-                await LoadAsync(user);
-                return Page();
-            }
-            
-            if (PasswordInput.OldPassword == PasswordInput.NewPassword)
-            {
-                ModelState.AddModelError(string.Empty, "Nové heslo musí být odlišné od starého.");
-                await LoadAsync(user);
-                return Page();
-            }
-
-            var changePasswordResult = await _userManager.ChangePasswordAsync(user, PasswordInput.OldPassword, PasswordInput.NewPassword);
-            if (!changePasswordResult.Succeeded)
-            {
-                foreach (var error in changePasswordResult.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                await LoadAsync(user);
-                ViewData["ActiveTab"] = "security";
-                return Page();
-            }
-
-            await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Heslo bylo úspěšně změněno.";
-            return RedirectToPage();
-        }
-
-        public async Task<IActionResult> OnPostLockAccountAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return NotFound();
-            
-            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
-            
-            await _signInManager.SignOutAsync();
-            
-            return RedirectToPage("/Index");
         }
     }
 }

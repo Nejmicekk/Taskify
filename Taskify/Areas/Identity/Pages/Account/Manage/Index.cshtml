@@ -16,9 +16,9 @@
 
 <h2 class="fw-bold mb-4">@ViewData["Title"]</h2>
 
-<div class="row g-4">
-    <div class="col-lg-7">
-        <div class="card shadow-sm border-0 rounded-4 h-100">
+<div class="row justify-content-center">
+    <div class="col-md-11 col-lg-9">
+        <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4 p-md-5">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0">Osobní údaje</h5>
@@ -51,9 +51,19 @@
                         </div>
                     </div>
 
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.Username" class="form-control" disabled id="input-username"/>
-                        <label asp-for="Input.Username">Uživatelské jméno</label>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Username" class="form-control" disabled id="input-username"/>
+                                <label asp-for="Input.Username">Uživatelské jméno</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
+                                <label asp-for="Input.Email">E-mailová adresa</label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -61,86 +71,55 @@
                         <label asp-for="Input.Bio">O mně (Bio)</label>
                     </div>
 
-                    <div class="form-floating mb-3">
-                        <input asp-for="Input.Email" class="form-control" disabled id="input-email"/>
-                        <label asp-for="Input.Email">E-mailová adresa</label>
-                    </div>
-
                     <div class="form-floating mb-4">
                         <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone"/>
                         <label asp-for="Input.PhoneNumber">Telefonní číslo</label>
                     </div>
 
-                    <div id="save-actions" class="d-none">
-                        <button id="save-btn" type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">Uložit změny</button>
-                        <button type="button" class="btn btn-link text-muted w-100 mt-2 text-decoration-none" onclick="location.reload()">Zrušit</button>
+                    <div id="save-actions" class="d-none border-top pt-4">
+                        <div class="d-flex gap-2">
+                            <button id="save-btn" type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">Uložit změny</button>
+                            <button type="button" class="btn btn-light rounded-pill px-4 text-muted" onclick="location.reload()">Zrušit</button>
+                        </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-5">
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-body p-4 p-md-5">
-                <h5 class="fw-bold mb-4">Zabezpečení & Heslo</h5>
-                <form id="change-password-form" method="post" asp-page-handler="ChangePassword">
-                    <div class="form-floating mb-3">
-                        <input asp-for="PasswordInput.OldPassword" class="form-control rounded-3" autocomplete="current-password" placeholder="Staré heslo" />
-                        <label asp-for="PasswordInput.OldPassword">Současné heslo</label>
-                        <span asp-validation-for="PasswordInput.OldPassword" class="text-danger small"></span>
-                    </div>
-
-                    <div class="form-floating mb-3">
-                        <input asp-for="PasswordInput.NewPassword" class="form-control rounded-3" autocomplete="new-password" placeholder="Nové heslo" />
-                        <label asp-for="PasswordInput.NewPassword">Nové heslo</label>
-                        <span asp-validation-for="PasswordInput.NewPassword" class="text-danger small"></span>
-                    </div>
-
-                    <div class="form-floating mb-4">
-                        <input asp-for="PasswordInput.ConfirmPassword" class="form-control rounded-3" autocomplete="new-password" placeholder="Potvrzení hesla" />
-                        <label asp-for="PasswordInput.ConfirmPassword">Potvrzení nového hesla</label>
-                        <span asp-validation-for="PasswordInput.ConfirmPassword" class="text-danger small"></span>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm">
-                        <i class="bi bi-key me-2"></i>Aktualizovat heslo
-                    </button>
                 </form>
             </div>
         </div>
         
-        <div class="card shadow-sm border-0 rounded-4 border-start border-warning border-4">
-            <div class="card-body p-4">
-                <h6 class="fw-bold text-warning mb-3">Zablokovat účet</h6>
-                <p class="small text-muted mb-4">Tato akce vás okamžitě odhlásí a zablokuje váš účet. Pro opětovné aktivování kontaktujte administrátora.</p>
-                <button type="button" class="btn btn-outline-warning btn-sm rounded-pill w-100 py-2" data-bs-toggle="modal" data-bs-target="#lockAccountModal">
-                    <i class="bi bi-lock me-2"></i>Zablokovat přístup
-                </button>
+        <div class="row mt-4 g-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 rounded-4 h-100 transition-hover">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-4 p-3 me-3">
+                            <i class="bi bi-shield-lock fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Zabezpečení a heslo</h6>
+                            <p class="text-muted small mb-2">Změňte si heslo nebo nastavte 2FA.</p>
+                            <a asp-page="./ChangePassword" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">Přejít do nastavení</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 rounded-4 h-100 transition-hover">
+                    <div class="card-body p-4 d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-4 p-3 me-3">
+                            <i class="bi bi-person-gear fs-3"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">Osobní data a účet</h6>
+                            <p class="text-muted small mb-2">Správa dat a pozastavení účtu.</p>
+                            <a asp-page="./PersonalData" class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-bold">Spravovat účet</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="lockAccountModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow-lg">
-            <div class="modal-header border-0 py-4 px-4 pb-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Zablokovat účet?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
-            </div>
-            <div class="modal-body p-4">
-                <p class="text-muted mb-0">Opravdu si přejete svůj účet zablokovat? Budete okamžitě odhlášeni a pro opětovný přístup budete muset kontaktovat podporu/administrátora.</p>
-            </div>
-            <div class="modal-footer border-0 p-4 pt-0">
-                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Zrušit</button>
-                <form method="post" asp-page-handler="LockAccount">
-                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Ano, zablokovat</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

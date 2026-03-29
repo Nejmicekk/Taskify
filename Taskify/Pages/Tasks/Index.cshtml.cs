@@ -25,6 +25,15 @@ namespace Taskify.Pages.Tasks
         public List<string> AvailableRegions { get; set; } = new();
         [BindProperty(SupportsGet = true)]
         public string? SelectedRegion { get; set; }
+        
+        [BindProperty(SupportsGet = true)]
+        public string? CreatedById { get; set; }
+        
+        [BindProperty(SupportsGet = true)]
+        public string? AssignedToId { get; set; }
+        
+        [BindProperty(SupportsGet = true)]
+        public string? FromProfile { get; set; }
     
         public async Task OnGetAsync()
         {
@@ -41,8 +50,23 @@ namespace Taskify.Pages.Tasks
                 .Include(t => t.Category)
                 .Include(t => t.Images)
                 .Include(t => t.Location)
-                .Where(t => t.Status == Models.Enums.TaskStatus.Open)
                 .AsQueryable();
+            
+            // Pokud filtrujeme podle uživatele, nezobrazujeme jen "Open"
+            if (string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
+            {
+                query = query.Where(t => t.Status == Models.Enums.TaskStatus.Open);
+            }
+            
+            if (!string.IsNullOrEmpty(CreatedById))
+            {
+                query = query.Where(t => t.CreatedById == CreatedById);
+            }
+            
+            if (!string.IsNullOrEmpty(AssignedToId))
+            {
+                query = query.Where(t => t.AssignedToId == AssignedToId);
+            }
             
             if (!string.IsNullOrWhiteSpace(SearchQuery))
             {

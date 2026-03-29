@@ -1,0 +1,80 @@
+@page
+@model PersonalDataModel
+@{
+    ViewData["Title"] = "Osobní data a účet";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<nav aria-label="breadcrumb" class="mt-4 mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/u/@User.Identity?.Name" class="text-decoration-none text-muted">Profil</a></li>
+        <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Nastavení účtu</a></li>
+        <li class="breadcrumb-item active fw-bold text-dark">Osobní údaje</li>
+    </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-page="./Index" class="btn btn-outline-secondary rounded-pill shadow-sm btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-bold mb-3">Správa účtu</h5>
+                <p class="text-muted small mb-4">
+                    Zde můžete spravovat citlivé údaje týkající se vaší identity na Taskify. Pokud se rozhodnete svůj účet pozastavit, nebudete mít k němu přístup, dokud nekontaktujete podporu.
+                </p>
+                
+                <div class="alert alert-warning border-0 rounded-4 p-4 mb-0">
+                    <div class="d-flex align-items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 mt-1 text-warning"></i>
+                        <div>
+                            <h6 class="fw-bold text-dark">Pozastavit účet?</h6>
+                            <p class="small text-muted mb-3">
+                                Tato akce vás okamžitě odhlásí a deaktivuje váš profil. Vaše data zůstanou uložena, ale nebudete se moci přihlásit.
+                            </p>
+                            <button type="button" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#lockAccountModal">
+                                <i class="bi bi-lock-fill me-2"></i>Deaktivovat můj účet
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm border-0 rounded-4 bg-light">
+            <div class="card-body p-4">
+                <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>Potřebujete smazat všechna data?</h6>
+                <p class="small text-muted mb-0">
+                    Pokud si přejete trvale odstranit svůj účet a všechna přidružená data (GDPR), kontaktujte prosím naši podporu na adrese <a href="mailto:support@taskify.cz" class="text-primary text-decoration-none fw-bold">support@taskify.cz</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lockAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 py-4 px-4 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Potvrdit deaktivaci</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-0">Opravdu si přejete svůj účet zablokovat? Budete okamžitě odhlášeni a pro opětovný přístup budete muset kontaktovat podporu nebo administrátora systému.</p>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Zrušit</button>
+                <form method="post" asp-page-handler="LockAccount">
+                    <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold">Ano, deaktivovat účet</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

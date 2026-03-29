@@ -7,137 +7,153 @@
 <link rel="stylesheet" href="~/css/Tasks/tasks.css" asp-append-version="true">
 
 <div class="container py-4">
-    <form method="get" id="filterForm" class="mb-5">
-        <div class="card shadow-sm border-0 rounded-pill bg-white w-auto">
-        <div class="card-body p-2">
-            <div class="row g-0 align-items-center">
-                
-                <div class="col-lg-4">
-                    <div class="input-group input-group-lg border-0">
-                        <span class="input-group-text bg-transparent border-0 text-muted ps-3">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" name="SearchQuery" value="@Model.SearchQuery" 
-                               class="form-control border-0 fs-6" placeholder="Co chcete vyřešit?">
+    @if (!string.IsNullOrEmpty(Model.FromProfile))
+    {
+        <div class="mb-4">
+            <a href="/u/@Model.FromProfile" class="btn btn-outline-secondary rounded-pill shadow-sm mb-3">
+                <i class="bi bi-arrow-left"></i> Zpět na profil
+            </a>
+            <h2 class="fw-bold mb-0">
+                @if (!string.IsNullOrEmpty(Model.CreatedById)) { <text>Vytvořené úkoly uživatele @Model.FromProfile</text> }
+                else if (!string.IsNullOrEmpty(Model.AssignedToId)) { <text>Úkoly, které řeší @Model.FromProfile</text> }
+                else { <text>Úkoly uživatele @Model.FromProfile</text> }
+            </h2>
+        </div>
+    }
+    else
+    {
+        <form method="get" id="filterForm" class="mb-5">
+            <div class="card shadow-sm border-0 rounded-pill bg-white w-auto">
+            <div class="card-body p-2">
+                <div class="row g-0 align-items-center">
+                    
+                    <div class="col-lg-4">
+                        <div class="input-group input-group-lg border-0">
+                            <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="SearchQuery" value="@Model.SearchQuery" 
+                                   class="form-control border-0 fs-6" placeholder="Co chcete vyřešit?">
+                        </div>
                     </div>
-                </div>
-                
-                <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
-                
-                <div class="col-lg-3">
-                    <div class="dropdown w-100 h-100">
-                        @{
-                            var currentCatName = Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name ?? "Všechny kategorie";
-                        }
-                        <input type="hidden" name="SelectedCategoryId" id="hiddenCategoryId" value="@Model.SelectedCategoryId">
-                        <input type="text" class="d-none" id="categoryNameDisplay" value="@currentCatName">
-                        
-                        <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6"
-                                type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                            <i class="bi bi-grid text-primary me-2"></i>
-                            <span class="text-truncate category-label-text">@currentCatName</span>
-                            <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
-                        </button>
-                        <ul class="dropdown-menu w-100 shadow-lg mt-2 border-0 rounded-3">
-                            <li class="p-2 border-bottom bg-light category-item cursor-pointer" data-id="" data-name="Všechny kategorie">
-                                <span class="fw-bold ps-2">Zobrazit vše</span>
-                            </li>
-                            @foreach (var l1 in Model.Categories.Where(c => c.LevelNumber == 1).OrderBy(c => c.Name))
-                            {
-                                <li class="parent-li border-bottom">
-                                    <div class="d-flex align-items-center category-header bg-light p-0">
-                                        <div class="p-3 flex-grow-1 category-item cursor-pointer" data-id="@l1.Id" data-name="@l1.Name">
-                                            <i class="bi @l1.IconUrl me-2 fs-5 text-primary"></i>
-                                            <span class="fw-bold">@l1.Name</span>
+                    
+                    <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
+                    
+                    <div class="col-lg-3">
+                        <div class="dropdown w-100 h-100">
+                            @{
+                                var currentCatName = Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name ?? "Všechny kategorie";
+                            }
+                            <input type="hidden" name="SelectedCategoryId" id="hiddenCategoryId" value="@Model.SelectedCategoryId">
+                            <input type="text" class="d-none" id="categoryNameDisplay" value="@currentCatName">
+                            
+                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6"
+                                    type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                                <i class="bi bi-grid text-primary me-2"></i>
+                                <span class="text-truncate category-label-text">@currentCatName</span>
+                                <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-lg mt-2 border-0 rounded-3">
+                                <li class="p-2 border-bottom bg-light category-item cursor-pointer" data-id="" data-name="Všechny kategorie">
+                                    <span class="fw-bold ps-2">Zobrazit vše</span>
+                                </li>
+                                @foreach (var l1 in Model.Categories.Where(c => c.LevelNumber == 1).OrderBy(c => c.Name))
+                                {
+                                    <li class="parent-li border-bottom">
+                                        <div class="d-flex align-items-center category-header bg-light p-0">
+                                            <div class="p-3 flex-grow-1 category-item cursor-pointer" data-id="@l1.Id" data-name="@l1.Name">
+                                                <i class="bi @l1.IconUrl me-2 fs-5 text-primary"></i>
+                                                <span class="fw-bold">@l1.Name</span>
+                                            </div>
+                                            <div class="p-3 border-start" data-bs-toggle="collapse" data-bs-target="#cat-index-@l1.Id" style="cursor:pointer">
+                                                <i class="bi bi-chevron-down text-muted chevron-icon"></i>
+                                            </div>
                                         </div>
-                                        <div class="p-3 border-start" data-bs-toggle="collapse" data-bs-target="#cat-index-@l1.Id" style="cursor:pointer">
-                                            <i class="bi bi-chevron-down text-muted chevron-icon"></i>
-                                        </div>
-                                    </div>
 
-                                    <ul class="collapse list-unstyled mb-0" id="cat-index-@l1.Id">
-                                        @foreach (var l2 in Model.Categories.Where(c => c.ParentId == l1.Id).OrderBy(c => c.Name))
-                                        {
-                                            var hasL3 = Model.Categories.Any(c => c.ParentId == l2.Id);
-                                            <li class="parent-li border-top">
-                                                <div class="d-flex align-items-center category-header p-0">
-                                                    <div class="p-2 ps-4 flex-grow-1 category-item cursor-pointer text-muted" data-id="@l2.Id" data-name="@l2.Name">
-                                                        <i class="bi @l2.IconUrl me-2 text-secondary"></i> @l2.Name
+                                        <ul class="collapse list-unstyled mb-0" id="cat-index-@l1.Id">
+                                            @foreach (var l2 in Model.Categories.Where(c => c.ParentId == l1.Id).OrderBy(c => c.Name))
+                                            {
+                                                var hasL3 = Model.Categories.Any(c => c.ParentId == l2.Id);
+                                                <li class="parent-li border-top">
+                                                    <div class="d-flex align-items-center category-header p-0">
+                                                        <div class="p-2 ps-4 flex-grow-1 category-item cursor-pointer text-muted" data-id="@l2.Id" data-name="@l2.Name">
+                                                            <i class="bi @l2.IconUrl me-2 text-secondary"></i> @l2.Name
+                                                        </div>
+                                                        @if (hasL3)
+                                                        {
+                                                            <div class="p-2 border-start" data-bs-toggle="collapse" data-bs-target="#cat-index-@l2.Id" style="cursor:pointer">
+                                                                <i class="bi bi-chevron-down text-muted chevron-icon" style="font-size: 0.8rem;"></i>
+                                                            </div>
+                                                        }
                                                     </div>
                                                     @if (hasL3)
                                                     {
-                                                        <div class="p-2 border-start" data-bs-toggle="collapse" data-bs-target="#cat-index-@l2.Id" style="cursor:pointer">
-                                                            <i class="bi bi-chevron-down text-muted chevron-icon" style="font-size: 0.8rem;"></i>
-                                                        </div>
+                                                        <ul class="collapse list-unstyled mb-0 bg-white" id="cat-index-@l2.Id">
+                                                            @foreach (var l3 in Model.Categories.Where(c => c.ParentId == l2.Id).OrderBy(c => c.Name))
+                                                            {
+                                                                <li class="category-item border-top p-2 ps-5 text-muted cursor-pointer" data-id="@l3.Id" data-name="@l3.Name">
+                                                                    <i class="bi @l3.IconUrl me-2"></i> @l3.Name
+                                                                </li>
+                                                            }
+                                                        </ul>
                                                     }
-                                                </div>
-                                                @if (hasL3)
-                                                {
-                                                    <ul class="collapse list-unstyled mb-0 bg-white" id="cat-index-@l2.Id">
-                                                        @foreach (var l3 in Model.Categories.Where(c => c.ParentId == l2.Id).OrderBy(c => c.Name))
-                                                        {
-                                                            <li class="category-item border-top p-2 ps-5 text-muted cursor-pointer" data-id="@l3.Id" data-name="@l3.Name">
-                                                                <i class="bi @l3.IconUrl me-2"></i> @l3.Name
-                                                            </li>
-                                                        }
-                                                    </ul>
-                                                }
-                                            </li>
-                                        }
-                                    </ul>
-                                </li>
-                            }
-                        </ul>
+                                                </li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     </div>
-                </div>
 
-                <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
-                
-                <div class="col-lg-3">
-                    <div class="dropdown w-100 h-100">
-                        <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 py-3" 
-                                type="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>
-                            <span class="text-truncate">
-                                @(string.IsNullOrEmpty(Model.SelectedRegion) ? "Celá ČR" : Model.SelectedRegion)
-                            </span>
-                            <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
-                        </button>
+                    <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
+                    
+                    <div class="col-lg-3">
+                        <div class="dropdown w-100 h-100">
+                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 py-3" 
+                                    type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                <span class="text-truncate">
+                                    @(string.IsNullOrEmpty(Model.SelectedRegion) ? "Celá ČR" : Model.SelectedRegion)
+                                </span>
+                                <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
+                            </button>
 
-                        <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
-                            <li>
-                                <a class="dropdown-item px-3 @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" 
-                                   href="?SelectedRegion=&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
-                                    Celá ČR
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider opacity-50"></li>
-                            @foreach (var region in Model.AvailableRegions)
-                            {
+                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
                                 <li>
-                                    <a class="dropdown-item px-3 @(Model.SelectedRegion == region ? "active" : "")" 
-                                       href="?SelectedRegion=@region&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
-                                        @region
+                                    <a class="dropdown-item px-3 @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" 
+                                       href="?SelectedRegion=&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
+                                        Celá ČR
                                     </a>
                                 </li>
-                            }
-                        </ul>
+                                <li><hr class="dropdown-divider opacity-50"></li>
+                                @foreach (var region in Model.AvailableRegions)
+                                {
+                                    <li>
+                                        <a class="dropdown-item px-3 @(Model.SelectedRegion == region ? "active" : "")" 
+                                           href="?SelectedRegion=@region&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
+                                            @region
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="col-lg-auto ms-auto pe-2">
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center shadow-sm border-0 no-anim">
-                        <i class="bi bi-search me-2"></i>
-                        <span class="fw-bold">Hledat</span>
-                    </button>
+                    
+                    <div class="col-lg-auto ms-auto pe-2">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center shadow-sm border-0 no-anim">
+                            <i class="bi bi-search me-2"></i>
+                            <span class="fw-bold">Hledat</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
-    
+    </form>
+        
 
-    <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+        <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+    }
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="tasks-container">
         @foreach (var task in Model.Tasks) {
