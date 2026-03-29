@@ -129,6 +129,12 @@ public static class DatabaseSeeder
                     Longitude = cityCoords.Item2 + faker.Random.Double(-0.05, 0.05)
                 }
             };
+            
+            if (status == TaskStatus.Completed)
+            {
+                task.SubmittedAt = faker.Date.Between(task.CreatedAt, DateTime.Now);
+            }
+
             task.Location.FullAddress = $"{task.Location.Street} {task.Location.StreetNumber}, {task.Location.City}";
             
             var photoKeywords = GetKeywordsForCategory(category.Name);

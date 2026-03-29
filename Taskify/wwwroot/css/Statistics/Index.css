@@ -1,0 +1,6 @@
+.stats-card { transition: transform 0.2s; border: none; border-radius: 1.2rem; }
+.stats-card:hover { transform: translateY(-5px); }
+.chart-container { position: relative; height: 300px; width: 100%; }
+.bg-gradient-primary { background: linear-gradient(45deg, #0d6efd, #0dcaf0); }
+.bg-gradient-success { background: linear-gradient(45deg, #198754, #20c997); }
+.icon-box { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }

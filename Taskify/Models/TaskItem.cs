@@ -49,4 +49,6 @@ public class TaskItem
     [ForeignKey("AssignedToId")]
     [InverseProperty("AssignedTasks")]
     public User? AssignedTo { get; set; }
+
+    public DateTime? SubmittedAt { get; set; }
 }

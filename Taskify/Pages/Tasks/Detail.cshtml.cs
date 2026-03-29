@@ -148,6 +148,7 @@ namespace Taskify.Pages.Tasks
             if (taskItem.AssignedToId != user.Id || taskItem.Status != Models.Enums.TaskStatus.InProgress) return BadRequest();
 
             taskItem.Status = Models.Enums.TaskStatus.WaitingForReview;
+            taskItem.SubmittedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["StatusMessage"] = "Skvělá práce! Nyní počkej, až autor řešení schválí.";
