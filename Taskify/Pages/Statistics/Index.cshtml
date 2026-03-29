@@ -23,6 +23,73 @@
             </span>
         </div>
     </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-trophy text-warning me-2"></i>TOP 5 Dobrovolníků <small class="text-muted fw-normal fs-6 ms-2">(splněné úkoly)</small></h5>
+                    @for (int i = 0; i < Model.TopPerformers.Count; i++)
+                    {
+                        var user = Model.TopPerformers[i];
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="fw-bold text-muted me-3" style="width: 20px;">@(i + 1).</div>
+                            <a href="/u/@user.UserName" class="avatar-sm me-3 text-decoration-none">
+                                @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                                {
+                                    <img src="@user.ProfilePictureUrl" alt="@user.UserName" class="rounded-circle shadow-sm hover-lift" style="width: 38px; height: 38px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm hover-lift" style="width: 38px; height: 38px; font-weight: bold;">
+                                        @user.UserName.Substring(0, 1).ToUpper()
+                                    </div>
+                                }
+                            </a>
+                            <div class="flex-grow-1">
+                                <a href="/u/@user.UserName" class="text-decoration-none text-dark fw-bold">@user.UserName</a>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">@user.Count splněno</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-megaphone text-primary me-2"></i>TOP 5 Tvůrců <small class="text-muted fw-normal fs-6 ms-2">(založené úkoly)</small></h5>
+                    @for (int i = 0; i < Model.TopCreators.Count; i++)
+                    {
+                        var user = Model.TopCreators[i];
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="fw-bold text-muted me-3" style="width: 20px;">@(i + 1).</div>
+                            <a href="/u/@user.UserName" class="avatar-sm me-3 text-decoration-none">
+                                @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                                {
+                                    <img src="@user.ProfilePictureUrl" alt="@user.UserName" class="rounded-circle shadow-sm hover-lift" style="width: 38px; height: 38px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center shadow-sm hover-lift" style="width: 38px; height: 38px; font-weight: bold;">
+                                        @user.UserName.Substring(0, 1).ToUpper()
+                                    </div>
+                                }
+                            </a>
+                            <div class="flex-grow-1">
+                                <a href="/u/@user.UserName" class="text-decoration-none text-dark fw-bold">@user.UserName</a>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">@user.Count úkolů</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="row g-4 mb-5 text-center">
         <div class="col-md-6 col-lg-3">
