@@ -10,10 +10,11 @@ public class TaskItem
     public int Id { get; set; }
 
     [Required(ErrorMessage = "Nadpis je povinný")]
-    [StringLength(100)]
+    [StringLength(25, ErrorMessage = "Nadpis může mít maximálně 25 znaků")]
     public string Title { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Popis je povinný, aby ostatní věděli, co přesně dělat.")]
+    [StringLength(200, ErrorMessage = "Popis může mít maximálně 200 znaků")]
     public string Description { get; set; } = string.Empty;
 
     public int RewardPoints { get; set; }

@@ -139,21 +139,20 @@ public class EditModel : PageModel
         if (taskToDelete == null) return NotFound();
         
         bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+        bool isCreator = taskToDelete.CreatedById == user.Id;
 
-        if (taskToDelete.CreatedById != user.Id && !isAdmin)
+        if (!isAdmin && !isCreator)
         {
             return Forbid();
         }
 
-        if (!isAdmin && taskToDelete.Status != Models.Enums.TaskStatus.Open)
-        {
-            return Forbid();
-        }
+        // Pokud úkol někdo plní (InProgress) nebo čeká na kontrolu, budeme chtít v budoucnu poslat notifikaci
+        // TODO: Až bude notifikační systém, poslat info uživateli (AssignedToId), že úkol byl autorem smazán.
         
-        taskToDelete.Status = Models.Enums.TaskStatus.Archived;
+        _context.Tasks.Remove(taskToDelete);
         await _context.SaveChangesAsync();
         
-        TempData["StatusMessage"] = "Úkol byl úspěšně a trvale smazán.";
+        TempData["StatusMessage"] = isAdmin ? "Úkol byl úspěšně odstraněn administrátorem." : "Tvůj úkol byl úspěšně smazán.";
 
         if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
         {

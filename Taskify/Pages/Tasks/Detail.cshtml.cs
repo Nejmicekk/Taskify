@@ -203,15 +203,24 @@ namespace Taskify.Pages.Tasks
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-            if (!User.IsInRole("Admin")) return Forbid();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
 
             var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
             if (taskItem == null) return NotFound();
 
+            bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            bool isCreator = taskItem.CreatedById == user.Id;
+
+            if (!isAdmin && !isCreator) return Forbid();
+
+            // Pokud úkol někdo plní (InProgress) nebo čeká na kontrolu, budeme chtít v budoucnu poslat notifikaci
+            // TODO: Až bude notifikační systém, poslat info uživateli (AssignedToId), že úkol byl autorem smazán.
+            
             _context.Tasks.Remove(taskItem);
             await _context.SaveChangesAsync();
 
-            TempData["StatusMessage"] = "Úkol byl úspěšně odstraněn administrátorem.";
+            TempData["StatusMessage"] = isAdmin ? "Úkol byl odstraněn administrátorem." : "Tvůj úkol byl úspěšně smazán.";
             return RedirectToPage("/Tasks/Index");
         }
     }
