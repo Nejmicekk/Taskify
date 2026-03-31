@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
@@ -10,16 +12,27 @@ namespace Taskify.Pages.Statistics
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public IndexModel(ApplicationDbContext context)
+        public IndexModel(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
+
+        [BindProperty(SupportsGet = true)]
+        public string Mode { get; set; } = "Global";
 
         public int TotalCompletedTasks { get; set; }
         public int TotalCreatedTasks { get; set; }
         public int ActiveUsers { get; set; }
         public int TotalDistributedXP { get; set; }
+        
+        public int UserCompletedRank { get; set; }
+        public double UserCompletedPercentile { get; set; }
+        
+        public int UserCreatedRank { get; set; }
+        public double UserCreatedPercentile { get; set; }
 
         public List<RegionStat> Top3Regions { get; set; } = new();
         public List<CategoryStat> Top3Categories { get; set; } = new();
@@ -77,56 +90,150 @@ namespace Taskify.Pages.Statistics
 
         public async Task OnGetAsync()
         {
-            TotalCreatedTasks = await _context.Tasks.CountAsync();
-            TotalCompletedTasks = await _context.Tasks.CountAsync(t => t.Status == Models.Enums.TaskStatus.Completed);
-            ActiveUsers = await _context.Users.CountAsync();
-
-            TotalDistributedXP = await _context.Tasks
-                .Where(t => t.Status == Models.Enums.TaskStatus.Completed)
-                .SumAsync(t => t.RewardPoints);
-
-
-            Top3Regions = await _context.Tasks
-                .Where(t => !string.IsNullOrEmpty(t.Location.Region))
-                .GroupBy(t => t.Location.Region)
-                .Select(g => new RegionStat { Region = g.Key!, Count = g.Count() })
-                .OrderByDescending(r => r.Count).Take(3).ToListAsync();
-
-            Top3Categories = await _context.Tasks.Include(t => t.Category)
-                .GroupBy(t => t.Category!.Name)
-                .Select(g => new CategoryStat { Name = g.Key, Count = g.Count() })
-                .OrderByDescending(c => c.Count).Take(3).ToListAsync();
-
-            CompletedByCategory = await _context.Tasks
-                .Where(t => t.Status == Models.Enums.TaskStatus.Completed).Include(t => t.Category)
-                .GroupBy(t => t.Category!.Name)
-                .Select(g => new CategoryStat { Name = g.Key, Count = g.Count() })
-                .OrderByDescending(c => c.Count).ToListAsync();
-
-            var submissions = await _context.Tasks.Where(t => t.SubmittedAt.HasValue)
-                .Select(t => t.SubmittedAt!.Value).ToListAsync();
-
-            foreach (var sub in submissions)
+            var user = await _userManager.GetUserAsync(User);
+            if (Mode == "Personal" && user == null)
             {
-                CompletionByHour[sub.Hour]++;
-                // převod DayOfWeek (Sunday=0) na 0=Po, 6=Ne
-                int dayIndex = ((int)sub.DayOfWeek + 6) % 7;
-                WeeklyActivity[dayIndex]++;
+                Mode = "Global";
             }
 
-            var startDate = DateTime.UtcNow.Date.AddDays(-9);
-            var trendData = await _context.Tasks
-                .Where(t => t.CreatedAt >= startDate)
-                .GroupBy(t => t.CreatedAt.Date)
-                .Select(g => new { Date = g.Key, Count = g.Count() })
-                .OrderBy(g => g.Date).ToListAsync();
-
-            for (int i = 0; i < 10; i++)
+            if (Mode == "Personal" && user != null)
             {
-                var date = startDate.AddDays(i);
-                var match = trendData.FirstOrDefault(d => d.Date == date);
-                TasksTrend.Add(new TrendStat { Date = date.ToString("dd.MM."), Count = match?.Count ?? 0 });
-                // Žebříček - TOP 5 Vykonávačů (splněné úkoly)
+                TotalCreatedTasks = await _context.Tasks.CountAsync(t => t.CreatedById == user.Id);
+                TotalCompletedTasks = await _context.Tasks.CountAsync(t => t.AssignedToId == user.Id && t.Status == TaskStatus.Completed);
+                
+                var totalUsers = await _context.Users.CountAsync();
+
+                // 1. Rank v počtu SPLNĚNÝCH úkolů (Top Performers)
+                var allPerformers = await _context.Users
+                    .Select(u => new { 
+                        Id = u.Id, 
+                        Count = _context.Tasks.Count(t => t.AssignedToId == u.Id && t.Status == TaskStatus.Completed) 
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ToListAsync();
+
+                UserCompletedRank = allPerformers.FindIndex(x => x.Id == user.Id) + 1;
+                UserCompletedPercentile = totalUsers > 0 ? (double)UserCompletedRank / totalUsers * 100 : 100;
+
+                // 2. Rank v počtu VYTVOŘENÝCH úkolů (Top Creators)
+                var allCreators = await _context.Users
+                    .Select(u => new { 
+                        Id = u.Id, 
+                        Count = _context.Tasks.Count(t => t.CreatedById == u.Id) 
+                    })
+                    .OrderByDescending(x => x.Count)
+                    .ToListAsync();
+
+                UserCreatedRank = allCreators.FindIndex(x => x.Id == user.Id) + 1;
+                UserCreatedPercentile = totalUsers > 0 ? (double)UserCreatedRank / totalUsers * 100 : 100;
+
+                Top3Regions = await _context.Tasks
+                    .Where(t => t.CreatedById == user.Id && !string.IsNullOrEmpty(t.Location.Region))
+                    .GroupBy(t => t.Location.Region)
+                    .Select(g => new RegionStat { Region = g.Key!, Count = g.Count() })
+                    .OrderByDescending(r => r.Count).Take(3).ToListAsync();
+
+                Top3Categories = await _context.Tasks
+                    .Where(t => t.CreatedById == user.Id)
+                    .Include(t => t.Category)
+                    .GroupBy(t => t.Category!.Name)
+                    .Select(g => new CategoryStat { Name = g.Key, Count = g.Count() })
+                    .OrderByDescending(c => c.Count).Take(3).ToListAsync();
+
+                CompletedByCategory = await _context.Tasks
+                    .Where(t => t.AssignedToId == user.Id && t.Status == TaskStatus.Completed)
+                    .Include(t => t.Category)
+                    .GroupBy(t => t.Category!.Name)
+                    .Select(g => new CategoryStat { Name = g.Key, Count = g.Count() })
+                    .OrderByDescending(c => c.Count).ToListAsync();
+
+                var submissions = await _context.Tasks
+                    .Where(t => t.AssignedToId == user.Id && t.SubmittedAt.HasValue)
+                    .Select(t => t.SubmittedAt!.Value).ToListAsync();
+
+                foreach (var sub in submissions)
+                {
+                    CompletionByHour[sub.Hour]++;
+                    int dayIndex = ((int)sub.DayOfWeek + 6) % 7;
+                    WeeklyActivity[dayIndex]++;
+                }
+
+                var startDate = DateTime.UtcNow.Date.AddDays(-9);
+                var trendData = await _context.Tasks
+                    .Where(t => t.AssignedToId == user.Id && t.Status == TaskStatus.Completed && t.SubmittedAt >= startDate)
+                    .GroupBy(t => t.SubmittedAt!.Value.Date)
+                    .Select(g => new { Date = g.Key, Count = g.Count() })
+                    .OrderBy(g => g.Date).ToListAsync();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    var date = startDate.AddDays(i);
+                    var match = trendData.FirstOrDefault(d => d.Date == date);
+                    TasksTrend.Add(new TrendStat { Date = date.ToString("dd.MM."), Count = match?.Count ?? 0 });
+                }
+
+                var statusGroups = await _context.Tasks
+                    .Where(t => t.CreatedById == user.Id)
+                    .GroupBy(t => t.Status)
+                    .Select(g => new { Status = g.Key, Count = g.Count() })
+                    .ToListAsync();
+
+                StatusDistribution = statusGroups.Select(g => new StatusStat
+                {
+                    Status = GetStatusLabel(g.Status),
+                    Count = g.Count
+                }).OrderByDescending(s => s.Count).ToList();
+            }
+            else
+            {
+                TotalCreatedTasks = await _context.Tasks.CountAsync();
+                TotalCompletedTasks = await _context.Tasks.CountAsync(t => t.Status == TaskStatus.Completed);
+                ActiveUsers = await _context.Users.CountAsync();
+                TotalDistributedXP = await _context.Tasks
+                    .Where(t => t.Status == TaskStatus.Completed)
+                    .SumAsync(t => t.RewardPoints);
+
+                Top3Regions = await _context.Tasks
+                    .Where(t => !string.IsNullOrEmpty(t.Location.Region))
+                    .GroupBy(t => t.Location.Region)
+                    .Select(g => new RegionStat { Region = g.Key!, Count = g.Count() })
+                    .OrderByDescending(r => r.Count).Take(3).ToListAsync();
+
+                Top3Categories = await _context.Tasks.Include(t => t.Category)
+                    .GroupBy(t => t.Category!.Name)
+                    .Select(g => new CategoryStat { Name = g.Key, Count = g.Count() })
+                    .OrderByDescending(c => c.Count).Take(3).ToListAsync();
+
+                CompletedByCategory = await _context.Tasks
+                    .Where(t => t.Status == TaskStatus.Completed).Include(t => t.Category)
+                    .GroupBy(t => t.Category!.Name)
+                    .Select(g => new CategoryStat { Name = g.Key, Count = g.Count() })
+                    .OrderByDescending(c => c.Count).ToListAsync();
+
+                var submissions = await _context.Tasks.Where(t => t.SubmittedAt.HasValue)
+                    .Select(t => t.SubmittedAt!.Value).ToListAsync();
+
+                foreach (var sub in submissions)
+                {
+                    CompletionByHour[sub.Hour]++;
+                    int dayIndex = ((int)sub.DayOfWeek + 6) % 7;
+                    WeeklyActivity[dayIndex]++;
+                }
+
+                var startDate = DateTime.UtcNow.Date.AddDays(-9);
+                var trendData = await _context.Tasks
+                    .Where(t => t.CreatedAt >= startDate)
+                    .GroupBy(t => t.CreatedAt.Date)
+                    .Select(g => new { Date = g.Key, Count = g.Count() })
+                    .OrderBy(g => g.Date).ToListAsync();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    var date = startDate.AddDays(i);
+                    var match = trendData.FirstOrDefault(d => d.Date == date);
+                    TasksTrend.Add(new TrendStat { Date = date.ToString("dd.MM."), Count = match?.Count ?? 0 });
+                }
+
                 TopPerformers = await _context.Users
                     .Select(u => new UserStat
                     {
@@ -134,13 +241,12 @@ namespace Taskify.Pages.Statistics
                         Name = u.Name,
                         ProfilePictureUrl = u.ProfilePictureUrl,
                         Count = _context.Tasks.Count(t =>
-                            t.AssignedToId == u.Id && t.Status == Models.Enums.TaskStatus.Completed)
+                            t.AssignedToId == u.Id && t.Status == TaskStatus.Completed)
                     })
                     .OrderByDescending(u => u.Count)
                     .Take(5)
                     .ToListAsync();
 
-                // Žebříček - TOP 5 Tvůrců (vytvořené úkoly)
                 TopCreators = await _context.Users
                     .Select(u => new UserStat
                     {

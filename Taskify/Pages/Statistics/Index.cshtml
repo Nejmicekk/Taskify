@@ -1,20 +1,23 @@
 @page
 @model Taskify.Pages.Statistics.IndexModel
+@using Microsoft.AspNetCore.Identity
+@using Taskify.Models
+@inject SignInManager<User> SignInManager
 @{
-    ViewData["Title"] = "Statistiky systému";
+    ViewData["Title"] = Model.Mode == "Personal" ? "Osobní statistiky" : "Obecné statistiky";
 }
 
 <link rel="stylesheet" href="~/css/Statistics/Index.css" asp-append-version="true"/>
 
 <div class="container py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div class="d-flex align-items-center gap-3">
             <div class="bg-primary text-white icon-box shadow-sm">
                 <i class="bi bi-graph-up-arrow fs-4"></i>
             </div>
             <div>
-                <h1 class="fw-bold mb-0">Statistiky</h1>
-                <p class="text-muted mb-0">Reálná data o aktivitě v Taskify</p>
+                <h1 class="fw-bold mb-0">@(Model.Mode == "Personal" ? "Osobní statistiky" : "Obecné statistiky")</h1>
+                <p class="text-muted mb-0">@(Model.Mode == "Personal" ? "Přehled tvé aktivity v Taskify" : "Reálná data o aktivitě v Taskify")</p>
             </div>
         </div>
         <div class="text-md-end">
@@ -24,131 +27,203 @@
         </div>
     </div>
 
-    <div class="row g-4 mb-5">
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4"><i class="bi bi-trophy text-warning me-2"></i>TOP 5 Dobrovolníků <small class="text-muted fw-normal fs-6 ms-2">(splněné úkoly)</small></h5>
-                    @for (int i = 0; i < Model.TopPerformers.Count; i++)
-                    {
-                        var user = Model.TopPerformers[i];
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="fw-bold text-muted me-3" style="width: 20px;">@(i + 1).</div>
-                            <a href="/u/@user.UserName" class="avatar-sm me-3 text-decoration-none">
-                                @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                                {
-                                    <img src="@user.ProfilePictureUrl" alt="@user.UserName" class="rounded-circle shadow-sm hover-lift" style="width: 38px; height: 38px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm hover-lift" style="width: 38px; height: 38px; font-weight: bold;">
-                                        @user.UserName.Substring(0, 1).ToUpper()
-                                    </div>
-                                }
-                            </a>
-                            <div class="flex-grow-1 lh-sm">
-                                <a href="/u/@user.UserName" class="text-decoration-none text-dark fw-bold d-block">@user.Name</a>
-                                <small class="text-muted" style="font-size: 0.75rem;">@@@user.UserName</small>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="d-flex justify-content-center" style="margin-top: -1.5rem; margin-bottom: 3.5rem;">
+            <div class="stats-toggle-container shadow-sm">
+                <div class="stats-toggle-slider @(Model.Mode == "Personal" ? "pos-personal" : "")"></div>
+                <a asp-page="./Index" asp-route-mode="Global" 
+                   class="stats-toggle-btn @(Model.Mode == "Global" ? "active" : "")">
+                    Obecné
+                </a>
+                <a asp-page="./Index" asp-route-mode="Personal" 
+                   class="stats-toggle-btn @(Model.Mode == "Personal" ? "active" : "")">
+                    Osobní
+                </a>
+            </div>
+        </div>
+    }
+
+    @if (Model.Mode == "Global")
+    {
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-trophy text-warning me-2"></i>TOP 5 Dobrovolníků <small class="text-muted fw-normal fs-6 ms-2">(splněné úkoly)</small></h5>
+                        @for (int i = 0; i < Model.TopPerformers.Count; i++)
+                        {
+                            var user = Model.TopPerformers[i];
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="fw-bold text-muted me-3" style="width: 20px;">@(i + 1).</div>
+                                <a href="/u/@user.UserName" class="avatar-sm me-3 text-decoration-none">
+                                    @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                                    {
+                                        <img src="@user.ProfilePictureUrl" alt="@user.UserName" class="rounded-circle shadow-sm hover-lift" style="width: 38px; height: 38px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm hover-lift" style="width: 38px; height: 38px; font-weight: bold;">
+                                            @user.UserName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                </a>
+                                <div class="flex-grow-1 lh-sm">
+                                    <a href="/u/@user.UserName" class="text-decoration-none text-dark fw-bold d-block">@user.Name</a>
+                                    <small class="text-muted" style="font-size: 0.75rem;">@@@user.UserName</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">@user.Count splněno</span>
+                                </div>
                             </div>
-                            <div class="text-end">
-                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">@user.Count splněno</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4"><i class="bi bi-megaphone text-primary me-2"></i>TOP 5 Tvůrců <small class="text-muted fw-normal fs-6 ms-2">(založené úkoly)</small></h5>
+                        @for (int i = 0; i < Model.TopCreators.Count; i++)
+                        {
+                            var user = Model.TopCreators[i];
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="fw-bold text-muted me-3" style="width: 20px;">@(i + 1).</div>
+                                <a href="/u/@user.UserName" class="avatar-sm me-3 text-decoration-none">
+                                    @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
+                                    {
+                                        <img src="@user.ProfilePictureUrl" alt="@user.UserName" class="rounded-circle shadow-sm hover-lift" style="width: 38px; height: 38px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center shadow-sm hover-lift" style="width: 38px; height: 38px; font-weight: bold;">
+                                            @user.UserName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                </a>
+                                <div class="flex-grow-1 lh-sm">
+                                    <a href="/u/@user.UserName" class="text-decoration-none text-dark fw-bold d-block">@user.Name</a>
+                                    <small class="text-muted" style="font-size: 0.75rem;">@@@user.UserName</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">@user.Count úkolů</span>
+                                </div>
                             </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row g-4 mb-5 text-center justify-content-center">
+        @if (Model.Mode == "Personal")
+        {
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-primary bg-opacity-10 text-primary icon-box"><i class="bi bi-megaphone"></i></div>
                         </div>
-                    }
+                        <h6 class="text-muted small fw-bold text-uppercase">Moje vytvořené</h6>
+                        <h2 class="fw-bold mb-0">@Model.TotalCreatedTasks</h2>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4"><i class="bi bi-megaphone text-primary me-2"></i>TOP 5 Tvůrců <small class="text-muted fw-normal fs-6 ms-2">(založené úkoly)</small></h5>
-                    @for (int i = 0; i < Model.TopCreators.Count; i++)
-                    {
-                        var user = Model.TopCreators[i];
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="fw-bold text-muted me-3" style="width: 20px;">@(i + 1).</div>
-                            <a href="/u/@user.UserName" class="avatar-sm me-3 text-decoration-none">
-                                @if (!string.IsNullOrEmpty(user.ProfilePictureUrl))
-                                {
-                                    <img src="@user.ProfilePictureUrl" alt="@user.UserName" class="rounded-circle shadow-sm hover-lift" style="width: 38px; height: 38px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center shadow-sm hover-lift" style="width: 38px; height: 38px; font-weight: bold;">
-                                        @user.UserName.Substring(0, 1).ToUpper()
-                                    </div>
-                                }
-                            </a>
-                            <div class="flex-grow-1 lh-sm">
-                                <a href="/u/@user.UserName" class="text-decoration-none text-dark fw-bold d-block">@user.Name</a>
-                                <small class="text-muted" style="font-size: 0.75rem;">@@@user.UserName</small>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3">@user.Count úkolů</span>
-                            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-success bg-opacity-10 text-success icon-box"><i class="bi bi-check2-circle"></i></div>
                         </div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row g-4 mb-5 text-center">
-        <div class="col-md-6 col-lg-3">
-            <div class="card shadow-sm stats-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="bg-primary bg-opacity-10 text-primary icon-box"><i class="bi bi-clipboard-data"></i></div>
-                        <span class="text-success small fw-bold mt-1"><i class="bi bi-arrow-up"></i> Live</span>
+                        <h6 class="text-muted small fw-bold text-uppercase">Moje splněné</h6>
+                        <h2 class="fw-bold mb-0">@Model.TotalCompletedTasks</h2>
                     </div>
-                    <h6 class="text-muted small fw-bold text-uppercase">Úkoly celkem</h6>
-                    <h2 class="fw-bold mb-0">@Model.TotalCreatedTasks</h2>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card shadow-sm stats-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="bg-success bg-opacity-10 text-success icon-box"><i class="bi bi-check-all"></i></div>
-                        <span class="text-success small fw-bold mt-1">@((Model.TotalCompletedTasks * 100.0 / (Model.TotalCreatedTasks > 0 ? Model.TotalCreatedTasks : 1)).ToString("F0"))%</span>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-info bg-opacity-10 text-info icon-box"><i class="bi bi-trophy"></i></div>
+                            <span class="text-muted small mt-1">TOP @Model.UserCompletedRank</span>
+                        </div>
+                        <h6 class="text-muted small fw-bold text-uppercase">Top v plnění</h6>
+                        <h2 class="fw-bold mb-0">@Model.UserCompletedPercentile.ToString("F1")%</h2>
                     </div>
-                    <h6 class="text-muted small fw-bold text-uppercase">Splněno</h6>
-                    <h2 class="fw-bold mb-0">@Model.TotalCompletedTasks</h2>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card shadow-sm stats-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="bg-info bg-opacity-10 text-info icon-box"><i class="bi bi-people"></i></div>
-                        <span class="text-muted small mt-1">Uživatelé</span>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-warning bg-opacity-10 text-warning icon-box"><i class="bi bi-star"></i></div>
+                            <span class="text-muted small mt-1">TOP @Model.UserCreatedRank</span>
+                        </div>
+                        <h6 class="text-muted small fw-bold text-uppercase">Top v tvorbě</h6>
+                        <h2 class="fw-bold mb-0">@Model.UserCreatedPercentile.ToString("F1")%</h2>
                     </div>
-                    <h6 class="text-muted small fw-bold text-uppercase">Komunita</h6>
-                    <h2 class="fw-bold mb-0">@Model.ActiveUsers</h2>
                 </div>
             </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card shadow-sm stats-card">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="bg-warning bg-opacity-10 text-warning icon-box"><i class="bi bi-star"></i></div>
-                        <span class="text-muted small mt-1">XP v oběhu</span>
+        }
+        else
+        {
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-primary bg-opacity-10 text-primary icon-box"><i class="bi bi-clipboard-data"></i></div>
+                            <span class="text-success small fw-bold mt-1"><i class="bi bi-arrow-up"></i> Live</span>
+                        </div>
+                        <h6 class="text-muted small fw-bold text-uppercase">Úkoly celkem</h6>
+                        <h2 class="fw-bold mb-0">@Model.TotalCreatedTasks</h2>
                     </div>
-                    <h6 class="text-muted small fw-bold text-uppercase">Celkem XP</h6>
-                    <h2 class="fw-bold mb-0">@Model.TotalDistributedXP</h2>
                 </div>
             </div>
-        </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-success bg-opacity-10 text-success icon-box"><i class="bi bi-check-all"></i></div>
+                            <span class="text-success small fw-bold mt-1">@((Model.TotalCompletedTasks * 100.0 / (Model.TotalCreatedTasks > 0 ? Model.TotalCreatedTasks : 1)).ToString("F0"))%</span>
+                        </div>
+                        <h6 class="text-muted small fw-bold text-uppercase">Splněno</h6>
+                        <h2 class="fw-bold mb-0">@Model.TotalCompletedTasks</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-info bg-opacity-10 text-info icon-box"><i class="bi bi-people"></i></div>
+                            <span class="text-muted small mt-1">Uživatelé</span>
+                        </div>
+                        <h6 class="text-muted small fw-bold text-uppercase">Komunita</h6>
+                        <h2 class="fw-bold mb-0">@Model.ActiveUsers</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm stats-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="bg-warning bg-opacity-10 text-warning icon-box"><i class="bi bi-star"></i></div>
+                            <span class="text-muted small mt-1">XP v oběhu</span>
+                        </div>
+                        <h6 class="text-muted small fw-bold text-uppercase">Celkem XP</h6>
+                        <h2 class="fw-bold mb-0">@Model.TotalDistributedXP</h2>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
     
     <div class="row g-4 mb-4">
         <div class="col-xl-8">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Trend růstu úkolů <small class="text-muted fw-normal fs-6 ms-2">(posledních 10 dní)</small></h5>
+                    <h5 class="fw-bold mb-4">@(Model.Mode == "Personal" ? "Trend mých splněných úkolů" : "Trend růstu úkolů") <small class="text-muted fw-normal fs-6 ms-2">(posledních 10 dní)</small></h5>
                     <div class="chart-container">
                         <canvas id="trendChart"></canvas>
                     </div>
@@ -158,7 +233,7 @@
         <div class="col-xl-4">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Aktuální stavy úkolů</h5>
+                    <h5 class="fw-bold mb-4">@(Model.Mode == "Personal" ? "Stav mých vytvořených úkolů" : "Aktuální stavy úkolů")</h5>
                     <div class="chart-container d-flex align-items-center justify-content-center" style="height: 250px;">
                         <canvas id="statusChart"></canvas>
                     </div>
@@ -185,7 +260,7 @@
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Nejaktivnější hodiny<small class="text-muted fw-normal fs-6 ms-2">(kdy se úkoly dokončují)</small></h5>
+                    <h5 class="fw-bold mb-4">@(Model.Mode == "Personal" ? "Nejaktivnější hodiny splnění" : "Nejaktivnější hodiny") <small class="text-muted fw-normal fs-6 ms-2">@(Model.Mode == "Personal" ? "" : "(kdy se úkoly dokončují)")</small></h5>
                     <div class="chart-container">
                         <canvas id="timeChart"></canvas>
                     </div>
@@ -195,7 +270,7 @@
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Nejaktivnější den v týdnu <small class="text-muted fw-normal fs-6 ms-2">(vytížení dobrovolníků)</small></h5>
+                    <h5 class="fw-bold mb-4">@(Model.Mode == "Personal" ? "Nejaktivnější dny splnění v týdnu" : "Nejaktivnější dny v týdnu") <small class="text-muted fw-normal fs-6 ms-2">@(Model.Mode == "Personal" ? "" : "(vytížení dobrovolníků)")</small></h5>
                     <div class="chart-container">
                         <canvas id="weeklyChart"></canvas>
                     </div>
@@ -208,20 +283,27 @@
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">Nejaktivnější kraje</h5>
-                    @foreach(var r in Model.Top3Regions) {
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="bg-danger bg-opacity-10 text-danger rounded p-2 me-3"><i class="bi bi-geo-alt"></i></div>
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="fw-bold">@r.Region</span>
-                                    <span class="small text-muted">@r.Count úkolů</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-danger" style="width: @((r.Count * 100.0 / Model.TotalCreatedTasks).ToString("F0"))%"></div>
+                    <h5 class="fw-bold mb-4">@(Model.Mode == "Personal" ? "Lokace mých úkolů" : "Nejaktivnější kraje")</h5>
+                    @if (Model.Top3Regions.Any())
+                    {
+                        foreach(var r in Model.Top3Regions) {
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-danger bg-opacity-10 text-danger rounded p-2 me-3"><i class="bi bi-geo-alt"></i></div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold">@r.Region</span>
+                                        <span class="small text-muted">@r.Count úkolů</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-danger" style="width: @((r.Count * 100.0 / (Model.TotalCreatedTasks > 0 ? Model.TotalCreatedTasks : 1)).ToString("F0"))%"></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Zatím žádná data o lokacích.</p>
                     }
                 </div>
             </div>
@@ -229,14 +311,23 @@
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4">TOP Kategorie</h5>
+                    <h5 class="fw-bold mb-4">@(Model.Mode == "Personal" ? "Kategorie mých splněných úkolů" : "TOP Kategorie")</h5>
                     <div class="row g-3">
-                        @foreach(var c in Model.Top3Categories) {
-                            <div class="col-md-4">
-                                <div class="p-3 bg-light rounded-4 text-center border">
-                                    <div class="h3 fw-bold text-primary mb-1">@c.Count</div>
-                                    <div class="small fw-bold text-truncate">@c.Name</div>
+                        @if (Model.CompletedByCategory.Any())
+                        {
+                            foreach(var c in Model.CompletedByCategory.Take(6)) {
+                                <div class="col-md-4">
+                                    <div class="p-3 bg-light rounded-4 text-center border">
+                                        <div class="h3 fw-bold text-primary mb-1">@c.Count</div>
+                                        <div class="small fw-bold text-truncate">@c.Name</div>
+                                    </div>
                                 </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12">
+                                <p class="text-muted small">Zatím jsi nesplnil žádné úkoly.</p>
                             </div>
                         }
                     </div>

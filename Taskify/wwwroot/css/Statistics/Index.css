@@ -4,3 +4,53 @@
 .bg-gradient-primary { background: linear-gradient(45deg, #0d6efd, #0dcaf0); }
 .bg-gradient-success { background: linear-gradient(45deg, #198754, #20c997); }
 .icon-box { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+
+/* Sliding Toggle Styles */
+.stats-toggle-container {
+    display: inline-flex;
+    position: relative;
+    background-color: #f1f3f5;
+    padding: 4px;
+    border-radius: 50px;
+    height: 48px;
+    min-width: 220px;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.stats-toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    height: calc(100% - 8px);
+    width: calc(50% - 4px);
+    background-color: #0d6efd;
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+    z-index: 1;
+}
+
+.pos-personal {
+    transform: translateX(100%);
+}
+
+.stats-toggle-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #495057;
+    z-index: 2;
+    border-radius: 50px;
+    position: relative;
+}
+
+.stats-toggle-btn.active {
+    color: white !important;
+}
+
+.stats-toggle-btn:hover:not(.active) {
+    color: #0d6efd;
+}
