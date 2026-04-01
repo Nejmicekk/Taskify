@@ -266,10 +266,17 @@ namespace Taskify.Pages.Tasks
             var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
 
             if (user == null || taskItem == null) return NotFound();
-            if (taskItem.AssignedToId != user.Id || taskItem.Status != Models.Enums.TaskStatus.InProgress) return BadRequest();
+            
+            if (taskItem.AssignedToId != user.Id || 
+                (taskItem.Status != Models.Enums.TaskStatus.InProgress && 
+                 taskItem.Status != Models.Enums.TaskStatus.WaitingForReview)) 
+            {
+                return BadRequest();
+            }
 
             taskItem.Status = Models.Enums.TaskStatus.Open;
             taskItem.AssignedToId = null;
+            taskItem.SubmittedAt = null; // Vynulovat čas odevzdání, pokud tam byl
 
             await _context.SaveChangesAsync();
             
@@ -283,6 +290,23 @@ namespace Taskify.Pages.Tasks
                 type: Models.Enums.NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Zrušil jsi svou účast na úkolu.";
+            return RedirectToPage(new { id });
+        }
+
+        public async Task<IActionResult> OnPostRevokeAsync(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            if (taskItem.AssignedToId != user.Id || taskItem.Status != Models.Enums.TaskStatus.WaitingForReview) return BadRequest();
+
+            taskItem.Status = Models.Enums.TaskStatus.InProgress;
+            taskItem.SubmittedAt = null;
+
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Úkol byl vrácen k dopracování.";
             return RedirectToPage(new { id });
         }
 

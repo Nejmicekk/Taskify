@@ -349,11 +349,22 @@
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.InProgress && Model.TaskItem.AssignedToId == Model.CurrentUserId)
                 {
-                    <form method="post" asp-page-handler="Finish" asp-route-id="@Model.TaskItem.Id" class="mt-auto">
-                        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
-                            <i class="bi bi-check2-all me-2"></i> Označit úkol jako splněný
-                        </button>
-                    </form>
+                    <div class="row g-2 mt-auto">
+                        <div class="col-sm-7">
+                            <form method="post" asp-page-handler="Finish" asp-route-id="@Model.TaskItem.Id">
+                                <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-check2-all me-2"></i> Hotovo
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-sm-5">
+                            <form method="post" asp-page-handler="Cancel" asp-route-id="@Model.TaskItem.Id">
+                                <button type="submit" class="btn btn-outline-danger w-100 py-3 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-x-circle me-2"></i> Zrušit účast
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
                 {
@@ -374,9 +385,27 @@
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.WaitingForReview && Model.TaskItem.AssignedToId == Model.CurrentUserId)
                 {
-                    <button class="btn btn-info w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark" disabled>
-                        <i class="bi bi-clock-history me-2"></i> Čeká na schválení autorem
-                    </button>
+                    <div class="mb-2">
+                        <button class="btn btn-info w-100 py-3 rounded-pill fw-bold shadow-sm text-dark" disabled>
+                            <i class="bi bi-clock-history me-2"></i> Čeká na schválení
+                        </button>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <form method="post" asp-page-handler="Revoke" asp-route-id="@Model.TaskItem.Id">
+                                <button type="submit" class="btn btn-outline-primary w-100 py-2 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Vrátit
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form method="post" asp-page-handler="Cancel" asp-route-id="@Model.TaskItem.Id">
+                                <button type="submit" class="btn btn-outline-danger w-100 py-2 rounded-pill fw-bold shadow-sm">
+                                    <i class="bi bi-x-circle me-1"></i> Zrušit účast
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 }
                 else
                 {

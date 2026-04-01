@@ -44,7 +44,15 @@ public class NotificationService : INotificationService
         var user = await _userManager.FindByIdAsync(userId);
         if (user?.Email != null && user.EnableEmailNotifications)
         {
-            bool shouldSendEmail = type switch
+            // Ochrana proti spamu
+            var fiveMinutesAgo = DateTime.Now.AddMinutes(-5);
+            var isDuplicate = await _context.Notifications
+                .AnyAsync(n => n.UserId == userId && 
+                               n.SenderId == senderId && 
+                               n.Title == title && 
+                               n.CreatedAt > fiveMinutesAgo);
+
+            bool shouldSendEmail = !isDuplicate && type switch
             {
                 NotificationType.TaskUpdate => user.EmailOnTaskUpdates,
                 NotificationType.TaskResult => user.EmailOnTaskResults,
