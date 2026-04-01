@@ -45,6 +45,7 @@ builder.Services.AddRazorPages(options =>
 
 // 5. Registrace email senderu
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 

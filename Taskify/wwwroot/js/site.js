@@ -58,3 +58,78 @@ function showStatusAlert(message, isSuccess = true) {
         }
     }, 5000);
 }
+
+// Notification System
+function markAsRead(id, event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+    
+    fetch(`/Notifications/Index?handler=MarkAsRead&id=${id}`, {
+        method: 'POST',
+        headers: {
+            'RequestVerificationToken': token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update UI - remove highlight and badge
+            const notifElement = document.getElementById(`notif-${id}`) || document.querySelector(`.notification-item[onclick*="markAsRead(${id}"]`);
+            if (notifElement) {
+                notifElement.classList.remove('bg-light-blue');
+                const btn = notifElement.querySelector('button');
+                if (btn) btn.remove();
+            }
+            updateBadge();
+        }
+    });
+}
+
+function markAllAsRead(event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+    fetch('/Notifications/Index?handler=MarkAllAsRead', {
+        method: 'POST',
+        headers: {
+            'RequestVerificationToken': token
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.querySelectorAll('.bg-light-blue').forEach(el => el.classList.remove('bg-light-blue'));
+            document.querySelectorAll('.notification-item button, .list-group-item button').forEach(el => el.remove());
+            const badge = document.getElementById('notificationBadge');
+            if (badge) badge.remove();
+            
+            const markAllBtn = document.querySelector('button[onclick*="markAllAsRead"]');
+            if (markAllBtn) markAllBtn.remove();
+        }
+    });
+}
+
+function updateBadge() {
+    const badge = document.getElementById('notificationBadge');
+    if (!badge) return;
+
+    let count = parseInt(badge.innerText);
+    if (!isNaN(count)) {
+        count--;
+        if (count <= 0) {
+            badge.remove();
+            const markAllBtn = document.querySelector('button[onclick*="markAllAsRead"]');
+            if (markAllBtn) markAllBtn.remove();
+        } else {
+            badge.innerText = count > 99 ? '99+' : count;
+        }
+    }
+}

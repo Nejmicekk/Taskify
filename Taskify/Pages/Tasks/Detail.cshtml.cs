@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
+using Taskify.Services;
 
 namespace Taskify.Pages.Tasks
 {
@@ -11,11 +12,13 @@ namespace Taskify.Pages.Tasks
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly INotificationService _notificationService;
 
-        public DetailsModel(ApplicationDbContext context, UserManager<User> userManager)
+        public DetailsModel(ApplicationDbContext context, UserManager<User> userManager, INotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         public TaskItem TaskItem { get; set; } = null!;
@@ -133,6 +136,13 @@ namespace Taskify.Pages.Tasks
             taskItem.AssignedToId = user.Id;
 
             await _context.SaveChangesAsync();
+            
+            await _notificationService.SendNotificationAsync(
+                taskItem.CreatedById, 
+                "Úkol přijat", 
+                $"Uživatel {user.UserName} přijal váš úkol: {taskItem.Title}", 
+                Models.Enums.NotificationPriority.Info);
+
             TempData["StatusMessage"] = "Úspěšně jsi přijal úkol! Pusť se do toho.";
             return RedirectToPage(new { id });
         }
@@ -151,6 +161,13 @@ namespace Taskify.Pages.Tasks
             taskItem.SubmittedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            
+            await _notificationService.SendNotificationAsync(
+                taskItem.CreatedById, 
+                "Úkol čeká na schválení", 
+                $"Uživatel {user.UserName} označil úkol '{taskItem.Title}' jako hotový. Prosím, zkontrolujte jej.", 
+                Models.Enums.NotificationPriority.Important);
+
             TempData["StatusMessage"] = "Skvělá práce! Nyní počkej, až autor řešení schválí.";
             return RedirectToPage(new { id });
         }
@@ -188,6 +205,13 @@ namespace Taskify.Pages.Tasks
                 }
                 
                 taskItem.AssignedTo.Level = currentLvl;
+
+                // Notify Solver
+                await _notificationService.SendNotificationAsync(
+                    taskItem.AssignedToId!, 
+                    "Úkol schválen!", 
+                    $"Autor schválil vaše řešení úkolu '{taskItem.Title}'. Získali jste {taskItem.RewardPoints} bodů.", 
+                    Models.Enums.NotificationPriority.Success);
             }
             
             if (taskItem.CreatedBy != null)
@@ -214,8 +238,15 @@ namespace Taskify.Pages.Tasks
 
             if (!isAdmin && !isCreator) return Forbid();
 
-            // Pokud úkol někdo plní (InProgress) nebo čeká na kontrolu, budeme chtít v budoucnu poslat notifikaci
-            // TODO: Až bude notifikační systém, poslat info uživateli (AssignedToId), že úkol byl autorem smazán.
+            // Notify solver if task is deleted by someone else
+            if (taskItem.AssignedToId != null && taskItem.AssignedToId != user.Id)
+            {
+                await _notificationService.SendNotificationAsync(
+                    taskItem.AssignedToId, 
+                    "Úkol byl smazán", 
+                    $"Úkol '{taskItem.Title}', na kterém jste pracovali, byl odstraněn {(isAdmin ? "administrátorem" : "autorem")}.", 
+                    Models.Enums.NotificationPriority.Warning);
+            }
             
             _context.Tasks.Remove(taskItem);
             await _context.SaveChangesAsync();

@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/Shared/layout.css" asp-append-version="true"/>
 </head>
-<body class="d-flex flex-column min-vh-100"> @if (ViewData["HideNavbar"] == null)
+a<body class="d-flex flex-column min-vh-100"> @Html.AntiForgeryToken()
+@if (ViewData["HideNavbar"] == null)
 {
     <header>
         <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom">
@@ -45,7 +46,9 @@
                         </li>
                     </ul>
 
-                    <partial name="_LoginPartial"/>
+                    <ul class="navbar-nav align-items-center">
+                        <partial name="_LoginPartial"/>
+                    </ul>
                 </div>
             </div>
         </nav>

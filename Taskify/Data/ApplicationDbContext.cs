@@ -10,10 +10,10 @@ public class ApplicationDbContext : IdentityDbContext<User>
         : base(options)
     {
     }
-    
-    public DbSet<TaskItem> Tasks { get; set; }
+
+    public DbSet<Notification> Notifications { get; set; }
     public DbSet<Category> Categories { get; set; }
-    
+    public DbSet<TaskItem> Tasks { get; set; }
     public DbSet<TaskImage> TaskImages { get; set; }
     
     public DbSet<Report> Reports { get; set; }

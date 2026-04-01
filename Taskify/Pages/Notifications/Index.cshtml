@@ -1,0 +1,98 @@
+@page
+@model Taskify.Pages.Notifications.IndexModel
+@using Taskify.Models.Enums
+@{
+    ViewData["Title"] = "Moje oznámení";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0 fw-bold">Moje oznámení</h4>
+                        <p class="text-muted small mb-0">Přehled všech vašich zpráv</p>
+                    </div>
+                    @if (Model.Notifications.Any(n => !n.IsRead))
+                    {
+                        <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="markAllAsRead(event)">
+                            <i class="bi bi-check-all me-1"></i> Označit vše jako přečtené
+                        </button>
+                    }
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Notifications.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var notification in Model.Notifications)
+                            {
+                                <div id="notif-@notification.Id" class="list-group-item p-4 border-0 border-bottom @(notification.IsRead ? "" : "bg-light-blue")" style="transition: background 0.3s;">
+                                    <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center">
+                                            @switch (notification.Priority)
+                                            {
+                                                case NotificationPriority.Success:
+                                                    <div class="bg-success-subtle text-success p-2 rounded-3 me-3"><i class="bi bi-check-circle fs-5"></i></div>
+                                                    break;
+                                                case NotificationPriority.Warning:
+                                                    <div class="bg-warning-subtle text-warning p-2 rounded-3 me-3"><i class="bi bi-exclamation-triangle fs-5"></i></div>
+                                                    break;
+                                                case NotificationPriority.Important:
+                                                    <div class="bg-danger-subtle text-danger p-2 rounded-3 me-3"><i class="bi bi-info-circle fs-5"></i></div>
+                                                    break;
+                                                default:
+                                                    <div class="bg-info-subtle text-info p-2 rounded-3 me-3"><i class="bi bi-info-circle fs-5"></i></div>
+                                                    break;
+                                            }
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">@notification.Title</h6>
+                                                <span class="badge @GetBadgeClass(notification.Priority) mb-1" style="font-size: 0.65rem;">@notification.Priority</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted d-block mb-2">@notification.CreatedAt.ToString("d. MMMM yyyy HH:mm")</small>
+                                            @if (!notification.IsRead)
+                                            {
+                                                <button class="btn btn-sm btn-link text-decoration-none p-0" onclick="markAsRead(@notification.Id, event)">
+                                                    Označit jako přečtené
+                                                </button>
+                                            }
+                                        </div>
+                                    </div>
+                                    <p class="mb-0 text-secondary ps-5 ms-3">@notification.Message</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-5 text-center">
+                            <div class="bg-light d-inline-flex p-4 rounded-circle mb-3">
+                                <i class="bi bi-bell-slash fs-1 text-muted"></i>
+                            </div>
+                            <h5>Zatím žádná oznámení</h5>
+                            <p class="text-muted">Jakmile se něco stane, dáme vám vědět.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetBadgeClass(NotificationPriority priority) => priority switch
+    {
+        NotificationPriority.Success => "bg-success",
+        NotificationPriority.Warning => "bg-warning text-dark",
+        NotificationPriority.Important => "bg-danger",
+        _ => "bg-info text-dark"
+    };
+}
+
+@section Scripts {
+    <script>
+        // JS logika bude v site.js, aby fungovala globálně i v dropdownu
+    </script>
+}

@@ -1,0 +1,90 @@
+@using Taskify.Services
+@using Microsoft.AspNetCore.Identity
+@using Taskify.Models
+@using Taskify.Models.Enums
+@inject INotificationService NotificationService
+@inject UserManager<User> UserManager
+
+@{
+    var userId = UserManager.GetUserId(User);
+    var unreadCount = 0;
+    List<Notification> recentNotifications = new();
+
+    if (userId != null)
+    {
+        unreadCount = await NotificationService.GetUnreadCountAsync(userId);
+        recentNotifications = await NotificationService.GetRecentNotificationsAsync(userId, 5);
+    }
+}
+
+@if (userId != null)
+{
+    <li class="nav-item dropdown me-3 list-unstyled">
+        <a class="nav-link position-relative dropdown-toggle no-caret" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-bell fs-5"></i>
+            @if (unreadCount > 0)
+            {
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge">
+                    @(unreadCount > 99 ? "99+" : unreadCount)
+                </span>
+            }
+        </a>
+        <div class="dropdown-menu dropdown-menu-end shadow border-0 py-0 overflow-hidden" aria-labelledby="notificationDropdown" style="width: 320px; border-radius: 12px;">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
+                <h6 class="mb-0 fw-bold">Oznámení</h6>
+                @if (unreadCount > 0)
+                {
+                    <button class="btn btn-sm btn-link p-0 text-decoration-none" onclick="markAllAsRead(event)">Označit vše</button>
+                }
+            </div>
+            <div class="notification-list" style="max-height: 400px; overflow-y: auto;">
+                @if (recentNotifications.Any())
+                {
+                    @foreach (var notification in recentNotifications)
+                    {
+                        <div class="notification-item p-3 border-bottom @(notification.IsRead ? "" : "bg-light-blue")" 
+                             onclick="markAsRead(@notification.Id, event)" 
+                             style="cursor: pointer; transition: background 0.2s;">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold small">@notification.Title</span>
+                                <span class="text-muted" style="font-size: 0.75rem;">@notification.CreatedAt.ToString("g")</span>
+                            </div>
+                            <p class="mb-0 small text-truncate">@notification.Message</p>
+                            <div class="mt-1">
+                                @switch (notification.Priority)
+                                {
+                                    case NotificationPriority.Success:
+                                        <span class="badge bg-success" style="font-size: 0.6rem;">Úspěch</span>
+                                        break;
+                                    case NotificationPriority.Warning:
+                                        <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Varování</span>
+                                        break;
+                                    case NotificationPriority.Important:
+                                        <span class="badge bg-danger" style="font-size: 0.6rem;">Důležité</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-info text-dark" style="font-size: 0.6rem;">Info</span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-bell-slash d-block fs-2 mb-2"></i>
+                        <p class="small mb-0">Žádná nová oznámení</p>
+                    </div>
+                }
+            </div>
+            <a class="dropdown-item text-center p-2 small fw-bold text-primary bg-light" asp-page="/Notifications/Index">Zobrazit vše</a>
+        </div>
+    </li>
+}
+
+<style>
+    .bg-light-blue { background-color: #f0f7ff; }
+    .notification-item:hover { background-color: #f8f9fa; }
+    .no-caret::after { display: none !important; }
+</style>
