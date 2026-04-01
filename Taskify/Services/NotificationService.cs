@@ -71,7 +71,14 @@ public class NotificationService : INotificationService
                     icon
                 );
                 
-                await _emailSender.SendEmailAsync(user.Email, $"Taskify: {title}", emailBody);
+                // Odeslání na pozadí, aby se nebrzdil uživatel
+                _ = Task.Run(async () => {
+                    try {
+                        await _emailSender.SendEmailAsync(user.Email, $"Taskify: {title}", emailBody);
+                    } catch (Exception) {
+                        // Logování selhání e-mailu (volitelné)
+                    }
+                });
             }
         }
     }
