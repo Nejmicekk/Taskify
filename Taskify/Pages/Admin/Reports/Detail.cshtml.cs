@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
-using Taskify.Models.Enums;
+using Taskify.Services;
 using TaskStatus = Taskify.Models.Enums.TaskStatus;
 
 namespace Taskify.Pages.Admin.Reports;
@@ -13,10 +13,12 @@ namespace Taskify.Pages.Admin.Reports;
 public class DetailModel : PageModel
 {
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public DetailModel(ApplicationDbContext context)
+    public DetailModel(ApplicationDbContext context, INotificationService notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     [BindProperty]
@@ -53,13 +55,23 @@ public class DetailModel : PageModel
     
     public async Task<IActionResult> OnPostDismissAsync(int id)
     {
-        var report = await _context.Reports.FindAsync(id);
+        var report = await _context.Reports
+            .Include(r => r.TaskItem)
+            .FirstOrDefaultAsync(r => r.Id == id);
+            
         if (report == null) return NotFound();
 
         report.IsResolved = true;
         report.AdminNote = string.IsNullOrEmpty(AdminNote) ? "Report byl zamítnut jako bezpředmětný." : AdminNote;
 
         await _context.SaveChangesAsync();
+        
+        await _notificationService.SendNotificationAsync(
+            report.ReporterId, 
+            "Report vyřešen", 
+            $"Vaše nahlášení úkolu '{report.TaskItem.Title}' bylo zpracováno. Výsledek: {report.AdminNote}", 
+            Models.Enums.NotificationPriority.Info);
+
         TempData["StatusMessage"] = "Report byl zamítnut a označen za vyřešený.";
         return RedirectToPage("./Index");
     }
@@ -77,6 +89,19 @@ public class DetailModel : PageModel
         report.TaskItem.Status = TaskStatus.Archived;
 
         await _context.SaveChangesAsync();
+        
+        await _notificationService.SendNotificationAsync(
+            report.TaskItem.CreatedById, 
+            "Úkol archivován", 
+            $"Váš úkol '{report.TaskItem.Title}' byl archivován administrátorem. Důvod: {report.AdminNote}", 
+            Models.Enums.NotificationPriority.Important);
+        
+        await _notificationService.SendNotificationAsync(
+            report.ReporterId, 
+            "Report vyřešen", 
+            $"Vaše nahlášení úkolu '{report.TaskItem.Title}' bylo zpracováno. Úkol byl archivován.", 
+            Models.Enums.NotificationPriority.Info);
+
         TempData["StatusMessage"] = "Úkol byl archivován a report uzavřen.";
         return RedirectToPage("./Index");
     }
@@ -96,6 +121,19 @@ public class DetailModel : PageModel
         report.AdminNote = string.IsNullOrEmpty(AdminNote) ? "Úkol byl upraven administrátorem a schválen." : AdminNote;
 
         await _context.SaveChangesAsync();
+        
+        await _notificationService.SendNotificationAsync(
+            report.TaskItem.CreatedById, 
+            "Úkol upraven administrátorem", 
+            $"Váš úkol '{report.TaskItem.Title}' byl upraven administrátorem z důvodu nahlášení. Poznámka: {report.AdminNote}", 
+            Models.Enums.NotificationPriority.Warning);
+        
+        await _notificationService.SendNotificationAsync(
+            report.ReporterId, 
+            "Report vyřešen", 
+            $"Vaše nahlášení úkolu '{report.TaskItem.Title}' bylo zpracováno. Úkol byl upraven.", 
+            Models.Enums.NotificationPriority.Info);
+
         TempData["StatusMessage"] = "Úkol byl upraven a report byl úspěšně uzavřen.";
         return RedirectToPage("./Index");
     }

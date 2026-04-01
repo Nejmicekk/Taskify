@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
 using Taskify.Models.Enums;
+using Taskify.Services;
 
 namespace Taskify.Pages.Admin.Users;
 
@@ -14,11 +15,13 @@ public class IndexModel : PageModel
 {
     private readonly UserManager<User> _userManager;
     private readonly ApplicationDbContext _context;
+    private readonly INotificationService _notificationService;
 
-    public IndexModel(UserManager<User> userManager, ApplicationDbContext context)
+    public IndexModel(UserManager<User> userManager, ApplicationDbContext context, INotificationService notificationService)
     {
         _userManager = userManager;
         _context = context;
+        _notificationService = notificationService;
     }
 
     public IList<UserViewModel> Users { get; set; } = default!;
@@ -121,6 +124,13 @@ public class IndexModel : PageModel
             await UnassignTasksFromUser(userId);
             
             string timeMsg = days.Value == 0 ? "trvale" : $"na {days.Value} dní";
+            
+            await _notificationService.SendNotificationAsync(
+                userId, 
+                "Váš účet byl pozastaven", 
+                $"Váš účet byl dočasně zablokován {timeMsg}. Důvod: Porušení podmínek služby.", 
+                Models.Enums.NotificationPriority.Important);
+
             TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl zablokován {timeMsg}.";
         }
         else

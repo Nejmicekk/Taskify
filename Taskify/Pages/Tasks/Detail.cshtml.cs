@@ -190,6 +190,9 @@ namespace Taskify.Pages.Tasks
             
             if (taskItem.AssignedTo != null)
             {
+                int oldLvl = taskItem.AssignedTo.Level;
+                int oldRep = taskItem.AssignedTo.Reputation;
+
                 taskItem.AssignedTo.Points += taskItem.RewardPoints;
                 taskItem.AssignedTo.Reputation += 20;
                 
@@ -205,13 +208,32 @@ namespace Taskify.Pages.Tasks
                 }
                 
                 taskItem.AssignedTo.Level = currentLvl;
-
-                // Notify Solver
+                
                 await _notificationService.SendNotificationAsync(
                     taskItem.AssignedToId!, 
                     "Úkol schválen!", 
                     $"Autor schválil vaše řešení úkolu '{taskItem.Title}'. Získali jste {taskItem.RewardPoints} bodů.", 
                     Models.Enums.NotificationPriority.Success);
+                
+                if (taskItem.AssignedTo.Level > oldLvl)
+                {
+                    await _notificationService.SendNotificationAsync(
+                        taskItem.AssignedToId!, 
+                        "Nová úroveň!", 
+                        $"Gratulujeme! Dosáhli jste úrovně {taskItem.AssignedTo.Level}!", 
+                        Models.Enums.NotificationPriority.Success);
+                }
+                
+                int[] milestones = { 100, 500, 1000 };
+                if (milestones.Any(m => oldRep < m && taskItem.AssignedTo.Reputation >= m))
+                {
+                    int reachedMilestone = milestones.First(m => taskItem.AssignedTo.Reputation >= m && oldRep < m);
+                    await _notificationService.SendNotificationAsync(
+                        taskItem.AssignedToId!, 
+                        "Milník reputace", 
+                        $"Skvělé! Dosáhli jste milníku {reachedMilestone} bodů reputace!", 
+                        Models.Enums.NotificationPriority.Info);
+                }
             }
             
             if (taskItem.CreatedBy != null)
@@ -222,6 +244,29 @@ namespace Taskify.Pages.Tasks
             await _context.SaveChangesAsync();
             
             TempData["StatusMessage"] = $"Úkol úspěšně uzavřen!";
+            return RedirectToPage(new { id });
+        }
+
+        public async Task<IActionResult> OnPostCancelAsync(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            if (taskItem.AssignedToId != user.Id || taskItem.Status != Models.Enums.TaskStatus.InProgress) return BadRequest();
+
+            taskItem.Status = Models.Enums.TaskStatus.Open;
+            taskItem.AssignedToId = null;
+
+            await _context.SaveChangesAsync();
+            
+            await _notificationService.SendNotificationAsync(
+                taskItem.CreatedById, 
+                "Dobrovolník odstoupil", 
+                $"Uživatel {user.UserName} zrušil svou účast na úkolu '{taskItem.Title}'. Úkol je opět volný.", 
+                Models.Enums.NotificationPriority.Info);
+
+            TempData["StatusMessage"] = "Zrušil jsi svou účast na úkolu.";
             return RedirectToPage(new { id });
         }
 
