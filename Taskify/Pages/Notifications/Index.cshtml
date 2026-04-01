@@ -14,7 +14,7 @@
                         <h4 class="mb-0 fw-bold">Moje oznámení</h4>
                         @if (Model.Notifications.Any(n => !n.IsRead))
                         {
-                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="markAllAsRead(event)">
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-inline-flex align-items-center justify-content-center" onclick="markAllAsRead(event)">
                                 <i class="bi bi-check-all me-1"></i> Označit vše jako přečtené
                             </button>
                         }
@@ -22,11 +22,11 @@
                     
                     <div class="d-flex gap-2">
                         <a asp-page="./Index" asp-route-filter="all" 
-                           class="btn btn-sm rounded-pill px-4 fw-bold no-anim @(Model.Filter == "all" ? "btn-primary" : "btn-light text-secondary")">
+                           class="btn btn-sm rounded-pill px-4 fw-bold no-anim d-inline-flex align-items-center justify-content-center @(Model.Filter == "all" ? "btn-primary" : "btn-light text-secondary")">
                             Všechna
                         </a>
                         <a asp-page="./Index" asp-route-filter="unread" 
-                           class="btn btn-sm rounded-pill px-4 fw-bold no-anim @(Model.Filter == "unread" ? "btn-primary" : "btn-light text-secondary")">
+                           class="btn btn-sm rounded-pill px-4 fw-bold no-anim d-inline-flex align-items-center justify-content-center @(Model.Filter == "unread" ? "btn-primary" : "btn-light text-secondary")">
                             Nepřečtená
                         </a>
                     </div>
