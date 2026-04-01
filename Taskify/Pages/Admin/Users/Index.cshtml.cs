@@ -131,7 +131,8 @@ public class IndexModel : PageModel
                 "Váš účet byl dočasně zablokován. Podívejte se na detaily v nastavení.", 
                 Models.Enums.NotificationPriority.Important,
                 currentUser.Id,
-                targetUrl: "/Identity/Account/Manage/Index");
+                targetUrl: "/Identity/Account/Manage/Index",
+                type: Models.Enums.NotificationType.Security);
 
             TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl zablokován {timeMsg}.";
         }

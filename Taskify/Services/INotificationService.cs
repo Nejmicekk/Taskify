@@ -5,7 +5,7 @@ namespace Taskify.Services;
 
 public interface INotificationService
 {
-    Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null);
+    Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null, NotificationType type = NotificationType.General);
     Task MarkAllAsReadAsync(string userId);
     Task MarkAsReadAsync(int notificationId);
     Task<List<Notification>> GetRecentNotificationsAsync(string userId, int count = 5);

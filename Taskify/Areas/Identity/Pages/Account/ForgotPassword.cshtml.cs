@@ -53,7 +53,8 @@ namespace Taskify.Areas.Identity.Pages.Account
                     title: "Resetování hesla 🔒",
                     message: "Obdrželi jsme žádost o obnovení hesla pro váš účet. Klikněte na tlačítko níže pro nastavení nového hesla.",
                     buttonText: "Nastavit nové heslo",
-                    buttonUrl: callbackUrl
+                    buttonUrl: callbackUrl,
+                    icon: "🔐"
                 );
 
                 await _emailSender.SendEmailAsync(

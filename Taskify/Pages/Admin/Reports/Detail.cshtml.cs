@@ -76,7 +76,8 @@ public class DetailModel : PageModel
             "Vaše nahlášení bylo zpracováno. Podívejte se na výsledek.", 
             Models.Enums.NotificationPriority.Info,
             adminId,
-            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}");
+            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}",
+            type: Models.Enums.NotificationType.General);
 
         TempData["StatusMessage"] = "Report byl zamítnut a označen za vyřešený.";
         return RedirectToPage("./Index");
@@ -91,7 +92,7 @@ public class DetailModel : PageModel
         if (report == null || report.TaskItem == null) return NotFound();
 
         report.IsResolved = true;
-        report.AdminNote = string.IsNullOrEmpty(AdminNote) ? "Úkol byl archivován z důvodu porušení pravidel." : AdminNote;
+        report.AdminNote = string.IsNullOrEmpty(AdminNote) ? "Úkol byl smazán z důvodu porušení pravidel." : AdminNote;
         report.TaskItem.Status = TaskStatus.Archived;
 
         await _context.SaveChangesAsync();
@@ -99,21 +100,23 @@ public class DetailModel : PageModel
         var adminId = _userManager.GetUserId(User);
         await _notificationService.SendNotificationAsync(
             report.TaskItem.CreatedById, 
-            "Úkol archivován", 
-            "Váš úkol byl archivován administrátorem.", 
+            "Úkol smazán", 
+            "Váš úkol byl smazán administrátorem z důvodu porušení pravidel.", 
             Models.Enums.NotificationPriority.Important,
             adminId,
-            targetUrl: "/Tasks/Index");
+            targetUrl: "/Tasks/Index",
+            type: Models.Enums.NotificationType.TaskResult);
         
         await _notificationService.SendNotificationAsync(
             report.ReporterId, 
             "Report vyřešen", 
-            "Vaše nahlášení bylo vyřešeno archivací úkolu.", 
+            "Vaše nahlášení bylo vyřešeno smazáním úkolu.", 
             Models.Enums.NotificationPriority.Info,
             adminId,
-            targetUrl: "/Tasks/Index");
+            targetUrl: "/Tasks/Index",
+            type: Models.Enums.NotificationType.TaskResult);
 
-        TempData["StatusMessage"] = "Úkol byl archivován a report uzavřen.";
+        TempData["StatusMessage"] = "Úkol byl smazán a report uzavřen.";
         return RedirectToPage("./Index");
     }
     
@@ -140,7 +143,8 @@ public class DetailModel : PageModel
             "Váš úkol byl upraven administrátorem.", 
             Models.Enums.NotificationPriority.Warning,
             adminId,
-            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}");
+            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}",
+            type: Models.Enums.NotificationType.TaskResult);
         
         await _notificationService.SendNotificationAsync(
             report.ReporterId, 
@@ -148,7 +152,8 @@ public class DetailModel : PageModel
             "Vaše nahlášení bylo vyřešeno úpravou úkolu.", 
             Models.Enums.NotificationPriority.Info,
             adminId,
-            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}");
+            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}",
+            type: Models.Enums.NotificationType.TaskResult);
 
         TempData["StatusMessage"] = "Úkol byl upraven a report byl úspěšně uzavřen.";
         return RedirectToPage("./Index");

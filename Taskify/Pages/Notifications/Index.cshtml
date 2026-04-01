@@ -12,12 +12,27 @@
                 <div class="card-header bg-white border-bottom p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="mb-0 fw-bold">Moje oznámení</h4>
-                        @if (Model.Notifications.Any(n => !n.IsRead))
-                        {
-                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 d-inline-flex align-items-center justify-content-center" onclick="markAllAsRead(event)">
-                                <i class="bi bi-check-all me-1"></i> Označit vše jako přečtené
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm rounded-circle no-anim" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px; padding: 0;">
+                                <i class="bi bi-three-dots"></i>
                             </button>
-                        }
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                @if (Model.Notifications.Any(n => !n.IsRead))
+                                {
+                                    <li>
+                                        <button class="dropdown-item py-2 d-flex align-items-center gap-2" onclick="markAllAsRead(event)">
+                                            <i class="bi bi-check-all fs-5 text-primary"></i> Označit vše jako přečtené
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li>
+                                    <a class="dropdown-item py-2 d-flex align-items-center gap-2" asp-area="Identity" asp-page="/Account/Manage/Notifications">
+                                        <i class="bi bi-gear fs-5 text-secondary"></i> Nastavení oznámení
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     
                     <div class="d-flex gap-2">

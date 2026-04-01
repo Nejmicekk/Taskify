@@ -23,7 +23,7 @@ public class NotificationService : INotificationService
         _userManager = userManager;
     }
 
-    public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null)
+    public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null, NotificationType type = NotificationType.General)
     {
         var notification = new Notification
         {
@@ -33,6 +33,7 @@ public class NotificationService : INotificationService
             Message = message,
             Priority = priority,
             TargetUrl = targetUrl,
+            Type = type,
             CreatedAt = DateTime.Now,
             IsRead = false
         };
@@ -40,19 +41,37 @@ public class NotificationService : INotificationService
         _context.Notifications.Add(notification);
         await _context.SaveChangesAsync();
 
-        if (priority == NotificationPriority.Important)
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user?.Email != null && user.EnableEmailNotifications)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user?.Email != null)
+            bool shouldSendEmail = type switch
             {
+                NotificationType.TaskUpdate => user.EmailOnTaskUpdates,
+                NotificationType.TaskResult => user.EmailOnTaskResults,
+                NotificationType.Security => user.EmailOnAccountSecurity,
+                NotificationType.General => priority == NotificationPriority.Important,
+                _ => false
+            };
+
+            if (shouldSendEmail)
+            {
+                string icon = type switch
+                {
+                    NotificationType.Security => "❗",
+                    NotificationType.TaskUpdate => "📋",
+                    NotificationType.TaskResult => priority == NotificationPriority.Success ? "✅" : "❗",
+                    _ => priority == NotificationPriority.Important ? "❗" : "🔔"
+                };
+
                 string emailBody = EmailTemplates.GetHtmlTemplate(
                     title, 
                     message, 
                     "Přejít do aplikace", 
-                    "https://taskify.cz"
+                    "https://taskify.cz",
+                    icon
                 );
                 
-                await _emailSender.SendEmailAsync(user.Email, $"Důležité upozornění: {title}", emailBody);
+                await _emailSender.SendEmailAsync(user.Email, $"Taskify: {title}", emailBody);
             }
         }
     }

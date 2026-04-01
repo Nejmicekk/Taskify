@@ -109,7 +109,8 @@ namespace Taskify.Areas.Identity.Pages.Account
                         title: "Vítejte v Taskify! 👋",
                         message: "Děkujeme za registraci. Pro aktivaci vašeho účtu prosím klikněte na tlačítko níže:",
                         buttonText: "Aktivovat účet",
-                        buttonUrl: callbackUrl
+                        buttonUrl: callbackUrl,
+                        icon: "✉️"
                     );
 
                     if (callbackUrl != null)

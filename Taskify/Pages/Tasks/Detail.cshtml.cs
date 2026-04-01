@@ -143,7 +143,8 @@ namespace Taskify.Pages.Tasks
                 "Někdo přijal váš úkol. Podívejte se na detaily.", 
                 Models.Enums.NotificationPriority.Info,
                 user.Id,
-                targetUrl: $"/Tasks/Detail/{taskItem.Id}");
+                targetUrl: $"/Tasks/Detail/{taskItem.Id}",
+                type: Models.Enums.NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Úspěšně jsi přijal úkol! Pusť se do toho.";
             return RedirectToPage(new { id });
@@ -170,7 +171,8 @@ namespace Taskify.Pages.Tasks
                 "Uživatel dokončil váš úkol a čeká na schválení.", 
                 Models.Enums.NotificationPriority.Important,
                 user.Id,
-                targetUrl: $"/Tasks/Detail/{taskItem.Id}");
+                targetUrl: $"/Tasks/Detail/{taskItem.Id}",
+                type: Models.Enums.NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Skvělá práce! Nyní počkej, až autor řešení schválí.";
             return RedirectToPage(new { id });
@@ -219,7 +221,8 @@ namespace Taskify.Pages.Tasks
                     "Autor schválil vaše řešení úkolu. Podívejte se na detaily.", 
                     Models.Enums.NotificationPriority.Success,
                     user.Id,
-                    targetUrl: $"/Tasks/Detail/{taskItem.Id}");
+                    targetUrl: $"/Tasks/Detail/{taskItem.Id}",
+                    type: Models.Enums.NotificationType.TaskResult);
                 
                 if (taskItem.AssignedTo.Level > oldLvl)
                 {
@@ -228,7 +231,8 @@ namespace Taskify.Pages.Tasks
                         "Nová úroveň!", 
                         $"Gratulujeme! Dosáhli jste úrovně {taskItem.AssignedTo.Level}!", 
                         Models.Enums.NotificationPriority.Success,
-                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}");
+                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}",
+                        type: Models.Enums.NotificationType.Achievement);
                 }
                 
                 int[] milestones = { 100, 500, 1000 };
@@ -240,7 +244,8 @@ namespace Taskify.Pages.Tasks
                         "Milník reputace", 
                         $"Skvělé! Dosáhli jste milníku {reachedMilestone} bodů reputace!", 
                         Models.Enums.NotificationPriority.Info,
-                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}");
+                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}",
+                        type: Models.Enums.NotificationType.Achievement);
                 }
             }
             
@@ -274,7 +279,8 @@ namespace Taskify.Pages.Tasks
                 "Dobrovolník zrušil svou účast na úkolu.", 
                 Models.Enums.NotificationPriority.Info,
                 user.Id,
-                targetUrl: $"/Tasks/Detail/{taskItem.Id}");
+                targetUrl: $"/Tasks/Detail/{taskItem.Id}",
+                type: Models.Enums.NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Zrušil jsi svou účast na úkolu.";
             return RedirectToPage(new { id });
@@ -302,7 +308,8 @@ namespace Taskify.Pages.Tasks
                     "Úkol, na kterém jste pracovali, byl odstraněn.", 
                     Models.Enums.NotificationPriority.Warning,
                     user.Id,
-                    targetUrl: "/Tasks/Index");
+                    targetUrl: "/Tasks/Index",
+                    type: Models.Enums.NotificationType.TaskResult);
             }
             
             _context.Tasks.Remove(taskItem);

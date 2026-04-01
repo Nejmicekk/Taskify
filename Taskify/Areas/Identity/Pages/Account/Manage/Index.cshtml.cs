@@ -260,7 +260,8 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                     title: "Změna e-mailu 📤",
                     message: "Obdrželi jsme žádost na změnu e-mailu u vašeho účtu Taskify. Pokud jste to nebyli vy, ignorujte tento email.",
                     buttonText: "Potvrdit nový e-mail",
-                    buttonUrl: callbackUrl
+                    buttonUrl: callbackUrl,
+                    icon: "📧"
                 );
                 
                 await _emailSender.SendEmailAsync(

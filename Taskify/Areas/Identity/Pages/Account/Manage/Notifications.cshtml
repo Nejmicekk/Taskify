@@ -1,0 +1,127 @@
+@page
+@model NotificationsModel
+@{
+    ViewData["Title"] = "Nastavení oznámení";
+    ViewData["ActivePage"] = ManageNavPages.Notifications;
+}
+
+<nav aria-label="breadcrumb" class="mt-4 mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/u/@User.Identity?.Name" class="text-decoration-none text-muted">Profil</a></li>
+        <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Nastavení účtu</a></li>
+        <li class="breadcrumb-item active fw-bold text-dark">Oznámení</li>
+    </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-page="./Index" class="btn btn-outline-secondary rounded-pill shadow-sm btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-bold mb-4">E-mailová oznámení</h5>
+                <p class="text-muted mb-4 small">Vyberte si, o kterých událostech chcete dostávat informace na svůj e-mail.</p>
+
+                <form id="notifications-form" method="post">
+                    <div asp-validation-summary="All" class="text-danger small mb-3" role="alert"></div>
+
+                    <div class="mb-4 pb-4 border-bottom">
+                        <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                            <div>
+                                <label asp-for="Input.EnableEmailNotifications" class="fw-bold mb-0" style="cursor: pointer;">Povolit zasílání e-mailů</label>
+                                <div class="text-muted small">Hlavní vypínač pro všechna e-mailová oznámení.</div>
+                            </div>
+                            <input asp-for="Input.EnableEmailNotifications" class="form-check-input ms-0" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;" onchange="toggleSubOptions(this.checked)">
+                        </div>
+                    </div>
+
+                    <div id="sub-options" class="@(Model.Input.EnableEmailNotifications ? "" : "opacity-50")">
+                        <div class="mb-4">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                                <div>
+                                    <label asp-for="Input.EmailOnTaskUpdates" class="fw-bold mb-0" style="cursor: pointer;">Aktualizace úkolů</label>
+                                    <div class="text-muted small">Informace o tom, že někdo přijal váš úkol, odevzdal ho nebo zrušil účast.</div>
+                                </div>
+                                @if (Model.Input.EnableEmailNotifications)
+                                {
+                                    <input asp-for="Input.EmailOnTaskUpdates" class="form-check-input ms-0 sub-check" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;">
+                                }
+                                else
+                                {
+                                    <input asp-for="Input.EmailOnTaskUpdates" class="form-check-input ms-0 sub-check" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;" disabled>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                                <div>
+                                    <label asp-for="Input.EmailOnTaskResults" class="fw-bold mb-0" style="cursor: pointer;">Výsledky úkolů</label>
+                                    <div class="text-muted small">Zprávy o schválení vašeho řešení nebo smazání úkolu, na kterém pracujete.</div>
+                                </div>
+                                @if (Model.Input.EnableEmailNotifications)
+                                {
+                                    <input asp-for="Input.EmailOnTaskResults" class="form-check-input ms-0 sub-check" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;">
+                                }
+                                else
+                                {
+                                    <input asp-for="Input.EmailOnTaskResults" class="form-check-input ms-0 sub-check" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;" disabled>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch d-flex align-items-center justify-content-between ps-0">
+                                <div>
+                                    <label asp-for="Input.EmailOnAccountSecurity" class="fw-bold mb-0" style="cursor: pointer;">Zabezpečení účtu</label>
+                                    <div class="text-muted small">Důležité zprávy o bezpečnosti, blokování účtu a změnách přístupových údajů.</div>
+                                </div>
+                                @if (Model.Input.EnableEmailNotifications)
+                                {
+                                    <input asp-for="Input.EmailOnAccountSecurity" class="form-check-input ms-0 sub-check" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;">
+                                }
+                                else
+                                {
+                                    <input asp-for="Input.EmailOnAccountSecurity" class="form-check-input ms-0 sub-check" type="checkbox" role="switch" style="width: 2.5rem; height: 1.25rem;" disabled>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button id="update-notifications-button" type="submit" class="btn btn-primary rounded-pill w-100 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-save me-2"></i>Uložit nastavení
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded-4 border text-center">
+            <p class="small text-muted mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Oznámení uvnitř aplikace budou chodit i nadále bez ohledu na toto nastavení.
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleSubOptions(enabled) {
+            const subOptions = document.getElementById('sub-options');
+            const checks = document.querySelectorAll('.sub-check');
+            
+            if (enabled) {
+                subOptions.classList.remove('opacity-50');
+                checks.forEach(c => c.disabled = false);
+            } else {
+                subOptions.classList.add('opacity-50');
+                checks.forEach(c => c.disabled = true);
+            }
+        }
+    </script>
+}

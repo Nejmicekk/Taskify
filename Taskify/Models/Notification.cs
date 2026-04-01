@@ -35,4 +35,7 @@ public class Notification
 
     [Required]
     public NotificationPriority Priority { get; set; }
+
+    [Required]
+    public NotificationType Type { get; set; } = NotificationType.General;
 }
