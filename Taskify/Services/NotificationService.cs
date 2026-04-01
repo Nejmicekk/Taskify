@@ -12,15 +12,18 @@ public class NotificationService : INotificationService
     private readonly ApplicationDbContext _context;
     private readonly IEmailSender _emailSender;
     private readonly UserManager<User> _userManager;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public NotificationService(
         ApplicationDbContext context, 
         IEmailSender emailSender,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IServiceScopeFactory scopeFactory)
     {
         _context = context;
         _emailSender = emailSender;
         _userManager = userManager;
+        _scopeFactory = scopeFactory;
     }
 
     public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null, NotificationType type = NotificationType.General)
@@ -50,7 +53,8 @@ public class NotificationService : INotificationService
                 .AnyAsync(n => n.UserId == userId && 
                                n.SenderId == senderId && 
                                n.Title == title && 
-                               n.CreatedAt > fiveMinutesAgo);
+                               n.CreatedAt > fiveMinutesAgo &&
+                               n.Id != notification.Id);
 
             bool shouldSendEmail = !isDuplicate && type switch
             {
@@ -79,12 +83,15 @@ public class NotificationService : INotificationService
                     icon
                 );
                 
-                // Odeslání na pozadí, aby se nebrzdil uživatel
+                // Odeslání na pozadí s vlastním scope
                 _ = Task.Run(async () => {
-                    try {
-                        await _emailSender.SendEmailAsync(user.Email, $"Taskify: {title}", emailBody);
-                    } catch (Exception) {
-                        // Logování selhání e-mailu (volitelné)
+                    using (var scope = _scopeFactory.CreateScope())
+                    {
+                        var scopedEmailSender = scope.ServiceProvider.GetRequiredService<IEmailSender>();
+                        try {
+                            await scopedEmailSender.SendEmailAsync(user.Email, $"Taskify: {title}", emailBody);
+                        } catch (Exception) {
+                        }
                     }
                 });
             }

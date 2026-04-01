@@ -89,6 +89,27 @@
                 </div>
             </div>
 
+            @if (Model.TaskItem.Status == Models.Enums.TaskStatus.Completed)
+            {
+                <div class="alert bg-primary bg-opacity-10 border-primary border-opacity-25 rounded-4 p-4 mb-4 shadow-sm text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-trophy-fill fs-3"></i>
+                    </div>
+                    <h5 class="fw-bold text-primary mb-1">Úkol úspěšně dokončen!</h5>
+                    <p class="small text-muted mb-0">Tento úkol byl vyřešen @(Model.TaskItem.SubmittedAt?.ToLocalTime().ToString("dd.MM.yyyy") ?? "nedávno") a úspěšně uzavřen.</p>
+                    
+                    @if (!string.IsNullOrEmpty(Model.TaskItem.AuthorComment))
+                    {
+                        <div class="mt-3 pt-3 border-top border-primary border-opacity-10">
+                            <span class="fw-bold text-dark small text-uppercase d-block mb-2">
+                                <i class="bi bi-chat-quote me-1 text-primary"></i> @(Model.IsMyTask ? "Můj vzkaz" : "Vzkaz od autora")
+                            </span>
+                            <p class="mb-0 text-dark italic" style="font-style: italic; font-size: 0.95rem;">"@Model.TaskItem.AuthorComment"</p>
+                        </div>
+                    }
+                </div>
+            }
+
             <h5 class="fw-bold mb-3">Podrobnosti úkolu</h5>
             <div class="card border-0 shadow-sm rounded-4 mb-3">
                 <div class="card-body p-3">
@@ -102,39 +123,42 @@
                 </div>
             </div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-1">
-                                <i class="bi bi-calendar-plus text-primary me-2"></i>
-                                <span class="small fw-bold text-muted text-uppercase">Vytvořeno</span>
+            @if (Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
+            {
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-calendar-plus text-primary me-2"></i>
+                                    <span class="small fw-bold text-muted text-uppercase">Vytvořeno</span>
+                                </div>
+                                <span class="text-dark fw-bold d-block">@Model.TimeAgo</span>
+                                <span class="text-muted small">@Model.TaskItem.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
                             </div>
-                            <span class="text-dark fw-bold d-block">@Model.TimeAgo</span>
-                            <span class="text-muted small">@Model.TaskItem.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card border-0 shadow-sm rounded-4 h-100">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-clock-history text-warning me-2"></i>
+                                    <span class="small fw-bold text-muted text-uppercase">Termín splnění</span>
+                                </div>
+                                @if (Model.TaskItem.Deadline.HasValue)
+                                {
+                                    <span class="text-dark fw-bold d-block">@Model.TimeLeft</span>
+                                    <span class="text-muted small">@Model.TaskItem.Deadline.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-dark fw-bold d-block">Není určen</span>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-1">
-                                <i class="bi bi-clock-history text-warning me-2"></i>
-                                <span class="small fw-bold text-muted text-uppercase">Termín splnění</span>
-                            </div>
-                            @if (Model.TaskItem.Deadline.HasValue)
-                            {
-                                <span class="text-dark fw-bold d-block">@Model.TimeLeft</span>
-                                <span class="text-muted small">@Model.TaskItem.Deadline.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
-                            }
-                            else
-                            {
-                                <span class="text-dark fw-bold d-block">Není určen</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
+            }
 
             <h5 class="fw-bold mb-3">Zapojení lidé</h5>
             <div class="row g-3 mb-4">
@@ -216,7 +240,7 @@
                 <p class="text-dark mb-0" style="line-height: 1.6;">@Model.TaskItem.Description</p>
             </div>
             
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Admin") && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
             {
                 <div class="alert bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-4 p-4 mb-4 shadow-sm">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
@@ -257,7 +281,7 @@
                     </div>
                 </div>
             }
-            else if (Model.IsMyTask)
+            else if (Model.IsMyTask && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
             {
                 <div class="alert bg-warning bg-opacity-10 border-warning border-opacity-25 rounded-4 p-4 mb-4 shadow-sm">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
@@ -314,17 +338,38 @@
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.WaitingForReview)
                 {
-                    <form method="post" asp-page-handler="Approve" asp-route-id="@Model.TaskItem.Id" class="mt-auto">
-                        <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm">
-                            <i class="bi bi-check-circle-fill me-2"></i> Schválit vyřešení
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" data-bs-toggle="modal" data-bs-target="#approveTaskModal">
+                        <i class="bi bi-check-circle-fill me-2"></i> Schválit vyřešení
+                    </button>
+
+                    @* Modal pro schválení *@
+                    <div class="modal fade" id="approveTaskModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content rounded-4 border-0 shadow-lg">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill text-success me-2"></i>Schválit splnění?</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                                </div>
+                                <form method="post" asp-page-handler="Approve" asp-route-id="@Model.TaskItem.Id">
+                                    <div class="modal-body p-4">
+                                        <p class="text-muted mb-3">Chcete zanechat dobrovolníkovi krátký vzkaz?</p>
+                                        <div class="form-floating">
+                                            <textarea asp-for="ApprovalComment" class="form-control rounded-3" style="height: 100px"></textarea>
+                                            <label asp-for="ApprovalComment">Vzkaz pro dobrovolníka (nepovinné)</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-0 p-4 pt-0">
+                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Zrušit</button>
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Potvrdit a uzavřít</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.Completed)
                 {
-                    <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto opacity-75" disabled>
-                        <i class="bi bi-trophy-fill me-2"></i> Úkol je úspěšně uzavřen
-                    </button>
+                    @* Sekce přesunuta nahoru *@
                 }
                 else
                 {
@@ -337,9 +382,7 @@
             {
                 if (Model.TaskItem.Status == Models.Enums.TaskStatus.Completed)
                 {
-                    <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto opacity-75" disabled>
-                        <i class="bi bi-trophy-fill me-2"></i> Úkol je úspěšně dokončen
-                    </button>
+                    @* Sekce přesunuta nahoru *@
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.Archived)
                 {
@@ -415,7 +458,7 @@
                 }
             }
             
-            @if (!Model.IsMyTask && User.Identity is { IsAuthenticated: true })
+            @if (!Model.IsMyTask && User.Identity is { IsAuthenticated: true } && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
             {
                 <div class="text-center mt-3">
                     <button class="btn btn-link text-muted small text-decoration-none" 

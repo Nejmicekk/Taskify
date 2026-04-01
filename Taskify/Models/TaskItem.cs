@@ -52,4 +52,7 @@ public class TaskItem
     public User? AssignedTo { get; set; }
 
     public DateTime? SubmittedAt { get; set; }
+
+    [StringLength(200, ErrorMessage = "Komentář může mít maximálně 200 znaků")]
+    public string? AuthorComment { get; set; }
 }

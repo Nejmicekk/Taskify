@@ -31,6 +31,9 @@ namespace Taskify.Pages.Tasks
         public string StatusBadgeText { get; set; } = string.Empty;
         public string StatusBadgeClass { get; set; } = string.Empty;
 
+        [BindProperty]
+        public string? ApprovalComment { get; set; }
+
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var taskitem = await _context.Tasks
@@ -193,6 +196,7 @@ namespace Taskify.Pages.Tasks
             if (taskItem.CreatedById != user.Id || taskItem.Status != Models.Enums.TaskStatus.WaitingForReview) return BadRequest();
 
             taskItem.Status = Models.Enums.TaskStatus.Completed;
+            taskItem.AuthorComment = ApprovalComment;
             
             if (taskItem.AssignedTo != null)
             {
@@ -215,10 +219,16 @@ namespace Taskify.Pages.Tasks
                 
                 taskItem.AssignedTo.Level = currentLvl;
                 
+                string notificationMsg = "Autor schválil vaše řešení úkolu.";
+                if (!string.IsNullOrEmpty(ApprovalComment))
+                {
+                    notificationMsg = $"Autor schválil vaše řešení. Vzkaz: \"{ApprovalComment}\"";
+                }
+
                 await _notificationService.SendNotificationAsync(
                     taskItem.AssignedToId!, 
                     "Úkol schválen!", 
-                    "Autor schválil vaše řešení úkolu. Podívejte se na detaily.", 
+                    notificationMsg, 
                     Models.Enums.NotificationPriority.Success,
                     user.Id,
                     targetUrl: $"/Tasks/Detail/{taskItem.Id}",
