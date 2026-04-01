@@ -15,12 +15,19 @@ public class Notification
     [ForeignKey(nameof(UserId))]
     public virtual User? User { get; set; }
 
+    public string? SenderId { get; set; }
+
+    [ForeignKey(nameof(SenderId))]
+    public virtual User? Sender { get; set; }
+
     [Required]
     [StringLength(200)]
     public string Title { get; set; } = string.Empty;
 
     [Required]
     public string Message { get; set; } = string.Empty;
+
+    public string? TargetUrl { get; set; }
 
     public bool IsRead { get; set; } = false;
 

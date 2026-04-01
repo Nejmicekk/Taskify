@@ -23,14 +23,16 @@ public class NotificationService : INotificationService
         _userManager = userManager;
     }
 
-    public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority)
+    public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null)
     {
         var notification = new Notification
         {
             UserId = userId,
+            SenderId = senderId,
             Title = title,
             Message = message,
             Priority = priority,
+            TargetUrl = targetUrl,
             CreatedAt = DateTime.Now,
             IsRead = false
         };
@@ -47,7 +49,7 @@ public class NotificationService : INotificationService
                     title, 
                     message, 
                     "Přejít do aplikace", 
-                    "https://taskify.cz" // TODO: Změnit na reálnou URL až bude VPS
+                    "https://taskify.cz"
                 );
                 
                 await _emailSender.SendEmailAsync(user.Email, $"Důležité upozornění: {title}", emailBody);
@@ -57,9 +59,16 @@ public class NotificationService : INotificationService
 
     public async Task<List<Notification>> GetRecentNotificationsAsync(string userId, int count = 5)
     {
+        return await GetNotificationsAsync(userId, count, 0);
+    }
+
+    public async Task<List<Notification>> GetNotificationsAsync(string userId, int count, int offset)
+    {
         return await _context.Notifications
+            .Include(n => n.Sender)
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
+            .Skip(offset)
             .Take(count)
             .ToListAsync();
     }

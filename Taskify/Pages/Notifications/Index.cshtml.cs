@@ -21,13 +21,37 @@ public class IndexModel : PageModel
 
     public List<Notification> Notifications { get; set; } = new();
 
+    [BindProperty(SupportsGet = true)]
+    public string Filter { get; set; } = "all";
+
     public async Task OnGetAsync()
     {
         var userId = _userManager.GetUserId(User);
         if (userId != null)
         {
-            Notifications = await _notificationService.GetRecentNotificationsAsync(userId, 50);
+            var notifications = await _notificationService.GetRecentNotificationsAsync(userId, 100);
+            if (Filter == "unread")
+            {
+                Notifications = notifications.Where(n => !n.IsRead).ToList();
+            }
+            else
+            {
+                Notifications = notifications;
+            }
         }
+    }
+
+    public async Task<PartialViewResult> OnGetLoadMoreAsync(int offset, int count = 5, string filter = "all")
+    {
+        var userId = _userManager.GetUserId(User);
+        var notifications = await _notificationService.GetNotificationsAsync(userId, count, offset);
+        
+        if (filter == "unread")
+        {
+            notifications = notifications.Where(n => !n.IsRead).ToList();
+        }
+        
+        return Partial("_NotificationItemsPartial", notifications);
     }
 
     public async Task<IActionResult> OnPostMarkAsReadAsync(int id)

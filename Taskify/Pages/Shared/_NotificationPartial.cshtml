@@ -10,81 +10,119 @@
     var unreadCount = 0;
     List<Notification> recentNotifications = new();
 
+    var isNotificationPage = ViewContext.RouteData.Values["page"]?.ToString() == "/Notifications/Index";
+
     if (userId != null)
     {
         unreadCount = await NotificationService.GetUnreadCountAsync(userId);
-        recentNotifications = await NotificationService.GetRecentNotificationsAsync(userId, 5);
+        recentNotifications = await NotificationService.GetRecentNotificationsAsync(userId, 10);
     }
+
+    var now = DateTime.Now;
+    var newNotifications = recentNotifications.Where(n => (now - n.CreatedAt).TotalHours < 1).ToList();
+    var todayNotifications = recentNotifications.Where(n => (now - n.CreatedAt).TotalHours >= 1 && n.CreatedAt.Date == now.Date).ToList();
+    var olderNotifications = recentNotifications.Where(n => n.CreatedAt.Date < now.Date).ToList();
+    
+    var initialDisplayCount = 5;
+    var displayedNew = newNotifications.Take(initialDisplayCount).ToList();
+    var displayedToday = todayNotifications.Take(Math.Max(0, initialDisplayCount - displayedNew.Count)).ToList();
+    var displayedOlder = olderNotifications.Take(Math.Max(0, initialDisplayCount - displayedNew.Count - displayedToday.Count)).ToList();
 }
 
 @if (userId != null)
 {
-    <li class="nav-item dropdown me-3 list-unstyled">
-        <a class="nav-link position-relative dropdown-toggle no-caret" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-bell fs-5"></i>
+    <li class="nav-item dropdown me-2 list-unstyled">
+        <a class="nav-link position-relative no-caret px-2 @(isNotificationPage ? "active-nav-notif disabled" : "dropdown-toggle")" 
+           href="#" id="notificationDropdown" role="button" 
+           @(isNotificationPage ? "" : "data-bs-toggle=dropdown aria-expanded=false data-bs-auto-close=outside")>
+            <i class="bi bi-bell fs-5 @(isNotificationPage ? "text-primary" : "text-dark")"></i>
             @if (unreadCount > 0)
             {
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notificationBadge">
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" id="notificationBadge" style="font-size: 0.65rem; padding: 0.25em 0.5em; margin-top: 5px; margin-left: -5px;">
                     @(unreadCount > 99 ? "99+" : unreadCount)
                 </span>
             }
         </a>
-        <div class="dropdown-menu dropdown-menu-end shadow border-0 py-0 overflow-hidden" aria-labelledby="notificationDropdown" style="width: 320px; border-radius: 12px;">
-            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-                <h6 class="mb-0 fw-bold">Oznámení</h6>
-                @if (unreadCount > 0)
-                {
-                    <button class="btn btn-sm btn-link p-0 text-decoration-none" onclick="markAllAsRead(event)">Označit vše</button>
-                }
-            </div>
-            <div class="notification-list" style="max-height: 400px; overflow-y: auto;">
-                @if (recentNotifications.Any())
-                {
-                    @foreach (var notification in recentNotifications)
+        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 py-0 overflow-hidden mt-2" aria-labelledby="notificationDropdown" style="width: 360px; border-radius: 16px;">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                <h5 class="mb-0 fw-bold">Oznámení</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a asp-page="/Notifications/Index" class="btn btn-sm btn-light rounded-pill px-3 fw-semibold text-primary" style="font-size: 0.8rem;">Zobrazit vše</a>
+                    @if (unreadCount > 0)
                     {
-                        <div class="notification-item p-3 border-bottom @(notification.IsRead ? "" : "bg-light-blue")" 
-                             onclick="markAsRead(@notification.Id, event)" 
-                             style="cursor: pointer; transition: background 0.2s;">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold small">@notification.Title</span>
-                                <span class="text-muted" style="font-size: 0.75rem;">@notification.CreatedAt.ToString("g")</span>
+                        <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="markAllAsRead(event)" title="Označit vše jako přečtené">
+                            <i class="bi bi-check-all"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+            
+            <div class="notification-container" style="max-height: 450px; overflow-y: auto;">
+                <div id="notification-items-list">
+                    @if (!recentNotifications.Any())
+                    {
+                        <div class="p-5 text-center text-muted">
+                            <div class="bg-light d-inline-flex p-3 rounded-circle mb-3">
+                                <i class="bi bi-bell-slash fs-2"></i>
                             </div>
-                            <p class="mb-0 small text-truncate">@notification.Message</p>
-                            <div class="mt-1">
-                                @switch (notification.Priority)
-                                {
-                                    case NotificationPriority.Success:
-                                        <span class="badge bg-success" style="font-size: 0.6rem;">Úspěch</span>
-                                        break;
-                                    case NotificationPriority.Warning:
-                                        <span class="badge bg-warning text-dark" style="font-size: 0.6rem;">Varování</span>
-                                        break;
-                                    case NotificationPriority.Important:
-                                        <span class="badge bg-danger" style="font-size: 0.6rem;">Důležité</span>
-                                        break;
-                                    default:
-                                        <span class="badge bg-info text-dark" style="font-size: 0.6rem;">Info</span>
-                                        break;
-                                }
-                            </div>
+                            <p class="small fw-medium mb-0">Žádná nová oznámení</p>
                         </div>
                     }
-                }
-                else
+                    else
+                    {
+                        @if (displayedNew.Any())
+                        {
+                            <div class="px-3 pt-3 pb-1">
+                                <h5 class="fw-bold mb-0 text-dark">Nové</h5>
+                            </div>
+                            <partial name="_NotificationItemsPartial" model="displayedNew" />
+                        }
+                        
+                        @if (displayedToday.Any())
+                        {
+                            <div class="px-3 pt-3 pb-1">
+                                <h5 class="fw-bold mb-0 text-dark">Dnes</h5>
+                            </div>
+                            <partial name="_NotificationItemsPartial" model="displayedToday" />
+                        }
+                        
+                        @if (displayedOlder.Any())
+                        {
+                            <div class="px-3 pt-3 pb-1">
+                                <h5 class="fw-bold mb-0 text-dark">Starší</h5>
+                            </div>
+                            <partial name="_NotificationItemsPartial" model="displayedOlder" />
+                        }
+                        
+                        <div id="loaded-notifications-container"></div>
+                    }
+                </div>
+                
+                @if (recentNotifications.Count >= initialDisplayCount)
                 {
-                    <div class="p-4 text-center text-muted">
-                        <i class="bi bi-bell-slash d-block fs-2 mb-2"></i>
-                        <p class="small mb-0">Žádná nová oznámení</p>
+                    <div class="p-2 border-top text-center" id="load-more-container">
+                        <button class="btn btn-sm btn-link text-decoration-none fw-bold w-100 py-2" onclick="loadMoreNotifications(event)" id="loadMoreBtn">
+                            Předchozí upozornění
+                        </button>
                     </div>
                 }
             </div>
-            <a class="dropdown-item text-center p-2 small fw-bold text-primary bg-light" asp-page="/Notifications/Index">Zobrazit vše</a>
         </div>
     </li>
 }
 
 <style>
-    .bg-light-blue { background-color: #f0f7ff; }
-    .notification-item:hover { background-color: #f8f9fa; }
+    .active-nav-notif {
+        background-color: rgba(13, 110, 253, 0.1);
+        border-radius: 50%;
+        cursor: default !important;
+    }
+    .bg-light-blue { background-color: #f0f7ff !important; }
+    .notification-item { border-bottom: 1px solid #f0f2f5 !important; }
+    .notification-item:hover { background-color: #f8f9fa !important; }
     .no-caret::after { display: none !important; }
+    .notification-container::-webkit-scrollbar { width: 6px; }
+    .notification-container::-webkit-scrollbar-track { background: transparent; }
+    .notification-container::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+    .notification-container::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 </style>

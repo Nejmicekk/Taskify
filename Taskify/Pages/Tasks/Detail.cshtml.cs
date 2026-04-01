@@ -140,8 +140,10 @@ namespace Taskify.Pages.Tasks
             await _notificationService.SendNotificationAsync(
                 taskItem.CreatedById, 
                 "Úkol přijat", 
-                $"Uživatel {user.UserName} přijal váš úkol: {taskItem.Title}", 
-                Models.Enums.NotificationPriority.Info);
+                "Někdo přijal váš úkol. Podívejte se na detaily.", 
+                Models.Enums.NotificationPriority.Info,
+                user.Id,
+                targetUrl: $"/Tasks/Detail/{taskItem.Id}");
 
             TempData["StatusMessage"] = "Úspěšně jsi přijal úkol! Pusť se do toho.";
             return RedirectToPage(new { id });
@@ -165,8 +167,10 @@ namespace Taskify.Pages.Tasks
             await _notificationService.SendNotificationAsync(
                 taskItem.CreatedById, 
                 "Úkol čeká na schválení", 
-                $"Uživatel {user.UserName} označil úkol '{taskItem.Title}' jako hotový. Prosím, zkontrolujte jej.", 
-                Models.Enums.NotificationPriority.Important);
+                "Uživatel dokončil váš úkol a čeká na schválení.", 
+                Models.Enums.NotificationPriority.Important,
+                user.Id,
+                targetUrl: $"/Tasks/Detail/{taskItem.Id}");
 
             TempData["StatusMessage"] = "Skvělá práce! Nyní počkej, až autor řešení schválí.";
             return RedirectToPage(new { id });
@@ -212,8 +216,10 @@ namespace Taskify.Pages.Tasks
                 await _notificationService.SendNotificationAsync(
                     taskItem.AssignedToId!, 
                     "Úkol schválen!", 
-                    $"Autor schválil vaše řešení úkolu '{taskItem.Title}'. Získali jste {taskItem.RewardPoints} bodů.", 
-                    Models.Enums.NotificationPriority.Success);
+                    "Autor schválil vaše řešení úkolu. Podívejte se na detaily.", 
+                    Models.Enums.NotificationPriority.Success,
+                    user.Id,
+                    targetUrl: $"/Tasks/Detail/{taskItem.Id}");
                 
                 if (taskItem.AssignedTo.Level > oldLvl)
                 {
@@ -221,7 +227,8 @@ namespace Taskify.Pages.Tasks
                         taskItem.AssignedToId!, 
                         "Nová úroveň!", 
                         $"Gratulujeme! Dosáhli jste úrovně {taskItem.AssignedTo.Level}!", 
-                        Models.Enums.NotificationPriority.Success);
+                        Models.Enums.NotificationPriority.Success,
+                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}");
                 }
                 
                 int[] milestones = { 100, 500, 1000 };
@@ -232,7 +239,8 @@ namespace Taskify.Pages.Tasks
                         taskItem.AssignedToId!, 
                         "Milník reputace", 
                         $"Skvělé! Dosáhli jste milníku {reachedMilestone} bodů reputace!", 
-                        Models.Enums.NotificationPriority.Info);
+                        Models.Enums.NotificationPriority.Info,
+                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}");
                 }
             }
             
@@ -263,8 +271,10 @@ namespace Taskify.Pages.Tasks
             await _notificationService.SendNotificationAsync(
                 taskItem.CreatedById, 
                 "Dobrovolník odstoupil", 
-                $"Uživatel {user.UserName} zrušil svou účast na úkolu '{taskItem.Title}'. Úkol je opět volný.", 
-                Models.Enums.NotificationPriority.Info);
+                "Dobrovolník zrušil svou účast na úkolu.", 
+                Models.Enums.NotificationPriority.Info,
+                user.Id,
+                targetUrl: $"/Tasks/Detail/{taskItem.Id}");
 
             TempData["StatusMessage"] = "Zrušil jsi svou účast na úkolu.";
             return RedirectToPage(new { id });
@@ -289,8 +299,10 @@ namespace Taskify.Pages.Tasks
                 await _notificationService.SendNotificationAsync(
                     taskItem.AssignedToId, 
                     "Úkol byl smazán", 
-                    $"Úkol '{taskItem.Title}', na kterém jste pracovali, byl odstraněn {(isAdmin ? "administrátorem" : "autorem")}.", 
-                    Models.Enums.NotificationPriority.Warning);
+                    "Úkol, na kterém jste pracovali, byl odstraněn.", 
+                    Models.Enums.NotificationPriority.Warning,
+                    user.Id,
+                    targetUrl: "/Tasks/Index");
             }
             
             _context.Tasks.Remove(taskItem);

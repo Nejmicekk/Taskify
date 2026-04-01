@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ public class DetailModel : PageModel
 {
     private readonly ApplicationDbContext _context;
     private readonly INotificationService _notificationService;
+    private readonly UserManager<User> _userManager;
 
-    public DetailModel(ApplicationDbContext context, INotificationService notificationService)
+    public DetailModel(ApplicationDbContext context, INotificationService notificationService, UserManager<User> userManager)
     {
         _context = context;
         _notificationService = notificationService;
+        _userManager = userManager;
     }
 
     [BindProperty]
@@ -66,11 +69,14 @@ public class DetailModel : PageModel
 
         await _context.SaveChangesAsync();
         
+        var adminId = _userManager.GetUserId(User);
         await _notificationService.SendNotificationAsync(
             report.ReporterId, 
             "Report vyřešen", 
-            $"Vaše nahlášení úkolu '{report.TaskItem.Title}' bylo zpracováno. Výsledek: {report.AdminNote}", 
-            Models.Enums.NotificationPriority.Info);
+            "Vaše nahlášení bylo zpracováno. Podívejte se na výsledek.", 
+            Models.Enums.NotificationPriority.Info,
+            adminId,
+            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}");
 
         TempData["StatusMessage"] = "Report byl zamítnut a označen za vyřešený.";
         return RedirectToPage("./Index");
@@ -90,17 +96,22 @@ public class DetailModel : PageModel
 
         await _context.SaveChangesAsync();
         
+        var adminId = _userManager.GetUserId(User);
         await _notificationService.SendNotificationAsync(
             report.TaskItem.CreatedById, 
             "Úkol archivován", 
-            $"Váš úkol '{report.TaskItem.Title}' byl archivován administrátorem. Důvod: {report.AdminNote}", 
-            Models.Enums.NotificationPriority.Important);
+            "Váš úkol byl archivován administrátorem.", 
+            Models.Enums.NotificationPriority.Important,
+            adminId,
+            targetUrl: "/Tasks/Index");
         
         await _notificationService.SendNotificationAsync(
             report.ReporterId, 
             "Report vyřešen", 
-            $"Vaše nahlášení úkolu '{report.TaskItem.Title}' bylo zpracováno. Úkol byl archivován.", 
-            Models.Enums.NotificationPriority.Info);
+            "Vaše nahlášení bylo vyřešeno archivací úkolu.", 
+            Models.Enums.NotificationPriority.Info,
+            adminId,
+            targetUrl: "/Tasks/Index");
 
         TempData["StatusMessage"] = "Úkol byl archivován a report uzavřen.";
         return RedirectToPage("./Index");
@@ -122,17 +133,22 @@ public class DetailModel : PageModel
 
         await _context.SaveChangesAsync();
         
+        var adminId = _userManager.GetUserId(User);
         await _notificationService.SendNotificationAsync(
             report.TaskItem.CreatedById, 
             "Úkol upraven administrátorem", 
-            $"Váš úkol '{report.TaskItem.Title}' byl upraven administrátorem z důvodu nahlášení. Poznámka: {report.AdminNote}", 
-            Models.Enums.NotificationPriority.Warning);
+            "Váš úkol byl upraven administrátorem.", 
+            Models.Enums.NotificationPriority.Warning,
+            adminId,
+            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}");
         
         await _notificationService.SendNotificationAsync(
             report.ReporterId, 
             "Report vyřešen", 
-            $"Vaše nahlášení úkolu '{report.TaskItem.Title}' bylo zpracováno. Úkol byl upraven.", 
-            Models.Enums.NotificationPriority.Info);
+            "Vaše nahlášení bylo vyřešeno úpravou úkolu.", 
+            Models.Enums.NotificationPriority.Info,
+            adminId,
+            targetUrl: $"/Tasks/Detail/{report.TaskItem.Id}");
 
         TempData["StatusMessage"] = "Úkol byl upraven a report byl úspěšně uzavřen.";
         return RedirectToPage("./Index");

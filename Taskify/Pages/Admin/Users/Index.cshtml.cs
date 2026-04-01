@@ -128,8 +128,10 @@ public class IndexModel : PageModel
             await _notificationService.SendNotificationAsync(
                 userId, 
                 "Váš účet byl pozastaven", 
-                $"Váš účet byl dočasně zablokován {timeMsg}. Důvod: Porušení podmínek služby.", 
-                Models.Enums.NotificationPriority.Important);
+                "Váš účet byl dočasně zablokován. Podívejte se na detaily v nastavení.", 
+                Models.Enums.NotificationPriority.Important,
+                currentUser.Id,
+                targetUrl: "/Identity/Account/Manage/Index");
 
             TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl zablokován {timeMsg}.";
         }

@@ -59,11 +59,50 @@ function showStatusAlert(message, isSuccess = true) {
     }, 5000);
 }
 
-// Notification System
-function markAsRead(id, event) {
+let notificationOffset = 5;
+
+function loadMoreNotifications(event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
+    }
+
+    const btn = document.getElementById('loadMoreBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Načítání...';
+    btn.disabled = true;
+
+    fetch(`/Notifications/Index?handler=LoadMore&offset=${notificationOffset}&count=5`)
+    .then(response => response.text())
+    .then(html => {
+        if (html.trim() === '') {
+            document.getElementById('load-more-container').innerHTML = '<p class="small text-muted py-2 mb-0">Žádná další oznámení</p>';
+        } else {
+            const container = document.getElementById('loaded-notifications-container');
+            container.insertAdjacentHTML('beforeend', html);
+            notificationOffset += 5;
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error('Error loading more notifications:', err);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+
+// Notification System
+function markAsRead(id, event) {
+    let targetUrl = null;
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+        // Get URL from the notification item element
+        const item = event.currentTarget;
+        if (item && item.dataset.url && item.dataset.url !== "") {
+            targetUrl = item.dataset.url;
+        }
     }
 
     const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
@@ -81,10 +120,17 @@ function markAsRead(id, event) {
             const notifElement = document.getElementById(`notif-${id}`) || document.querySelector(`.notification-item[onclick*="markAsRead(${id}"]`);
             if (notifElement) {
                 notifElement.classList.remove('bg-light-blue');
+                const unreadDot = notifElement.querySelector('.bg-primary.rounded-circle');
+                if (unreadDot) unreadDot.remove();
                 const btn = notifElement.querySelector('button');
                 if (btn) btn.remove();
             }
             updateBadge();
+            
+            // Redirect if we have a target URL
+            if (targetUrl) {
+                window.location.href = targetUrl;
+            }
         }
     });
 }
@@ -108,6 +154,7 @@ function markAllAsRead(event) {
         if (data.success) {
             document.querySelectorAll('.bg-light-blue').forEach(el => el.classList.remove('bg-light-blue'));
             document.querySelectorAll('.notification-item button, .list-group-item button').forEach(el => el.remove());
+            document.querySelectorAll('.notification-item .bg-primary.rounded-circle').forEach(el => el.remove());
             const badge = document.getElementById('notificationBadge');
             if (badge) badge.remove();
             

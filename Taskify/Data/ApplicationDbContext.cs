@@ -44,5 +44,11 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .WithMany(c => c.SubCategories)
             .HasForeignKey(c => c.ParentId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Notification>()
+            .HasOne(n => n.Sender)
+            .WithMany()
+            .HasForeignKey(n => n.SenderId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
