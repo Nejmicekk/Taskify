@@ -105,10 +105,13 @@ public static class DatabaseSeeder
                 ? faker.PickRandom(allUsers.Where(u => u.Id != creator.Id)) 
                 : null;
 
+            var taskTitle = GenerateTitleForCategory(category.Name, faker);
+            var taskDescription = GenerateDescriptionForTitle(taskTitle, faker);
+
             var task = new TaskItem
             {
-                Title = GenerateTitleForCategory(category.Name, faker),
-                Description = faker.Lorem.Paragraphs(1),
+                Title = taskTitle,
+                Description = taskDescription,
                 RewardPoints = 50,
                 Status = status,
                 CreatedAt = faker.Date.Past(1),
@@ -194,6 +197,32 @@ public static class DatabaseSeeder
             "Vyzvednutí zásilek a pošta" => faker.PickRandom("Vyzvednutí balíku", "Cesta na poštu", "Doručení dopisu"),
             "Pomoc se stěhováním a odvozem" => faker.PickRandom("Stěhování skříně", "Odvoz krabic", "Pomoc se stěhováním"),
             _ => categoryName.Length > 25 ? categoryName.Substring(0, 25) : categoryName
+        };
+    }
+
+    private static string GenerateDescriptionForTitle(string title, Faker faker)
+    {
+        return title switch
+        {
+            "Úklid parku" or "Sběr plastů" or "Čistý les" or "Sběr odpadu" => "Hledáme dobrovolníky na pomoc s úklidem odpadků v okolí. Pytle a rukavice zajistíme, stačí jen dobrá nálada a chuť pomoci přírodě.",
+            "Odstranění skvrn" or "Úklid skládky" or "Čištění chodníku" => "V dané lokalitě se nachází znečištění, které bychom rádi společně odstranili. Jedná se o fyzicky náročnější práci, ale výsledek bude stát za to.",
+            "Odklízení sněhu" or "Posypání cesty" or "Záchrana chodníku" => "Napadlo hodně sněhu a chodníky jsou špatně schůdné. Potřebujeme pomoci s odházením sněhu před domy a posypáním namrzlých úseků solí.",
+            "Hrabání listí" or "Odvoz bioodpadu" or "Podzimní úklid" => "Zahrada a přilehlé cesty jsou plné listí. Potřebujeme pomoc s jeho shrabáním na hromady a následným naložením do připravených kontejnerů.",
+            "Oprava lavičky" or "Upevnění koše" or "Oprava hřiště" => "Některé prvky městského mobiliáře jsou uvolněné nebo poškozené. Pokud umíš vzít do ruky šroubovák nebo kladivo, tvoje pomoc se nám bude hodit.",
+            "Nátěr plotu" or "Obnova zábradlí" or "Natření lavičky" => "Starý nátěr už dosloužil. Hledáme šikovné ruce, které by pomohly s broušením staré barvy a nanesením nové ochranné vrstvy.",
+            "Údržba pískoviště" or "Kontrola hřiště" => "Dětské hřiště potřebuje pravidelnou údržbu. Jedná se o prosetí písku, odstranění plevele v okolí a kontrolu bezpečnosti herních prvků.",
+            "Péče o záhony" or "Úprava dvorku" or "Osázení truhlíků" => "Hledáme milovníky zahradničení, kteří by pomohli s pletím záhonů, zastřižením okrasných keřů nebo výsadbou nových květin do truhlíků.",
+            "Posekání trávy" or "Stříhání keřů" or "Úprava trávníku" => "Trávník už je příliš vysoký. Potřebujeme pomoci se sekáním a následným odklizením posekané trávy. Veškeré vybavení je k dispozici na místě.",
+            "Zalévání květin" or "Závlaha stromků" or "Voda pro park" => "Kvůli suchu je potřeba pravidelně zalévat nově vysazené stromky a květinové záhony. Stačí pomoc s nošením konví nebo obsluhou hadice.",
+            "Venčení psa" or "Procházka s mopsíkem" or "Hlídání psa" => "Hledám někoho spolehlivého, kdo by vzal mého čtyřnohého kamaráda na hodinovou procházku do parku. Pes je přátelský a zvyklý na lidi.",
+            "Krmení kočky" or "Pohlídání křečka" or "Návštěva mazlíčka" => "Během mé nepřítomnosti potřebuji zkontrolovat mého domácího mazlíčka, dát mu čerstvou vodu, krmení a věnovat mu trochu pozornosti.",
+            "Doučování matematiky" or "Příprava na zkoušku" or "Pomoc s logikou" => "Hledám trpělivého člověka, který by mi pomohl s pochopením látky a přípravou na blížící se test. Termín a místo dle domluvy.",
+            "Konverzace v AJ" or "Doučování němčiny" or "Základy španělštiny" => "Rád bych si procvičil mluvení v cizím jazyce. Hledám někoho na nezávaznou konverzaci nad kávou nebo online, abych neztratil slovní zásobu.",
+            "Pomoc s PC" or "Instalace tiskárny" or "Nastavení mobilu" => "Potřebuji technickou pomoc s nastavením nového zařízení nebo opravou drobné chyby v systému. Pokud se vyznáš v IT, budu vděčný za tvůj čas.",
+            "Nákup potravin" or "Vyzvednutí léků" or "Týdenní nákup" => "Z důvodu nemoci nebo nedostatku času potřebuji pomoci s nákupem základních potravin nebo vyzvednutím receptu v lékárně. Seznam zašlu předem.",
+            "Vyzvednutí balíku" or "Cesta na poštu" or "Doručení dopisu" => "Hledám někoho, kdo by za mě zašel na poštu vyzvednout zásilku nebo odeslat důležitý dopis. Průkaz pro vyzvednutí zajistím.",
+            "Stěhování skříně" or "Odvoz krabic" or "Pomoc se stěhováním" => "Potřebuji silné ruce na pomoc s přenesením pár kusů nábytku nebo naložením krabic do auta. Práce na cca 2 hodiny, odměna jistá.",
+            _ => "Hledáme ochotného dobrovolníka, který by nám pomohl s vyřešením tohoto úkolu. Všechny podrobnosti doladíme po přijetí úkolu."
         };
     }
 
