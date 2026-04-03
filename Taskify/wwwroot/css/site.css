@@ -19,6 +19,7 @@ html {
 
 body {
   margin-bottom: 0;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
