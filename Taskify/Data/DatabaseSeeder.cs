@@ -66,7 +66,6 @@ public static class DatabaseSeeder
         var categories = await context.Categories.ToListAsync();
         var allUsers = await context.Users.Where(u => u.UserName != "admin").ToListAsync();
 
-        // Mapování Region -> (Města, PSČ pro model)
         var regionalData = new[] {
             new { PostCode = "110 00", Coords = new[] { (50.08, 14.42), (49.97, 14.39), (50.10, 14.58), (50.05, 14.30), (50.12, 14.45) } }, // Praha
             new { PostCode = "250 01", Coords = new[] { (50.14, 14.10), (50.41, 14.90), (49.69, 14.01), (49.95, 15.26), (50.18, 15.04) } }, // Středočeský
@@ -84,15 +83,13 @@ public static class DatabaseSeeder
             new { PostCode = "702 00", Coords = new[] { (49.82, 18.26), (49.77, 18.43), (49.93, 17.90), (49.84, 18.49), (50.01, 17.66) } }  // Moravskoslezský
         };
 
-        Console.WriteLine("Generuji 200 úkolů (14 krajů, 70 měst, fixní 50 XP)...");
+        Console.WriteLine("Generuji 200 úkolů s unikátními Unsplash obrázky...");
         var tasks = new List<TaskItem>();
 
         for (int i = 0; i < 200; i++)
         {
             var creator = faker.PickRandom(allUsers);
             var category = faker.PickRandom(categories);
-            
-            // Vybereme náhodný region a v něm náhodné město
             var region = faker.PickRandom(regionalData);
             var cityCoords = faker.PickRandom(region.Coords);
             
@@ -124,7 +121,7 @@ public static class DatabaseSeeder
                     Street = faker.Address.StreetName(),
                     StreetNumber = faker.Address.BuildingNumber(),
                     City = faker.Address.City(),
-                    PostCode = region.PostCode, // TADY JE TA OPRAVA - PSČ odpovídá regionu
+                    PostCode = region.PostCode,
                     Latitude = cityCoords.Item1 + faker.Random.Double(-0.05, 0.05),
                     Longitude = cityCoords.Item2 + faker.Random.Double(-0.05, 0.05)
                 }
@@ -137,12 +134,14 @@ public static class DatabaseSeeder
 
             task.Location.FullAddress = $"{task.Location.Street} {task.Location.StreetNumber}, {task.Location.City}";
             
-            var photoKeywords = GetKeywordsForCategory(category.Name);
+            // POUŽITÍ PROVĚŘENÝCH UNSPLASH ODKAZŮ
+            var photoUrls = GetPhotosForCategory(category.Name);
             int photoCount = faker.Random.Int(1, 2);
-            for (int j = 0; j < photoCount; j++)
+            var selectedPhotos = faker.PickRandom(photoUrls, photoCount).ToList();
+            
+            foreach (var url in selectedPhotos)
             {
-                var keyword = faker.PickRandom(photoKeywords);
-                task.Images.Add(new TaskImage { Url = $"https://loremflickr.com/800/600/{keyword}?lock={faker.Random.Int(1, 10000)}" });
+                task.Images.Add(new TaskImage { Url = url });
             }
             tasks.Add(task);
         }
@@ -177,43 +176,106 @@ public static class DatabaseSeeder
         return categoryName switch
         {
             "Sběr odpadků" => faker.PickRandom("Úklid parku", "Sběr plastů", "Čistý les", "Sběr odpadu"),
-            "Odstranění lokálního znečištění" => faker.PickRandom("Odstranění skvrn", "Úklid černé skládky", "Čištění chodníku"),
+            "Odstranění lokálního znečištění" => faker.PickRandom("Odstranění skvrn", "Úklid skládky", "Čištění chodníku"),
             "Odklízení sněhu a náledí" => faker.PickRandom("Odklízení sněhu", "Posypání cesty", "Záchrana chodníku"),
             "Hrabání a odvoz listí" => faker.PickRandom("Hrabání listí", "Odvoz bioodpadu", "Podzimní úklid"),
             "Oprava drobného mobiliáře" => faker.PickRandom("Oprava lavičky", "Upevnění koše", "Oprava hřiště"),
             "Nátěry a renovace" => faker.PickRandom("Nátěr plotu", "Obnova zábradlí", "Natření lavičky"),
-            "Dětská hřiště a sportoviště" => faker.PickRandom("Oprava prolézačky", "Údržba pískoviště", "Kontrola hřiště"),
+            "Dětská hřiště a sportoviště" => faker.PickRandom("Oprava hřiště", "Údržba pískoviště", "Kontrola hřiště"),
             "Údržba komunitních prostor" => faker.PickRandom("Péče o záhony", "Úprava dvorku", "Osázení truhlíků"),
             "Sekání trávy a prostřih" => faker.PickRandom("Posekání trávy", "Stříhání keřů", "Úprava trávníku"),
             "Zalévání" => faker.PickRandom("Zalévání květin", "Závlaha stromků", "Voda pro park"),
-            "Venčení psů" => faker.PickRandom("Venčení labradora", "Procházka s mopsíkem", "Hlídání psa"),
+            "Venčení psů" => faker.PickRandom("Venčení psa", "Procházka s mopsíkem", "Hlídání psa"),
             "Hlídání zvířat" => faker.PickRandom("Krmení kočky", "Pohlídání křečka", "Návštěva mazlíčka"),
-            "Matematika a logika" => faker.PickRandom("Doučování M", "Příprava na test", "Pomoc s logikou"),
+            "Matematika a logika" => faker.PickRandom("Doučování matematiky", "Příprava na zkoušku", "Pomoc s logikou"),
             "Cizí jazyky a konverzace" => faker.PickRandom("Konverzace v AJ", "Doučování němčiny", "Základy španělštiny"),
             "IT a elektrotechnika" => faker.PickRandom("Pomoc s PC", "Instalace tiskárny", "Nastavení mobilu"),
             "Základní nákupy a léky" => faker.PickRandom("Nákup potravin", "Vyzvednutí léků", "Týdenní nákup"),
             "Vyzvednutí zásilek a pošta" => faker.PickRandom("Vyzvednutí balíku", "Cesta na poštu", "Doručení dopisu"),
             "Pomoc se stěhováním a odvozem" => faker.PickRandom("Stěhování skříně", "Odvoz krabic", "Pomoc se stěhováním"),
-            _ => categoryName.Length > 20 ? categoryName.Substring(0, 20) : categoryName
+            _ => categoryName.Length > 25 ? categoryName.Substring(0, 25) : categoryName
         };
     }
 
-    private static string[] GetKeywordsForCategory(string categoryName)
+    private static string[] GetPhotosForCategory(string categoryName)
     {
         return categoryName switch
         {
-            "Sběr odpadků" => new[] { "trash", "cleaning", "forest" },
-            "Venčení psů" => new[] { "dog", "puppy", "park" },
-            "Hlídání zvířat" => new[] { "cat", "hamster", "pet" },
-            "Matematika a logika" => new[] { "math", "calculator", "study" },
-            "IT a elektrotechnika" => new[] { "computer", "laptop", "it" },
-            "Základní nákupy a léky" => new[] { "grocery", "shopping", "pharmacy" },
-            "Sekání trávy a prostřih" => new[] { "lawn", "garden", "grass" },
-            "Zalévání" => new[] { "watering", "plants", "garden" },
-            "Odklízení sněhu a náledí" => new[] { "snow", "winter", "shovel" },
-            "Nátěry a renovace" => new[] { "paint", "brush", "wood" },
-            "Oprava drobného mobiliáře" => new[] { "bench", "tools", "repair" },
-            _ => new[] { "community", "help", "city" }
+            "Sběr odpadků" or "Odstranění lokálního znečištění" => new[] {
+                "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1567393528677-d6df27d999e5?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80"
+            },
+            "Venčení psů" => new[] {
+                "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1534361960057-19889db9621e?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?auto=format&fit=crop&w=800&q=80"
+            },
+            "Hlídání zvířat" => new[] {
+                "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1573865526739-10659fef78a5?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1543852786-1cf6624b9987?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80"
+            },
+            "Matematika a logika" or "Cizí jazyky a konverzace" => new[] {
+                "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1454165833767-027ffea9e77b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80"
+            },
+            "IT a elektrotechnika" => new[] {
+                "https://images.unsplash.com/photo-1484417894907-623942c8ee29?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80"
+            },
+            "Základní nákupy a léky" or "Vyzvednutí zásilek a pošta" => new[] {
+                "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1573855619003-97b4799dcd8b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1580913428735-bd3c269d6a82?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1506617564039-2f3b650ad701?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1586015555705-eb1f3e056ee2?auto=format&fit=crop&w=800&q=80"
+            },
+            "Sekání trávy a prostřih" or "Zalévání" or "Údržba komunitních prostor" => new[] {
+                "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1558905619-17355266324d?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1592419044706-39796d40f98c?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1599591037488-dc55759dc74d?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1598902133033-5e732df1bb17?auto=format&fit=crop&w=800&q=80"
+            },
+            "Odklízení sněhu a náledí" => new[] {
+                "https://images.unsplash.com/photo-1453306458620-5bbef13a5bca?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1483921020237-2ff51e8e4b22?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1517299321609-52687d1bc55a?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1478265409102-310505c117f9?auto=format&fit=crop&w=800&q=80"
+            },
+            "Nátěry a renovace" or "Oprava drobného mobiliáře" or "Dětská hřiště a sportoviště" => new[] {
+                "https://images.unsplash.com/photo-1581244277943-fe4a9c777189?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1595814433015-e6f5cdabd197?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1584622650114-ade6020a719f?auto=format&fit=crop&w=800&q=80"
+            },
+            _ => new[] {
+                "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80"
+            }
         };
     }
 }
