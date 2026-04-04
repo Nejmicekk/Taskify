@@ -1,4 +1,4 @@
-﻿# Ignorovat složky sestavení projektu/runu - trash
+# Ignorovat složky sestavení projektu/runu - trash
 bin/
 obj/
 
