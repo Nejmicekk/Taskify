@@ -1,0 +1,45 @@
+MOŽNOSTI ROLÍ
+   - Host (Guest) -> nepřihlášený/nezaregistrovaný
+   - Uživatel (User) -> přihlášený (host + další funkce)
+   - Administrátor (Admin) -> správce systému (user + další funkce)
+
+USE CASE DIAGRAM:
+
+HOST - GUEST
+   - UC1: Prohlížení mapy úkolů. -> nemožná identifikace specifického úkolu, kvůli neprozrazení lokace
+   - UC2: Zobrazení seznamu úkolů (jako seznam) -> zamazaná lokace
+   - UC2: Filtrace úkolů podle kategorií
+   - UC3: Registrace
+   - UC4: Přihlášení do systému
+
+UŽIVATEL - USER
+   - UC5: Vytvoření nového úkolu (včetně nahrání fotek a výběru polohy na mapě)
+   - UC6: Zobrazení detailu úkolu bez dobrovolníka
+   - UC7: Zobrazení detailu úkolu jež vytvořil
+   -> OSTATNÍ JDOU DĚLAT V DETAILU
+  	- UC8: Přijetí úkolu (změna stavu na InProgress)
+   	- UC9: Odevzdání úkolu (nahrání výsledku/komentáře)
+  	- UC10: Potvrzení splnění (zadavateli) / Hodnocení řešitele
+ 	- UC11: Zrušení ("smazání") vlastního úkolu
+   - UC12: Nahlášení nevhodného úkolu (Report) -> lze všude kde je úkol zobrazen KROMĚ mapy (dashboard - seznam; detail;...)
+   - UC13: Zobrazení profilu (sebe, uživatele)
+        - Zobrazení achievementů
+	POKUD SEBE, TAK:
+   	- UC14: Správa osobního profilu (bio, fotka, jméno, email, tel. číslo)
+   	- UC15: Nastavení uživatele
+ 		- UC16:  oznámení na email (zapnuto, vypnuto)
+ 		- UC17:  osobní data (deaktivace účtu)
+ 		- UC18:  změna hesla (zapnuto, vypnuto)
+   - UC19: Zobrazení vlastních statistik a bodového ohodnocení
+   - UC20: Zobrazení statistik aplikace
+   - UC21: Zobrazení notifikací /notifications
+
+ADMINISTRÁTOR - ADMIN
+   - UC22: Přístup k Admin Dashboardu.
+   	- UC23: Moderování nahlášených úkolů (schválení/smazání + přidat komentář/důvod).
+   	- UC16: Správa úkolů. -> zobrazení detailu + smazání
+   	- UC16: Správa uživatelů. -> blokace účtu
+   - UC24: Zablokování/Odemknutí uživatelského účtu v profilu.
+
+
+ADD: Zobrazení profilu nějakého uživatele pro nepřihlášeného uživatele je možné, ale celá stránka je zablurovaná s podmínkou příhlašení
