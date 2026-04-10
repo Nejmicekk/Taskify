@@ -1,6 +1,39 @@
 ﻿document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector('form');
     const imageInput = document.getElementById('imageUploads');
+    const imagePreview = document.getElementById('imagePreview');
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            imagePreview.innerHTML = '';
+            const files = Array.from(this.files);
+            
+            // Kontrola na GIF
+            const hasGif = files.some(file => file.type === 'image/gif' || file.name.toLowerCase().endsWith('.gif'));
+            if (hasGif) {
+                alert('GIF soubory nejsou povoleny. Prosím vyberte jiné obrázky (JPG, PNG atd.).');
+                this.value = ''; // Reset inputu
+                return;
+            }
+
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'col';
+                    col.innerHTML = `
+                        <div class="position-relative">
+                            <img src="${e.target.result}" class="img-thumbnail rounded-3 shadow-sm" style="width: 100%; height: 80px; object-fit: cover;">
+                            ${index === 0 ? '<span class="badge bg-primary position-absolute top-0 start-0 m-1" style="font-size: 0.5rem">Hlavní</span>' : ''}
+                        </div>
+                    `;
+                    imagePreview.appendChild(col);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    }
+
     const latInput = document.getElementById('lat-input');
     const cityInput = document.getElementById('city-input');
     const addressSearchInput = document.getElementById('address-search');

@@ -39,7 +39,7 @@ public class CreateModel : PageModel
 
         [Required(ErrorMessage = "Vyberte kategorii.")]
         [Display(Name = "Kategorie")]
-        public int CategoryId { get; set; }
+        public int? CategoryId { get; set; }
 
         [Display(Name = "Termín splnění (volitelné)")]
         public DateTime? Deadline { get; set; }
@@ -137,7 +137,7 @@ public class CreateModel : PageModel
         {
             Title = Input.Title,
             Description = Input.Description,
-            CategoryId = Input.CategoryId,
+            CategoryId = Input.CategoryId.Value,
             RewardPoints = 50,
             Deadline = Input.Deadline,
             Location = new AddressInfo
@@ -170,7 +170,15 @@ public class CreateModel : PageModel
         {
             if (file.Length > 0)
             {
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var extension = Path.GetExtension(file.FileName).ToLower();
+                if (extension == ".gif")
+                {
+                    ModelState.AddModelError("Input.ImageUploadsValidation", "GIF soubory nejsou povoleny.");
+                    await LoadCategoriesAsync();
+                    return Page();
+                }
+
+                string fileName = Guid.NewGuid().ToString() + extension;
                 string filePath = Path.Combine(uploadPath, fileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
