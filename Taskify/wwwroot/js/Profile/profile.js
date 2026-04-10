@@ -31,18 +31,38 @@ function previewImage(input) {
 
 function copyProfileLink(btn) {
     const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
+    
+    const showSuccess = () => {
         const originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="bi bi-check2 me-2"></i>Zkopírováno!';
         btn.classList.replace('btn-light', 'btn-success');
         btn.classList.add('text-white');
-
         setTimeout(() => {
             btn.innerHTML = originalHtml;
             btn.classList.replace('btn-success', 'btn-light');
             btn.classList.remove('text-white');
         }, 2000);
-    });
+    };
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(showSuccess);
+    } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showSuccess();
+        } catch (err) {
+            console.error('Nepodařilo se kopírovat:', err);
+        }
+        document.body.removeChild(textArea);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
