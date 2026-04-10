@@ -101,7 +101,7 @@ namespace Taskify.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Neplatný email nebo heslo.");
+                    ModelState.AddModelError(string.Empty, "Neplatné přihlašovací údaje.");
                     return Page();
                 }
             }

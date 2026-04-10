@@ -50,7 +50,7 @@ namespace Taskify.Areas.Identity.Pages.Account
                     protocol: Request.Scheme);
                 
                 string htmlBody = EmailTemplates.GetHtmlTemplate(
-                    title: "Resetování hesla 🔒",
+                    title: "Resetování hesla",
                     message: "Obdrželi jsme žádost o obnovení hesla pro váš účet. Klikněte na tlačítko níže pro nastavení nového hesla.",
                     buttonText: "Nastavit nové heslo",
                     buttonUrl: callbackUrl,
