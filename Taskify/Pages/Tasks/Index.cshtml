@@ -23,23 +23,24 @@
     else
     {
         <form method="get" id="filterForm" class="mb-5">
-            <div class="card shadow-sm border-0 rounded-pill bg-white w-auto">
+            <div class="card shadow-sm border-0 search-bar-card bg-white w-100">
             <div class="card-body p-2">
-                <div class="row g-0 align-items-center">
+                <div class="row g-2 g-lg-0 align-items-center">
                     
-                    <div class="col-lg-4">
+                    <div class="col-12 col-lg-4">
                         <div class="input-group input-group-lg border-0">
                             <span class="input-group-text bg-transparent border-0 text-muted ps-3">
                                 <i class="bi bi-search"></i>
                             </span>
                             <input type="text" name="SearchQuery" value="@Model.SearchQuery" 
-                                   class="form-control border-0 fs-6" placeholder="Co chcete vyřešit?">
+                                   class="form-control border-0 fs-6 shadow-none" placeholder="Co chcete vyřešit?">
                         </div>
                     </div>
                     
                     <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
+                    <div class="d-lg-none border-top mx-3 opacity-25" style="height: 1px;"></div>
                     
-                    <div class="col-lg-3">
+                    <div class="col-12 col-lg-3">
                         <div class="dropdown w-100 h-100">
                             @{
                                 var currentCatName = Model.Categories.FirstOrDefault(c => c.Id == Model.SelectedCategoryId)?.Name ?? "Všechny kategorie";
@@ -47,9 +48,9 @@
                             <input type="hidden" name="SelectedCategoryId" id="hiddenCategoryId" value="@Model.SelectedCategoryId">
                             <input type="text" class="d-none" id="categoryNameDisplay" value="@currentCatName">
                             
-                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6"
+                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 shadow-none"
                                     type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-                                <i class="bi bi-grid text-primary me-2"></i>
+                                <i class="bi bi-grid text-primary me-2 ms-2 ms-lg-0"></i>
                                 <span class="text-truncate category-label-text">@currentCatName</span>
                                 <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
                             </button>
@@ -107,12 +108,13 @@
                     </div>
 
                     <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
+                    <div class="d-lg-none border-top mx-3 opacity-25" style="height: 1px;"></div>
                     
-                    <div class="col-lg-3">
+                    <div class="col-12 col-lg-3">
                         <div class="dropdown w-100 h-100">
-                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 py-3" 
+                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 shadow-none" 
                                     type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                <i class="bi bi-geo-alt-fill text-danger me-2 ms-2 ms-lg-0"></i>
                                 <span class="text-truncate">
                                     @(string.IsNullOrEmpty(Model.SelectedRegion) ? "Celá ČR" : Model.SelectedRegion)
                                 </span>
@@ -140,8 +142,8 @@
                         </div>
                     </div>
                     
-                    <div class="col-lg-auto ms-auto pe-2">
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center shadow-sm border-0 no-anim">
+                    <div class="col-12 col-lg-auto ms-lg-auto p-2 pe-lg-2">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center shadow-sm border-0 no-anim">
                             <i class="bi bi-search me-2"></i>
                             <span class="fw-bold">Hledat</span>
                         </button>

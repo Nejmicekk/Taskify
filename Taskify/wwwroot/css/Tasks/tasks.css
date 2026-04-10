@@ -51,3 +51,12 @@
     transform: scale(1.03);
     box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3) !important;
 }
+
+.search-bar-card {
+    border-radius: 1.5rem;
+}
+@media (min-width: 992px) {
+    .search-bar-card {
+        border-radius: 50rem;
+    }
+}
