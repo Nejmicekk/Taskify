@@ -17,10 +17,22 @@
                     <i class="bi bi-shield-lock-fill fs-5"></i>
                     <span>Administrace</span>
                 </a>
+                
+                @if (user != null)
+                {
+                    <div class="nav-user-stats ms-2 d-none d-lg-flex">
+                        <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
+                            <i class="bi bi-star-fill"></i> @user.Level
+                        </span>
+                        <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
+                            <i class="bi bi-award-fill"></i> @user.Reputation
+                        </span>
+                    </div>
+                }
             }
             else
             {
-                <a class="nav-link text-dark d-flex align-items-center gap-2" href="/u/@user?.UserName" title="Můj profil">
+                <a class="nav-link text-dark d-flex align-items-center gap-2 pe-0" href="/u/@user?.UserName" title="Můj profil">
                     <div class="hover-lift" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
                         @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
                         {
@@ -33,6 +45,18 @@
                     </div>
                     <span class="fw-bold">@user?.Name</span>
                 </a>
+                
+                @if (user != null)
+                {
+                    <div class="nav-user-stats d-none d-lg-flex">
+                        <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
+                            <i class="bi bi-star-fill"></i> @user.Level
+                        </span>
+                        <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
+                            <i class="bi bi-award-fill"></i> @user.Reputation
+                        </span>
+                    </div>
+                }
             }
             
             <partial name="_NotificationPartial"/>
