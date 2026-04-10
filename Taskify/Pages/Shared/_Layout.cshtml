@@ -44,10 +44,10 @@
 
                 <div class="navbar-collapse collapse">
                     
-                    <ul class="navbar-nav mx-auto align-items-center">
+                    <ul class="navbar-nav mx-auto align-items-md-center">
                         <li class="nav-item">
                             <a class="nav-link" asp-page="/Tasks/Index">
-                                <i class="bi bi-list-task me-2"></i>Úkoly
+                                <i class="bi bi-list-task me-2 d-none d-md-inline"></i>Úkoly
                             </a>
                         </li>
                         <li class="nav-item">
@@ -57,12 +57,12 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-page="/Statistics/Index">
-                                <i class="bi bi-bar-chart me-2"></i>Statistiky
+                                <i class="bi bi-bar-chart me-2 d-none d-md-inline"></i>Statistiky
                             </a>
                         </li>
                     </ul>
 
-                    <ul class="navbar-nav align-items-center">
+                    <ul class="navbar-nav ms-auto align-items-md-center border-top-mobile mt-2 mt-md-0 pt-2 pt-md-0">
                         <partial name="_LoginPartial"/>
                     </ul>
                 </div>

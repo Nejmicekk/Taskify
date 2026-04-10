@@ -32,13 +32,17 @@
 @if (userId != null)
 {
     <li class="nav-item dropdown me-2 list-unstyled">
-        <a class="nav-link position-relative no-caret px-2 @(isNotificationPage ? "active-nav-notif disabled" : "dropdown-toggle")" 
+        <a class="nav-link position-relative no-caret px-3 px-md-2 @(isNotificationPage ? "active-nav-notif disabled" : "dropdown-toggle")" 
            href="#" id="notificationDropdown" role="button" 
            @(isNotificationPage ? "" : "data-bs-toggle=dropdown aria-expanded=false data-bs-auto-close=outside")>
             <i class="bi bi-bell fs-5 @(isNotificationPage ? "text-primary" : "text-dark")"></i>
+            <span class="d-md-none ms-2 fw-bold" style="color: #495057;">Oznámení</span>
             @if (unreadCount > 0)
             {
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" id="notificationBadge" style="font-size: 0.65rem; padding: 0.25em 0.5em; margin-top: 5px; margin-left: -5px;">
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white d-none d-md-block" id="notificationBadge" style="font-size: 0.65rem; padding: 0.25em 0.5em; margin-top: 5px; margin-left: -5px;">
+                    @(unreadCount > 99 ? "99+" : unreadCount)
+                </span>
+                <span class="badge rounded-pill bg-danger d-md-none ms-auto" id="notificationBadgeMobile">
                     @(unreadCount > 99 ? "99+" : unreadCount)
                 </span>
             }

@@ -3,78 +3,79 @@
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
 
-<ul class="navbar-nav align-items-center">
-    @if (SignInManager.IsSignedIn(User))
-    {
-        var user = await UserManager.GetUserAsync(User);
-        bool isAdmin = User.IsInRole("Admin");
-    
-        <li class="nav-item d-flex align-items-center">
-            @if (isAdmin)
-            {
-                <a class="nav-link text-danger d-flex align-items-center gap-2 fw-bold px-3 py-1 rounded-pill bg-danger bg-opacity-10 border border-danger border-opacity-25" 
-                   asp-page="/Admin/AdminDashboard" title="Přejít do administrace">
-                    <i class="bi bi-shield-lock-fill fs-5"></i>
-                    <span>Administrace</span>
-                </a>
-                
-                @if (user != null)
-                {
-                    <div class="nav-user-stats ms-2 d-none d-lg-flex">
-                        <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
-                            <i class="bi bi-star-fill"></i> @user.Level
-                        </span>
-                        <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
-                            <i class="bi bi-award-fill"></i> @user.Reputation
-                        </span>
-                    </div>
-                }
-            }
-            else
-            {
-                <a class="nav-link text-dark d-flex align-items-center gap-2 pe-0" href="/u/@user?.UserName" title="Můj profil">
-                    <div class="hover-lift" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">
-                        @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
-                        {
-                            <img src="@user.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
-                        }
-                        else
-                        {
-                            @(user?.Name?.Substring(0, 1).ToUpper() ?? "U")
-                        }
-                    </div>
-                    <span class="fw-bold">@user?.Name</span>
-                </a>
-                
-                @if (user != null)
-                {
-                    <div class="nav-user-stats d-none d-lg-flex">
-                        <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
-                            <i class="bi bi-star-fill"></i> @user.Level
-                        </span>
-                        <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
-                            <i class="bi bi-award-fill"></i> @user.Reputation
-                        </span>
-                    </div>
-                }
-            }
-            
-            <partial name="_NotificationPartial"/>
+@if (SignInManager.IsSignedIn(User))
+{
+    var user = await UserManager.GetUserAsync(User);
+    bool isAdmin = User.IsInRole("Admin");
 
-            <form class="form-inline logout-form ms-2" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="btn btn-link text-muted p-0 d-flex align-items-center text-decoration-none" title="Odhlásit se">
-                    <i class="bi bi-box-arrow-right fs-5"></i>
-                </button>
-            </form>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-btn-login text-decoration-none" asp-area="Identity" asp-page="/Account/Register">Registrovat</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-btn-login ms-2 px-3 btn-sm rounded-pill text-decoration-none" asp-area="Identity" asp-page="/Account/Login">Přihlásit se</a>
-        </li>
-    }
-</ul>
+    <li class="nav-item d-flex flex-column flex-md-row align-items-center mb-2 mb-md-0">
+        @if (isAdmin)
+        {
+            <a class="nav-link text-danger d-flex align-items-center gap-2 fw-bold px-3 py-1 rounded-pill bg-danger bg-opacity-10 border border-danger border-opacity-25 text-nowrap" 
+               asp-page="/Admin/AdminDashboard" title="Přejít do administrace">
+                <i class="bi bi-shield-lock-fill fs-5"></i>
+                <span>Administrace</span>
+            </a>
+            
+            @if (user != null)
+            {
+                <div class="nav-user-stats ms-md-2 mt-2 mt-md-0 d-flex text-nowrap w-100 w-md-auto justify-content-center">
+                    <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
+                        <i class="bi bi-star-fill"></i> @user.Level
+                    </span>
+                    <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
+                        <i class="bi bi-award-fill"></i> @user.Reputation
+                    </span>
+                </div>
+            }
+        }
+        else
+        {
+            <a class="nav-link text-dark d-flex align-items-center justify-content-center gap-2 pe-0 border-0 text-nowrap w-100" href="/u/@user?.UserName" title="Můj profil">
+                <div class="hover-lift" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; flex-shrink: 0;">
+                    @if (user != null && !string.IsNullOrEmpty(user.ProfilePictureUrl))
+                    {
+                        <img src="@user.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
+                    }
+                    else
+                    {
+                        @(user?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                    }
+                </div>
+                <span class="fw-bold">@user?.Name</span>
+            </a>
+            
+            @if (user != null)
+            {
+                <div class="nav-user-stats ms-md-2 mt-2 mt-md-0 d-flex text-nowrap w-100 w-md-auto justify-content-center">
+                    <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
+                        <i class="bi bi-star-fill"></i> @user.Level
+                    </span>
+                    <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
+                        <i class="bi bi-award-fill"></i> @user.Reputation
+                    </span>
+                </div>
+            }
+        }
+    </li>
+    
+    <partial name="_NotificationPartial"/>
+
+    <li class="nav-item d-flex align-items-center w-100 w-md-auto mt-2 mt-md-0">
+        <form class="form-inline logout-form ms-md-2 w-100" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+            <button type="submit" class="btn btn-link text-muted p-0 d-flex align-items-center text-decoration-none w-100 justify-content-center justify-content-md-start" title="Odhlásit se">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+                <span class="d-md-none ms-2 fw-bold text-nowrap" style="color: inherit;">Odhlásit se</span>
+            </button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item w-100 w-md-auto mb-2 mb-md-0">
+        <a class="nav-btn-login text-decoration-none w-100 text-center text-nowrap" asp-area="Identity" asp-page="/Account/Register">Registrovat</a>
+    </li>
+    <li class="nav-item w-100 w-md-auto">
+        <a class="nav-btn-login ms-md-2 px-3 btn-sm rounded-pill text-decoration-none w-100 text-center text-nowrap" asp-area="Identity" asp-page="/Account/Login">Přihlásit se</a>
+    </li>
+}
