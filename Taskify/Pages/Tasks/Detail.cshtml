@@ -6,7 +6,9 @@
 }
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css">
 <link rel="stylesheet" href="~/css/Tasks/detail.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/Tasks/air-datepicker.css" asp-append-version="true">
 
 <div class="container mt-4 mb-5">
     <div class="row g-5">
@@ -109,50 +111,176 @@
                     }
                 </div>
             }
-
-            <h5 class="fw-bold mb-3">Podrobnosti úkolu</h5>
-            <div class="card border-0 shadow-sm rounded-4 mb-3">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center mb-1">
-                        <i class="bi bi-geo-alt-fill text-danger me-2"></i>
-                        <span class="small fw-bold text-muted text-uppercase">Lokalita</span>
+            else if (Model.IsExpired && Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
+            {
+                <div class="alert bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-4 p-4 mb-4 shadow-sm text-center">
+                    <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-calendar-x fs-3"></i>
                     </div>
-                    <p class="mb-0 fw-bold text-dark">
-                        @($"{Model.TaskItem.Location.Street} {Model.TaskItem.Location.StreetNumber}, {Model.TaskItem.Location.City}, {Model.TaskItem.Location.PostCode}")
-                    </p>
+                    <h5 class="fw-bold text-danger mb-1">Termín vypršel!</h5>
+                    
+                    @if (Model.IsMyTask)
+                    {
+                        <p class="small text-muted mb-3">Tento úkol nikdo nepřijal včas. Přejete si ho prodloužit, nebo ho raději archivujete?</p>
+                        <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center">
+                            <button type="button" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm no-anim" data-bs-toggle="modal" data-bs-target="#extendDeadlineModal">
+                                <i class="bi bi-calendar-plus me-2"></i> Prodloužit úkol
+                            </button>
+                            <form method="post" asp-page-handler="Archive" asp-route-id="@Model.TaskItem.Id">
+                                <button type="submit" class="btn btn-outline-secondary rounded-pill px-4 fw-bold shadow-sm">
+                                    <i class="bi bi-archive me-2"></i> Archivovat
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="small text-muted mb-0">Bohužel tento úkol už není aktivní a nelze ho přijmout.</p>
+                    }
                 </div>
-            </div>
+                
+                <div class="modal fade" id="extendDeadlineModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content rounded-4 border-0 shadow-lg">
+                            <div class="modal-header border-0 pb-0">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-calendar-event text-primary me-2"></i>Nový termín splnění</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                            </div>
+                            <form method="post" asp-page-handler="Extend" asp-route-id="@Model.TaskItem.Id">
+                                <div class="modal-body p-4 text-start">
+                                    <p class="text-muted small mb-3">Vyberte prosím nové datum a čas, do kdy má být úkol splněn.</p>
+                                    <div class="form-floating mb-3">
+                                        <input type="text" id="new-deadline-display" class="form-control bg-white" readonly style="cursor: pointer;"/>
+                                        <label for="new-deadline-display">Nový termín</label>
+                                        <input type="hidden" name="newDeadline" id="new-deadline-input" required/>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-0 p-4 pt-0">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Zrušit</button>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm no-anim">Uložit termín</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
 
             @if (Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
             {
+                <h5 class="fw-bold mb-3">Podrobnosti úkolu</h5>
+                <div class="card border-0 shadow-sm rounded-4 mb-3 @(Model.IsExpired ? "bg-light opacity-75" : "")">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                            <span class="small fw-bold text-muted text-uppercase">Lokalita</span>
+                        </div>
+                        <p class="mb-0 fw-bold text-dark">
+                            @($"{Model.TaskItem.Location.Street} {Model.TaskItem.Location.StreetNumber}, {Model.TaskItem.Location.City}, {Model.TaskItem.Location.PostCode}")
+                        </p>
+                    </div>
+                </div>
+
+                @if (!Model.IsExpired)
+                {
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-calendar-plus text-primary me-2"></i>
+                                        <span class="small fw-bold text-muted text-uppercase">Vytvořeno</span>
+                                    </div>
+                                    <span class="text-dark fw-bold d-block">@Model.TimeAgo</span>
+                                    <span class="text-muted small">@Model.TaskItem.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <i class="bi bi-clock-history text-warning me-2"></i>
+                                        <span class="small fw-bold text-muted text-uppercase">Termín splnění</span>
+                                    </div>
+                                    @if (Model.TaskItem.Deadline.HasValue)
+                                    {
+                                        <span class="text-dark fw-bold d-block">@Model.TimeLeft</span>
+                                        <span class="text-muted small">@Model.TaskItem.Deadline.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-dark fw-bold d-block">Není určen</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (!Model.IsExpired)
+            {
+                <h5 class="fw-bold mb-3">Zapojení lidé</h5>
                 <div class="row g-3 mb-4">
                     <div class="col-6">
                         <div class="card border-0 shadow-sm rounded-4 h-100">
                             <div class="card-body p-3">
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="bi bi-calendar-plus text-primary me-2"></i>
-                                    <span class="small fw-bold text-muted text-uppercase">Vytvořeno</span>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-person-fill text-info me-2"></i>
+                                    <span class="small fw-bold text-muted text-uppercase">Autor úkolu</span>
                                 </div>
-                                <span class="text-dark fw-bold d-block">@Model.TimeAgo</span>
-                                <span class="text-muted small">@Model.TaskItem.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                <div class="d-flex align-items-center">
+                                    <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;" class="me-2 shadow-sm hover-lift text-decoration-none">
+                                        @if (!string.IsNullOrEmpty(Model.TaskItem.CreatedBy.ProfilePictureUrl))
+                                        {
+                                            <img src="@Model.TaskItem.CreatedBy.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
+                                        }
+                                        else
+                                        {
+                                            @(Model.TaskItem.CreatedBy.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                        }
+                                    </a>
+                                    <div class="d-flex flex-column text-truncate">
+                                        <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" class="text-decoration-none text-dark fw-bold hover-primary lh-sm small">
+                                            @Model.TaskItem.CreatedBy.Name
+                                        </a>
+                                        <small class="text-muted" style="font-size: 0.7rem;">@@@Model.TaskItem.CreatedBy.UserName</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="card border-0 shadow-sm rounded-4 h-100">
                             <div class="card-body p-3">
-                                <div class="d-flex align-items-center mb-1">
-                                    <i class="bi bi-clock-history text-warning me-2"></i>
-                                    <span class="small fw-bold text-muted text-uppercase">Termín splnění</span>
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-person-arms-up text-success me-2"></i>
+                                    <span class="small fw-bold text-muted text-uppercase">Dobrovolník</span>
                                 </div>
-                                @if (Model.TaskItem.Deadline.HasValue)
+                                @if (Model.TaskItem.AssignedTo != null)
                                 {
-                                    <span class="text-dark fw-bold d-block">@Model.TimeLeft</span>
-                                    <span class="text-muted small">@Model.TaskItem.Deadline.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                                    <div class="d-flex align-items-center">
+                                        <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #198754; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;" class="me-2 shadow-sm hover-lift text-decoration-none">
+                                            @if (!string.IsNullOrEmpty(Model.TaskItem.AssignedTo.ProfilePictureUrl))
+                                            {
+                                                <img src="@Model.TaskItem.AssignedTo.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
+                                            }
+                                            else
+                                            {
+                                                @(Model.TaskItem.AssignedTo.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                            }
+                                        </a>
+                                        <div class="d-flex flex-column text-truncate">
+                                            <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" class="text-decoration-none text-dark fw-bold hover-primary lh-sm small">
+                                                @Model.TaskItem.AssignedTo.Name
+                                            </a>
+                                            <small class="text-muted" style="font-size: 0.7rem;">@@@Model.TaskItem.AssignedTo.UserName</small>
+                                        </div>
+                                    </div>
                                 }
                                 else
                                 {
-                                    <span class="text-dark fw-bold d-block">Není určen</span>
+                                    <span class="text-muted small italic">Očekává dobrovolníka</span>
                                 }
                             </div>
                         </div>
@@ -160,75 +288,8 @@
                 </div>
             }
 
-            <h5 class="fw-bold mb-3">Zapojení lidé</h5>
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-person-fill text-info me-2"></i>
-                                <span class="small fw-bold text-muted text-uppercase">Autor úkolu</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #0d6efd; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;" class="me-2 shadow-sm hover-lift text-decoration-none">
-                                    @if (!string.IsNullOrEmpty(Model.TaskItem.CreatedBy.ProfilePictureUrl))
-                                    {
-                                        <img src="@Model.TaskItem.CreatedBy.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
-                                    }
-                                    else
-                                    {
-                                        @(Model.TaskItem.CreatedBy.Name?.Substring(0, 1).ToUpper() ?? "U")
-                                    }
-                                </a>
-                                <div class="d-flex flex-column text-truncate">
-                                    <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.CreatedBy.UserName" class="text-decoration-none text-dark fw-bold hover-primary lh-sm small">
-                                        @Model.TaskItem.CreatedBy.Name
-                                    </a>
-                                    <small class="text-muted" style="font-size: 0.7rem;">@@@Model.TaskItem.CreatedBy.UserName</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-3">
-                            <div class="d-flex align-items-center mb-2">
-                                <i class="bi bi-person-arms-up text-success me-2"></i>
-                                <span class="small fw-bold text-muted text-uppercase">Dobrovolník</span>
-                            </div>
-                            @if (Model.TaskItem.AssignedTo != null)
-                            {
-                                <div class="d-flex align-items-center">
-                                    <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: #198754; color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;" class="me-2 shadow-sm hover-lift text-decoration-none">
-                                        @if (!string.IsNullOrEmpty(Model.TaskItem.AssignedTo.ProfilePictureUrl))
-                                        {
-                                            <img src="@Model.TaskItem.AssignedTo.ProfilePictureUrl" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" />
-                                        }
-                                        else
-                                        {
-                                            @(Model.TaskItem.AssignedTo.Name?.Substring(0, 1).ToUpper() ?? "U")
-                                        }
-                                    </a>
-                                    <div class="d-flex flex-column text-truncate">
-                                        <a asp-page="/Users/UserProfile" asp-route-username="@Model.TaskItem.AssignedTo.UserName" class="text-decoration-none text-dark fw-bold hover-primary lh-sm small">
-                                            @Model.TaskItem.AssignedTo.Name
-                                        </a>
-                                        <small class="text-muted" style="font-size: 0.7rem;">@@@Model.TaskItem.AssignedTo.UserName</small>
-                                    </div>
-                                </div>
-                            }
-                            else
-                            {
-                                <span class="text-muted small italic">Očekává dobrovolníka</span>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <h5 class="fw-bold mb-3">Kategorie</h5>
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4 @(Model.IsExpired ? "bg-light opacity-75" : "")">
                 <div class="card-body p-3 d-flex align-items-center">
                     <i class="bi @(Model.TaskItem.Category?.IconUrl ?? "bi-tag") me-2 fs-5 text-primary"></i>
                     <span class="fw-bold">@Model.TaskItem.Category?.Name</span>
@@ -236,11 +297,11 @@
             </div>
 
             <h5 class="fw-bold mb-2">Popis problému</h5>
-            <div class="card border-0 bg-light rounded-4 mb-4 p-3">
+            <div class="card border-0 bg-light rounded-4 mb-4 p-3 @(Model.IsExpired ? "opacity-75" : "")">
                 <p class="text-dark mb-0" style="line-height: 1.6;">@Model.TaskItem.Description</p>
             </div>
             
-            @if (User.IsInRole("Admin") && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
+            @if (User.IsInRole("Admin") && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed && !Model.IsExpired)
             {
                 <div class="alert bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-4 p-4 mb-4 shadow-sm">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
@@ -281,7 +342,7 @@
                     </div>
                 </div>
             }
-            else if (Model.IsMyTask && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed)
+            else if (Model.IsMyTask && Model.TaskItem.Status != Models.Enums.TaskStatus.Completed && !Model.IsExpired)
             {
                 <div class="alert bg-warning bg-opacity-10 border-warning border-opacity-25 rounded-4 p-4 mb-4 shadow-sm">
                     <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
@@ -326,9 +387,12 @@
             {
                 if (Model.TaskItem.Status == Models.Enums.TaskStatus.Open)
                 {
-                    <a asp-page="/Tasks/Edit" asp-route-id="@Model.TaskItem.Id" asp-route-returnUrl="@HttpContext.Request.Query["returnUrl"]" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark">
-                        <i class="bi bi-pencil-square me-2"></i> Upravit úkol
-                    </a>
+                    if (!Model.IsExpired)
+                    {
+                        <a asp-page="/Tasks/Edit" asp-route-id="@Model.TaskItem.Id" asp-route-returnUrl="@HttpContext.Request.Query["returnUrl"]" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto text-dark">
+                            <i class="bi bi-pencil-square me-2"></i> Upravit úkol
+                        </a>
+                    }
                 }
                 else if (Model.TaskItem.Status == Models.Enums.TaskStatus.InProgress)
                 {
@@ -413,9 +477,7 @@
                 {
                     if (Model.IsExpired)
                     {
-                        <button class="btn btn-danger w-100 py-3 rounded-pill fw-bold shadow-sm mt-auto" disabled>
-                            <i class="bi bi-calendar-x-fill me-2"></i> Termín úkolu vypršel
-                        </button>
+                        @* Zobrazeno nahoře v červeném alertu *@
                     }
                     else
                     {
@@ -475,6 +537,8 @@
 
 @section Scripts {
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+    <script src="~/js/Tasks/_localeCs.js" asp-append-version="true"></script> 
     <script src="~/js/Tasks/detail.js" asp-append-version="true"></script>
     <script src="~/js/Tasks/report_modal.js" asp-append-version="true"></script>
 }

@@ -113,6 +113,13 @@ namespace Taskify.Pages.Tasks
                 {
                     IsExpired = true;
                     TimeLeft = "Termín vypršel";
+                    
+                    // Pokud je úkol stále jen "Open", ale vypršel, vizuálně změníme status
+                    if (TaskItem.Status == Models.Enums.TaskStatus.Open)
+                    {
+                        StatusBadgeText = "Termín vypršel";
+                        StatusBadgeClass = "bg-danger";
+                    }
                 }
             }
 
@@ -351,6 +358,42 @@ namespace Taskify.Pages.Tasks
 
             TempData["StatusMessage"] = isAdmin ? "Úkol byl odstraněn administrátorem." : "Tvůj úkol byl úspěšně smazán.";
             return RedirectToPage("/Tasks/Index");
+        }
+
+        public async Task<IActionResult> OnPostExtendAsync(int id, DateTime newDeadline)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            if (taskItem.CreatedById != user.Id || taskItem.Status != Models.Enums.TaskStatus.Open) return BadRequest();
+
+            if (newDeadline <= DateTime.UtcNow)
+            {
+                TempData["ErrorMessage"] = "Nový termín musí být v budoucnosti.";
+                return RedirectToPage(new { id });
+            }
+
+            taskItem.Deadline = newDeadline;
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Termín úkolu byl úspěšně prodloužen.";
+            return RedirectToPage(new { id });
+        }
+
+        public async Task<IActionResult> OnPostArchiveAsync(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var taskItem = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (user == null || taskItem == null) return NotFound();
+            if (taskItem.CreatedById != user.Id) return BadRequest();
+
+            taskItem.Status = Models.Enums.TaskStatus.Archived;
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Úkol byl úspěšně archivován.";
+            return RedirectToPage("/Users/UserProfile", new { username = user.UserName });
         }
     }
 }

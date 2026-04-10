@@ -20,7 +20,7 @@ public class IndexModel : PageModel
             .Include(t => t.Category)
             .Include(t => t.Images)
             .Include(t => t.CreatedBy)
-            .Where(t => t.Status == TaskStatus.Open)
+            .Where(t => t.Status == TaskStatus.Open && (t.Deadline == null || t.Deadline > DateTime.UtcNow))
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }

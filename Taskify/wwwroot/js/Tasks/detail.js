@@ -32,4 +32,22 @@ document.addEventListener('DOMContentLoaded', function () {
             map.invalidateSize();
         }, 200);
     }
+    
+    var deadlineInput = document.getElementById('new-deadline-display');
+    if (deadlineInput) {
+        new AirDatepicker('#new-deadline-display', {
+            container: '#extendDeadlineModal',
+            locale: datepickerLocaleCs,
+            timepicker: true,
+            minDate: new Date(),
+            dateFormat: 'dd.MM.yyyy',
+            timeFormat: 'HH:mm',
+            autoClose: true,
+            onSelect({date}) {
+                if (date) {
+                    document.getElementById('new-deadline-input').value = date.toISOString();
+                }
+            }
+        });
+    }
 });

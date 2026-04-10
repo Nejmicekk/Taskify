@@ -28,30 +28,3 @@
 .category-header[aria-expanded="true"] .chevron-icon {
     transform: rotate(180deg); 
 }
-
-.air-datepicker {
-    --adp-color-primary: #0d6efd !important;
-    --adp-color-primary-dark: #0b5ed7 !important;
-    --adp-day-name-color: #0d6efd !important;
-    --adp-btn-color: #0d6efd !important;
-    --adp-color-primary-alpha: rgba(13, 110, 253, 0.1) !important;
-    --adp-cell-background-color-selected: #0b5ed7 !important;
-    --adp-color-current-date: #0b5ed7 !important;
-}
-
-.air-datepicker-body--day-name {
-    color: #0d6efd !important;
-    font-weight: bold;
-}
-
-.air-datepicker-cell.-selected- {
-    font-weight: bold;
-}
-
-.air-datepicker-time--current-hours, .air-datepicker-time--current-minutes {
-    font-weight: bold;
-}
-
-.air-datepicker-cell:hover {
-    background-color: #0d6efd !important;
-}

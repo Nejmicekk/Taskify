@@ -12,11 +12,13 @@ namespace Taskify.Pages.Users
     {
         private readonly UserManager<User> _userManager;
         private readonly Data.ApplicationDbContext _context;
+        private readonly Taskify.Services.INotificationService _notificationService;
 
-        public UserProfileModel(UserManager<User> userManager, Data.ApplicationDbContext context)
+        public UserProfileModel(UserManager<User> userManager, Data.ApplicationDbContext context, Taskify.Services.INotificationService notificationService)
         {
             _userManager = userManager;
             _context = context;
+            _notificationService = notificationService;
         }
 
         public User? DisplayedUser { get; set; }
@@ -28,6 +30,7 @@ namespace Taskify.Pages.Users
         
         public IList<TaskItem> CreatedTasks { get; set; } = new List<TaskItem>();
         public IList<TaskItem> AssignedTasks { get; set; } = new List<TaskItem>();
+        public IList<TaskItem> ExpiredTasks { get; set; } = new List<TaskItem>();
 
         public async Task<IActionResult> OnGetAsync(string username)
         {
@@ -61,14 +64,51 @@ namespace Taskify.Pages.Users
 
             IsMe = currentUser != null && currentUser.Id == DisplayedUser.Id;
             
+            // Aktivní vytvořené úkoly (nejsou po termínu)
             CreatedTasks = await _context.Tasks
                 .Include(t => t.Category)
                 .Include(t => t.Images)
                 .Include(t => t.Location)
-                .Where(t => t.CreatedById == DisplayedUser.Id)
+                .Where(t => t.CreatedById == DisplayedUser.Id && 
+                           t.Status == Models.Enums.TaskStatus.Open && 
+                           (t.Deadline == null || t.Deadline > DateTime.UtcNow))
                 .OrderByDescending(t => t.CreatedAt)
                 .Take(3)
                 .ToListAsync();
+
+            // Pokud je to můj profil, chci vidět i ty, co vypršely a nikdo je nepřijal
+            if (IsMe)
+            {
+                ExpiredTasks = await _context.Tasks
+                    .Include(t => t.Category)
+                    .Include(t => t.Images)
+                    .Include(t => t.Location)
+                    .Where(t => t.CreatedById == DisplayedUser.Id && 
+                               t.Status == Models.Enums.TaskStatus.Open && 
+                               t.Deadline != null && t.Deadline <= DateTime.UtcNow)
+                    .OrderByDescending(t => t.Deadline)
+                    .ToListAsync();
+
+                // Just-in-Time Notifikace pro vypršené úkoly
+                foreach (var task in ExpiredTasks)
+                {
+                    string targetUrl = $"/Tasks/Detail/{task.Id}";
+                    // Zkontrolujeme, zda uživatel už o tomto konkrétním úkolu dostal notifikaci
+                    bool alreadyNotified = await _context.Notifications
+                        .AnyAsync(n => n.UserId == currentUser!.Id && n.TargetUrl == targetUrl && n.Title == "Termín úkolu vypršel");
+
+                    if (!alreadyNotified)
+                    {
+                        await _notificationService.SendNotificationAsync(
+                            currentUser!.Id,
+                            "Termín úkolu vypršel",
+                            $"U vašeho úkolu \"{task.Title}\" vypršel termín a nikdo jej nepřijal. Prosím, prodlužte jej nebo archivujte.",
+                            Models.Enums.NotificationPriority.Warning,
+                            targetUrl: targetUrl,
+                            type: Models.Enums.NotificationType.TaskResult);
+                    }
+                }
+            }
             
             if (IsMe)
             {

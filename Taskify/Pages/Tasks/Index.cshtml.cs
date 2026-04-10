@@ -55,7 +55,7 @@ namespace Taskify.Pages.Tasks
             // Pokud filtrujeme podle uživatele, nezobrazujeme jen "Open"
             if (string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
             {
-                query = query.Where(t => t.Status == Models.Enums.TaskStatus.Open);
+                query = query.Where(t => t.Status == Models.Enums.TaskStatus.Open && (t.Deadline == null || t.Deadline > DateTime.UtcNow));
             }
             
             if (!string.IsNullOrEmpty(CreatedById))

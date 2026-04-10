@@ -34,31 +34,24 @@
             allCollapses.forEach(ul => ul.classList.remove('show'));
         }
     });
-    
-    const localeCs = {
-        days: ['Neděle', 'Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota'],
-        daysShort: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'],
-        daysMin: ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'],
-        months: ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
-        monthsShort: ['Led', 'Úno', 'Bře', 'Dub', 'Kvě', 'Čer', 'Čvc', 'Srp', 'Zář', 'Říj', 'Lis', 'Pro'],
-        today: 'Dnes', clear: 'Vymazat', dateFormat: 'dd.MM.yyyy', timeFormat: 'HH:mm', firstDay: 1
-    };
 
     let tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 7);
 
-    new AirDatepicker('#deadline-display', {
-        locale: localeCs,
-        timepicker: true,
-        minDate: new Date(),
-        selectedDates: [tomorrow],
-        autoClose: true,
-        dateFormat: 'dd.MM.yyyy',
-        timeFormat: 'HH:mm',
-        altField: '#deadline-picker',
-        altFieldDateFormat: 'yyyy-MM-dd HH:mm',
-        buttons: ['clear']
-    });
+    if (document.getElementById('deadline-display')) {
+        new AirDatepicker('#deadline-display', {
+            locale: datepickerLocaleCs,
+            timepicker: true,
+            minDate: new Date(),
+            selectedDates: [tomorrow],
+            autoClose: true,
+            dateFormat: 'dd.MM.yyyy',
+            timeFormat: 'HH:mm',
+            altField: '#deadline-picker',
+            altFieldDateFormat: 'yyyy-MM-dd HH:mm',
+            buttons: ['clear']
+        });
+    }
     
     var map = L.map('map').setView([49.0371, 16.6192], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
