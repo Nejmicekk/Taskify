@@ -10,13 +10,25 @@
     {
         unreadCount = await NotificationService.GetUnreadCountAsync(userId);
     }
+    
+    var pageTitle = ViewData["Title"]?.ToString();
+    var notifPrefix = unreadCount > 0 ? $"({unreadCount}) " : "";
 }
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@(unreadCount > 0 ? $"({unreadCount}) " : "")@ViewData["Title"] | Taskify</title>
+    <title>
+        @notifPrefix@if (!string.IsNullOrEmpty(pageTitle) && pageTitle != "Home" && pageTitle != "Index")
+        {
+            <text>@pageTitle | Taskify</text>
+        }
+        else
+        {
+            <text>Taskify</text>
+        }
+    </title>
     
     <link rel="icon" type="image/svg+xml" href="/Logo_Taskify.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="~/Logo_Taskify_Phone.png">
