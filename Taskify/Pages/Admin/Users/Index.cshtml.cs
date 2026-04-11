@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
 using Taskify.Models.Enums;
+using Taskify.Models.Enums.Notifications;
 using Taskify.Services;
 
 namespace Taskify.Pages.Admin.Users;
@@ -103,9 +104,9 @@ public class IndexModel : PageModel
             "lvl_asc" => viewModels.OrderBy(u => u.Level).ToList(),
             _ => viewModels.OrderBy(u => u.UserName).ToList()
         };
-        }
+    }
 
-        public async Task<IActionResult> OnPostToggleLockAsync(string userId, int? days)
+    public async Task<IActionResult> OnPostToggleLockAsync(string userId, int? days)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return NotFound();
@@ -129,10 +130,10 @@ public class IndexModel : PageModel
                 userId, 
                 "Váš účet byl pozastaven", 
                 "Váš účet byl dočasně zablokován. Podívejte se na detaily v nastavení.", 
-                Models.Enums.NotificationPriority.Important,
-                currentUser.Id,
+                NotificationPriority.Important,
+                currentUser?.Id,
                 targetUrl: "/Identity/Account/Manage/Index",
-                type: Models.Enums.NotificationType.Security);
+                type: NotificationType.Security);
 
             TempData["StatusMessage"] = $"Účet uživatele {user.UserName} byl zablokován {timeMsg}.";
         }

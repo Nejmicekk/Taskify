@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Taskify.Models;
+using Taskify.Models.Enums.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -103,9 +104,9 @@ namespace Taskify.Pages.Users
                             currentUser!.Id,
                             "Termín úkolu vypršel",
                             $"U vašeho úkolu \"{task.Title}\" vypršel termín a nikdo jej nepřijal. Prosím, prodlužte jej nebo archivujte.",
-                            Models.Enums.NotificationPriority.Warning,
+                            NotificationPriority.Warning,
                             targetUrl: targetUrl,
-                            type: Models.Enums.NotificationType.TaskResult);
+                            type: NotificationType.TaskResult);
                     }
                 }
             }

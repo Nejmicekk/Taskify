@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
+using Taskify.Models.Enums.Notifications;
 using Taskify.Services;
 
 namespace Taskify.Pages.Tasks
@@ -160,10 +161,10 @@ namespace Taskify.Pages.Tasks
                 taskItem.CreatedById, 
                 "Úkol přijat", 
                 "Někdo přijal váš úkol. Podívejte se na detaily.", 
-                Models.Enums.NotificationPriority.Info,
+                NotificationPriority.Info,
                 user.Id,
                 targetUrl: $"/Tasks/Detail/{taskItem.Id}",
-                type: Models.Enums.NotificationType.TaskUpdate);
+                type: NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Úspěšně jsi přijal úkol! Pusť se do toho.";
             return RedirectToPage(new { id });
@@ -188,10 +189,10 @@ namespace Taskify.Pages.Tasks
                 taskItem.CreatedById, 
                 "Úkol čeká na schválení", 
                 "Uživatel dokončil váš úkol a čeká na schválení.", 
-                Models.Enums.NotificationPriority.Important,
+                NotificationPriority.Important,
                 user.Id,
                 targetUrl: $"/Tasks/Detail/{taskItem.Id}",
-                type: Models.Enums.NotificationType.TaskUpdate);
+                type: NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Skvělá práce! Nyní počkej, až autor řešení schválí.";
             return RedirectToPage(new { id });
@@ -260,10 +261,10 @@ namespace Taskify.Pages.Tasks
                     taskItem.AssignedToId!, 
                     "Úkol schválen!", 
                     notificationMsg, 
-                    Models.Enums.NotificationPriority.Success,
+                    NotificationPriority.Success,
                     user.Id,
                     targetUrl: $"/Tasks/Detail/{taskItem.Id}",
-                    type: Models.Enums.NotificationType.TaskResult);
+                    type: NotificationType.TaskResult);
             }
             
             if (taskItem.CreatedBy != null)
@@ -301,10 +302,10 @@ namespace Taskify.Pages.Tasks
                 taskItem.CreatedById, 
                 "Dobrovolník odstoupil", 
                 "Dobrovolník zrušil svou účast na úkolu.", 
-                Models.Enums.NotificationPriority.Info,
+                NotificationPriority.Info,
                 user.Id,
                 targetUrl: $"/Tasks/Detail/{taskItem.Id}",
-                type: Models.Enums.NotificationType.TaskUpdate);
+                type: NotificationType.TaskUpdate);
 
             TempData["StatusMessage"] = "Zrušil jsi svou účast na úkolu.";
             return RedirectToPage(new { id });
@@ -347,10 +348,10 @@ namespace Taskify.Pages.Tasks
                     taskItem.AssignedToId, 
                     "Úkol byl smazán", 
                     "Úkol, na kterém jste pracovali, byl odstraněn.", 
-                    Models.Enums.NotificationPriority.Warning,
+                    NotificationPriority.Warning,
                     user.Id,
                     targetUrl: "/Tasks/Index",
-                    type: Models.Enums.NotificationType.TaskResult);
+                    type: NotificationType.TaskResult);
             }
             
             _context.Tasks.Remove(taskItem);

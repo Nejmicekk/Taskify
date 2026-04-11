@@ -1,5 +1,6 @@
 using Taskify.Models;
 using Taskify.Models.Enums;
+using Taskify.Models.Enums.Notifications;
 
 namespace Taskify.Services;
 

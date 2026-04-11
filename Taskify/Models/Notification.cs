@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Taskify.Models.Enums;
+using Taskify.Models.Enums.Notifications;
 
 namespace Taskify.Models;
 
