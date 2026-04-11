@@ -50,7 +50,8 @@ public class UserService : IUserService
         if (leveledUp)
         {
             user.Level = currentLvl;
-            
+
+            // Odeslání notifikace o level-upu
             await _notificationService.SendNotificationAsync(
                 user.Id,
                 "Level Up! ✨",
@@ -60,8 +61,43 @@ public class UserService : IUserService
                 "/Profile",
                 NotificationType.General
             );
-            
+
+            // Zkontrolujeme achievementy za level-up
             await _achievementService.CheckAchievementsAsync(user.Id, AchievementCategory.LevelReached);
         }
+    }
+
+    public async Task ChangeReputationAsync(string userId, int amount)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null) return;
+
+        user.Reputation += amount;
+
+        // Notifikace o změně reputace
+        string title = amount > 0 ? "Reputace zvýšena! 📈" : "Reputace snížena! 📉";
+        string message = amount > 0 
+            ? $"Získal jsi {amount} bodů reputace." 
+            : $"Ztratil jsi {Math.Abs(amount)} bodů reputace.";
+
+        await _notificationService.SendNotificationAsync(
+            user.Id,
+            title,
+            message,
+            amount > 0 ? NotificationPriority.Info : NotificationPriority.Warning,
+            null,
+            "/Profile",
+            NotificationType.General
+        );
+
+        // Zkontrolujeme achievementy za reputaci (pokud se zvýšila)
+        if (amount > 0)
+        {
+            await _achievementService.CheckAchievementsAsync(user.Id, AchievementCategory.ReputationPoints);
+        }
+
+        await _context.SaveChangesAsync();
     }
 }

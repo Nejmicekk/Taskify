@@ -16,12 +16,18 @@ public class DetailModel : PageModel
     private readonly ApplicationDbContext _context;
     private readonly INotificationService _notificationService;
     private readonly UserManager<User> _userManager;
+    private readonly IUserService _userService;
 
-    public DetailModel(ApplicationDbContext context, INotificationService notificationService, UserManager<User> userManager)
+    public DetailModel(
+        ApplicationDbContext context, 
+        INotificationService notificationService, 
+        UserManager<User> userManager,
+        IUserService userService)
     {
         _context = context;
         _notificationService = notificationService;
         _userManager = userManager;
+        _userService = userService;
     }
 
     [BindProperty]
@@ -95,6 +101,10 @@ public class DetailModel : PageModel
         report.AdminNote = string.IsNullOrEmpty(AdminNote) ? "Úkol byl smazán z důvodu porušení pravidel." : AdminNote;
         report.TaskItem.Status = TaskStatus.Archived;
 
+        // Změna reputace
+        await _userService.ChangeReputationAsync(report.ReporterId, 15); // Odměna pro oznamovatele
+        await _userService.ChangeReputationAsync(report.TaskItem.CreatedById, -50); // Trest pro autora
+
         await _context.SaveChangesAsync();
         
         var adminId = _userManager.GetUserId(User);
@@ -133,6 +143,10 @@ public class DetailModel : PageModel
 
         report.IsResolved = true;
         report.AdminNote = string.IsNullOrEmpty(AdminNote) ? "Úkol byl upraven administrátorem a schválen." : AdminNote;
+
+        // Změna reputace
+        await _userService.ChangeReputationAsync(report.ReporterId, 10); // Malá odměna pro oznamovatele
+        await _userService.ChangeReputationAsync(report.TaskItem.CreatedById, -20); // Malý trest pro autora
 
         await _context.SaveChangesAsync();
         
