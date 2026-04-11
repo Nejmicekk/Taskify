@@ -22,13 +22,15 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<IndexModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IAchievementService _achievementService;
 
         public IndexModel(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IWebHostEnvironment webHostEnvironment,
             ILogger<IndexModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IAchievementService _achievementService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -166,6 +168,8 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                 user.ProfilePictureUrl = "/uploads/profiles/" + uniqueFileName;
                 await _userManager.UpdateAsync(user);
                 
+                await _achievementService.CheckSpecialAchievementAsync(user.Id, "První krok");
+                
                 if (!string.IsNullOrEmpty(oldProfilePictureUrl))
                 {
                     string oldFilePath = Path.Combine(_webHostEnvironment.WebRootPath, oldProfilePictureUrl.TrimStart('/'));
@@ -257,7 +261,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
                     protocol: Request.Scheme);
                 
                 string htmlBody = EmailTemplates.GetHtmlTemplate(
-                    title: "Změna e-mailu 📤",
+                    title: "Změna e-mailu",
                     message: "Obdrželi jsme žádost na změnu e-mailu u vašeho účtu Taskify. Pokud jste to nebyli vy, ignorujte tento email.",
                     buttonText: "Potvrdit nový e-mail",
                     buttonUrl: callbackUrl,

@@ -87,7 +87,7 @@ public static class AchievementSeeder
             {
                 a.IconUrl = "/images/achievements/placeholder.svg";
             }
-
+            
             var existing = await context.Achievements.FirstOrDefaultAsync(dbA => dbA.Name == a.Name);
             if (existing == null)
             {

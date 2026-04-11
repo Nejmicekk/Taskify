@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
 using Taskify.Models.Enums.Achievements;
-using Taskify.Models.Enums;
 using Taskify.Models.Enums.Notifications;
 
 namespace Taskify.Services;
@@ -26,13 +25,41 @@ public class AchievementService : IAchievementService
 
         if (user == null) return;
 
-        // 1. Získáme ID achievementů, které uživatel už má odemčené
+        // streaky
+        if (category == AchievementCategory.TasksCompleted)
+        {
+            var now = DateTime.UtcNow;
+            if (user.LastStreakUpdate == null)
+            {
+                user.CurrentWeeklyStreak = 1;
+                user.LastStreakUpdate = now;
+            }
+            else
+            {
+                var timeSinceLast = now - user.LastStreakUpdate.Value;
+                if (timeSinceLast.TotalDays >= 7 && timeSinceLast.TotalDays <= 14)
+                {
+                    // streak pokračuje
+                    user.CurrentWeeklyStreak++;
+                    user.LastStreakUpdate = now;
+                    await _context.SaveChangesAsync(); // Uložíme streak před kontrolou
+                    await CheckAchievementsAsync(userId, AchievementCategory.WeeklyStreak);
+                }
+                else if (timeSinceLast.TotalDays > 14)
+                {
+                    // uživatel vynechal týden -> streak se resetuje
+                    user.CurrentWeeklyStreak = 1;
+                    user.LastStreakUpdate = now;
+                }
+                // pokud je to méně než 7 dní, neděláme nic (v rámci jednoho týdne se streak nezvyšuje)
+            }
+        }
+        
         var unlockedAchievementIds = user.Achievements
             .Where(ua => ua.IsUnlocked)
             .Select(ua => ua.AchievementId)
             .ToList();
-
-        // 2. Načteme všechny achievementy v dané kategorii, které uživatel ještě NEMÁ odemčené
+        
         var lockedAchievements = await _context.Achievements
             .Where(a => a.Category == category)
             .Where(a => !unlockedAchievementIds.Contains(a.Id))
@@ -94,11 +121,9 @@ public class AchievementService : IAchievementService
         userAchievement.IsUnlocked = true;
         userAchievement.EarnedAt = DateTime.UtcNow;
         userAchievement.CurrentProgress = achievement.TargetValue;
-
-        // Odměna (XP)
+        
         user.Points += achievement.XpReward;
-
-        // Přepočet levelu (stejná logika jako v UserService pro konzistenci)
+        
         int currentLvl = user.Level;
         double pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
         bool leveledUp = false;
@@ -112,7 +137,6 @@ public class AchievementService : IAchievementService
         if (leveledUp)
         {
             user.Level = currentLvl;
-            // Notifikace o level-upu
             await _notificationService.SendNotificationAsync(
                 user.Id,
                 "Level Up! ✨",

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
+using Taskify.Services;
 
 namespace Taskify.Pages.Tasks;
 
@@ -14,11 +15,13 @@ public class CreateModel : PageModel
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<User> _userManager;
+    private readonly IAchievementService _achievementService;
 
-    public CreateModel(ApplicationDbContext context, UserManager<User> userManager)
+    public CreateModel(ApplicationDbContext context, UserManager<User> userManager, IAchievementService achievementService)
     {
         _context = context;
         _userManager = userManager;
+        _achievementService = achievementService;
     }
 
     [BindProperty]
@@ -191,6 +194,20 @@ public class CreateModel : PageModel
                 });
             }
         }
+        await _context.SaveChangesAsync();
+        
+        currentUser.TotalTasksCreated++;
+        await _achievementService.CheckAchievementsAsync(currentUser.Id, Models.Enums.Achievements.AchievementCategory.TasksCreated);
+        
+        var hour = DateTime.Now.Hour;
+        if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(currentUser.Id, "Ranní ptáče");
+        if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(currentUser.Id, "Noční hrdina");
+        
+        if (imageUploads.Count == 10)
+        {
+            await _achievementService.CheckSpecialAchievementAsync(currentUser.Id, "Paparazzi");
+        }
+
         await _context.SaveChangesAsync();
 
         TempData["StatusMessage"] = "Úkol byl úspěšně vytvořen a zveřejněn na mapě!";

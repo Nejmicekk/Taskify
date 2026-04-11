@@ -185,6 +185,10 @@ namespace Taskify.Pages.Tasks
 
             await _context.SaveChangesAsync();
             
+            var hour = DateTime.Now.Hour;
+            if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(user.Id, "Ranní ptáče");
+            if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(user.Id, "Noční hrdina");
+            
             await _notificationService.SendNotificationAsync(
                 taskItem.CreatedById, 
                 "Úkol čeká na schválení", 
@@ -217,35 +221,27 @@ namespace Taskify.Pages.Tasks
             
             if (taskItem.AssignedTo != null)
             {
-                // Inkrementace statistik pro achievementy
                 taskItem.AssignedTo.TotalTasksCompleted++;
                 taskItem.AssignedTo.Reputation += 20;
-
-                // 1. PŘIDÁNÍ XP A LEVEL-UP (vše v jedné metodě)
+                
                 await _userService.AddXpAsync(taskItem.AssignedToId!, taskItem.RewardPoints);
                 
-                // 2. KONTROLA STANDARDNÍCH ACHIEVEMENTŮ
                 await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.TasksCompleted);
                 await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.ReputationPoints);
-
-                // 3. KONTROLA RYCHLOSTI (Blesk, Sprinter...)
+                
                 if (taskItem.SubmittedAt.HasValue)
                 {
                     var timeToComplete = taskItem.SubmittedAt.Value - taskItem.CreatedAt;
                     if (timeToComplete.TotalHours <= 24)
                     {
-                        // Zde by bylo potřeba mít čítač pro rychlé úkoly, pro zjednodušení teď kontrolujeme jen základ
                         await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.CompletionSpeed);
                     }
                 }
-
-                // 4. KONTROLA SECRET ACHIEVEMENTŮ
-                // Ranní ptáče / Noční hrdina
+                
                 var hour = DateTime.Now.Hour;
-                if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Ranní ptáče");
-                if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Noční hrdina");
-
-                // Na poslední chvíli (splněno v den deadline)
+                if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(user.Id, "Ranní ptáče");
+                if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(user.Id, "Noční hrdina");
+                
                 if (taskItem.Deadline.HasValue && taskItem.SubmittedAt.HasValue && taskItem.SubmittedAt.Value.Date == taskItem.Deadline.Value.Date)
                 {
                     await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Na poslední chvíli");
@@ -294,7 +290,7 @@ namespace Taskify.Pages.Tasks
 
             taskItem.Status = Models.Enums.TaskStatus.Open;
             taskItem.AssignedToId = null;
-            taskItem.SubmittedAt = null; // Vynulovat čas odevzdání, pokud tam byl
+            taskItem.SubmittedAt = null; 
 
             await _context.SaveChangesAsync();
             
@@ -341,7 +337,6 @@ namespace Taskify.Pages.Tasks
 
             if (!isAdmin && !isCreator) return Forbid();
 
-            // Notify solver if task is deleted by someone else
             if (taskItem.AssignedToId != null && taskItem.AssignedToId != user.Id)
             {
                 await _notificationService.SendNotificationAsync(
