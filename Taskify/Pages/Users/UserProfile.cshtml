@@ -150,14 +150,32 @@ else
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-4"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Statistiky</h5>
                         
-                        <div class="mb-4 p-3 bg-custom-warning-light rounded-4 border border-warning-subtle">
+                        @* Reputace *@
+                        @{
+                            bool isNegativeRep = Model.DisplayedUser.Reputation < 0;
+                            string repBoxClass = isNegativeRep ? "bg-danger-subtle border-danger-subtle" : "bg-custom-warning-light border-warning-subtle";
+                            string repTextClass = isNegativeRep ? "text-danger" : "text-warning";
+                            string repIcon = isNegativeRep ? "bi-exclamation-triangle-fill" : "bi-star-fill";
+                        }
+
+                        <div class="mb-4 p-3 rounded-4 border @repBoxClass">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="fw-bold text-warning"><i class="bi bi-star-fill me-2"></i>Reputace</span>
-                                <span class="h4 fw-bold text-warning mb-0">@Model.DisplayedUser.Reputation</span>
+                                <span class="fw-bold @repTextClass"><i class="bi @repIcon me-2"></i>Reputace</span>
+                                <span class="h4 fw-bold @repTextClass mb-0">@Model.DisplayedUser.Reputation</span>
                             </div>
-                            <div class="progress xp-progress">
-                                <div class="progress-bar bg-custom-warning" style="width: @Math.Min(Model.DisplayedUser.Reputation / 10.0, 100.0)%;"></div>
-                            </div>
+                            @if (isNegativeRep)
+                            {
+                                <div class="d-flex align-items-center text-danger small fw-bold mt-1">
+                                    <i class="bi bi-shield-exclamation me-2 fs-5"></i>
+                                    <span>Tento uživatel není věrohodný</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="progress xp-progress">
+                                    <div class="progress-bar bg-custom-warning" style="width: @Math.Min(Model.DisplayedUser.Reputation / 10.0, 100.0)%;"></div>
+                                </div>
+                            }
                         </div>
 
                         <div class="mb-2 p-3 bg-custom-info-light rounded-4 border border-info-subtle">

@@ -23,8 +23,8 @@
                     <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
                         <i class="bi bi-star-fill"></i> @user.Level
                     </span>
-                    <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
-                        <i class="bi bi-award-fill"></i> @user.Reputation
+                    <span class="nav-stat-badge nav-stat-reputation @(user.Reputation < 0 ? "text-danger fw-bold" : "")" title="Moje reputace">
+                        <i class="bi @(user.Reputation < 0 ? "bi-exclamation-triangle-fill" : "bi-award-fill")"></i> @user.Reputation
                     </span>
                 </div>
             }
@@ -51,8 +51,8 @@
                     <span class="nav-stat-badge nav-stat-level" title="Moje úroveň">
                         <i class="bi bi-star-fill"></i> @user.Level
                     </span>
-                    <span class="nav-stat-badge nav-stat-reputation" title="Moje reputace">
-                        <i class="bi bi-award-fill"></i> @user.Reputation
+                    <span class="nav-stat-badge nav-stat-reputation @(user.Reputation < 0 ? "text-danger fw-bold" : "")" title="Moje reputace">
+                        <i class="bi @(user.Reputation < 0 ? "bi-exclamation-triangle-fill" : "bi-award-fill")"></i> @user.Reputation
                     </span>
                 </div>
             }
