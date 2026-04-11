@@ -1,0 +1,61 @@
+.achievements-page {
+    font-family: 'Poppins', sans-serif;
+}
+
+.extra-small { font-size: 0.6rem; }
+
+.achievement-card {
+    transition: all 0.2s ease;
+    border-left: 5px solid transparent !important;
+}
+
+.achievement-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08) !important;
+}
+
+.achievement-card.is-locked {
+    background-color: #fafafa !important;
+    opacity: 0.75;
+}
+
+.achievement-icon-box {
+    width: 70px;
+    height: 70px;
+    background: #f8f9fa;
+    border: 2px solid #eee;
+    flex-shrink: 0;
+    padding: 10px;
+}
+
+.achievement-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.locked-img {
+    filter: grayscale(100%);
+    opacity: 0.3;
+}
+
+.rarity-common.is-unlocked { border-left-color: #95a5a6 !important; }
+.rarity-rare.is-unlocked { border-left-color: #3498db !important; }
+.rarity-epic.is-unlocked { border-left-color: #9b59b6 !important; }
+.rarity-legendary.is-unlocked {
+    border-left-color: #f1c40f !important;
+    background: linear-gradient(to right, #fffdf0, #ffffff) !important;
+}
+
+.rarity-badge-common { background: #95a5a6; color: white; }
+.rarity-badge-rare { background: #3498db; color: white; }
+.rarity-badge-epic { background: #9b59b6; color: white; }
+.rarity-badge-legendary { background: #f1c40f; color: black; }
+
+.rarity-border-rare { border-color: #3498db !important; }
+.rarity-border-epic { border-color: #9b59b6 !important; }
+.rarity-border-legendary { border-color: #f1c40f !important; }
+
+.progress {
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}

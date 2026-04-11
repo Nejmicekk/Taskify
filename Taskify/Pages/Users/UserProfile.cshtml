@@ -93,8 +93,7 @@ else
                                     }
                                 </div>
                             </div>
-
-                            @* Achievement Showcase Grid (3x2) *@
+                            
                             <div class="col-lg-4 text-center text-lg-end mt-3 mt-lg-0">
                                 <div class="achievement-showcase-container d-inline-block p-3 rounded-4 bg-white bg-opacity-50 border border-light">
                                     <div class="achievement-grid">
@@ -117,7 +116,7 @@ else
                                             }
                                         }
                                     </div>
-                                    <a href="/Achievements" class="btn btn-link btn-sm text-decoration-none text-muted mt-2 p-0 fw-bold">
+                                    <a href="/Achievements?username=@Model.DisplayedUser.UserName" class="btn btn-link btn-sm text-decoration-none text-muted mt-2 p-0 fw-bold">
                                         Zobrazit vše <i class="bi bi-chevron-right small"></i>
                                     </a>
                                 </div>
@@ -176,8 +175,7 @@ else
                     </div>
                 </div>
             </div>
-
-            @* Pravý sloupec - Statistiky *@
+            
             <div class="col-lg-5">
                 <div class="card stat-card shadow-sm no-anim">
                     <div class="card-body p-4">
@@ -347,12 +345,6 @@ else
     </div>
 }
 
-@section Scripts {
-    <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
-    <script src="~/js/Tasks/report_modal.js" asp-append-version="true"></script>
-}
-
-@* Achievement Overlay Detail *@
 <div id="achievement-overlay" class="achievement-detail-overlay" onclick="closeAchievementDetail()">
     <div class="achievement-overlay-content p-5 text-center shadow-lg" onclick="event.stopPropagation()">
         <button class="btn-close-overlay" onclick="closeAchievementDetail()">&times;</button>
@@ -367,5 +359,10 @@ else
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
+    <script src="~/js/Tasks/report_modal.js" asp-append-version="true"></script>
+}
 
 <partial name="_LockUserModal" />
