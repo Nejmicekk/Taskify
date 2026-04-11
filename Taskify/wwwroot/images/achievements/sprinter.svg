@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Vrstva_1" data-name="Vrstva 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100.71 116.59">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-2, .cls-3 {
+        stroke-width: 1.35px;
+      }
+
+      .cls-2, .cls-3, .cls-4 {
+        stroke: #333;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: #606060;
+      }
+
+      .cls-5 {
+        fill: #333;
+      }
+
+      .cls-4 {
+        fill: none;
+        stroke-width: 2.55px;
+      }
+    </style>
+  </defs>
+  <g>
+    <circle class="cls-5" cx="47.22" cy="69.38" r="47.22"/>
+    <circle class="cls-1" cx="47.22" cy="69.38" r="39.35"/>
+    <circle class="cls-5" cx="47.22" cy="69.38" r="4.25"/>
+    <path class="cls-5" d="M59.8,47.16h0c.97,0,1.75.78,1.75,1.75v24.11h-3.5v-24.11c0-.97.78-1.75,1.75-1.75Z" transform="translate(72.26 -23.76) rotate(53.31)"/>
+    <path class="cls-5" d="M37.41,52.96h.4c.86,0,1.55.7,1.55,1.55v18.26h-3.5v-18.26c0-.86.7-1.55,1.55-1.55Z" transform="translate(-35.49 58.14) rotate(-55.41)"/>
+    <rect class="cls-5" x="45.44" y="32.82" width="3.21" height="7.78" rx="1.48" ry="1.48"/>
+    <rect class="cls-5" x="45.61" y="98.15" width="3.21" height="7.78" rx="1.48" ry="1.48"/>
+    <rect class="cls-5" x="78.36" y="65.49" width="3.21" height="7.78" rx="1.48" ry="1.48" transform="translate(149.34 -10.59) rotate(90)"/>
+    <rect class="cls-5" x="12.86" y="65.49" width="3.21" height="7.78" rx="1.48" ry="1.48" transform="translate(83.84 54.91) rotate(90)"/>
+    <rect class="cls-5" x="62.61" y="37.38" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(28.87 -26.53) rotate(30)"/>
+    <rect class="cls-5" x="28.83" y="94.94" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(53.12 -1.93) rotate(30)"/>
+    <rect class="cls-5" x="28.73" y="37.38" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(-16.27 20.47) rotate(-30)"/>
+    <rect class="cls-5" x="62.61" y="94.94" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(-40.51 45.12) rotate(-30)"/>
+    <rect class="cls-5" x="74.75" y="49.6" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(78.98 -39.75) rotate(57.03)"/>
+    <rect class="cls-5" x="17.03" y="82.72" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(80.46 23.77) rotate(57.03)"/>
+    <rect class="cls-5" x="16.64" y="49.6" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(72.69 63.66) rotate(120)"/>
+    <rect class="cls-5" x="74.75" y="83.15" width="2.66" height="6.43" rx="1.22" ry="1.22" transform="translate(188.91 63.66) rotate(120)"/>
+    <rect class="cls-5" x="13.44" y="19.92" width="8.16" height="14.57" transform="translate(-12.79 15.86) rotate(-36.69)"/>
+    <rect class="cls-5" x="10.83" y="16.4" width="8.26" height="14.76" rx="2.35" ry="2.35" transform="translate(4.83 49.99) rotate(-126.69)"/>
+    <rect class="cls-5" x="72.57" y="19.89" width="8.16" height="14.57" transform="translate(28.7 -38.51) rotate(34.36)"/>
+    <rect class="cls-5" x="74.93" y="16.26" width="8.26" height="14.76" rx="2.35" ry="2.35" transform="translate(14.92 75.57) rotate(-55.64)"/>
+    <circle class="cls-4" cx="47.05" cy="13.35" r="12.07"/>
+  </g>
+  <g>
+    <path class="cls-3" d="M97.18,70.25h-21.16v9.36c.9-.99,2.17-1.81,3.8-2.44,1.63-.63,3.39-.95,5.29-.95,3.39,0,6.21.77,8.44,2.31,2.24,1.54,3.88,3.53,4.92,5.97,1.04,2.44,1.56,5.09,1.56,7.94,0,5.29-1.49,9.49-4.48,12.58-2.98,3.1-7.19,4.65-12.62,4.65-3.62,0-6.76-.62-9.43-1.87-2.67-1.24-4.73-2.97-6.17-5.19-1.45-2.21-2.24-4.77-2.37-7.66h11.33c.27,1.4.93,2.57,1.97,3.49,1.04.93,2.46,1.39,4.27,1.39,2.12,0,3.71-.68,4.75-2.03,1.04-1.36,1.56-3.16,1.56-5.43s-.54-3.91-1.63-5.09c-1.09-1.18-2.67-1.76-4.75-1.76-1.54,0-2.8.37-3.8,1.12-1,.75-1.65,1.73-1.97,2.95h-11.19v-29.5h31.67v10.17Z"/>
+    <path class="cls-2" d="M97.18,67.76h-21.16v9.36c.9-.99,2.17-1.81,3.8-2.44,1.63-.63,3.39-.95,5.29-.95,3.39,0,6.21.77,8.44,2.31,2.24,1.54,3.88,3.53,4.92,5.97,1.04,2.44,1.56,5.09,1.56,7.94,0,5.29-1.49,9.49-4.48,12.58-2.98,3.1-7.19,4.65-12.62,4.65-3.62,0-6.76-.62-9.43-1.87-2.67-1.24-4.73-2.97-6.17-5.19-1.45-2.21-2.24-4.77-2.37-7.66h11.33c.27,1.4.93,2.57,1.97,3.49,1.04.93,2.46,1.39,4.27,1.39,2.12,0,3.71-.68,4.75-2.03,1.04-1.36,1.56-3.16,1.56-5.43s-.54-3.91-1.63-5.09c-1.09-1.18-2.67-1.76-4.75-1.76-1.54,0-2.8.37-3.8,1.12-1,.75-1.65,1.73-1.97,2.95h-11.19v-29.5h31.67v10.17Z"/>
+  </g>
+</svg>

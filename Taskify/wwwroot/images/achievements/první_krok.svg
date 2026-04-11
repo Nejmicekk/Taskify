@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Vrstva_1" data-name="Vrstva 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 111.19 106.67">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #999;
+      }
+    </style>
+  </defs>
+  <g id="První_krok" data-name="První krok">
+    <circle class="cls-1" cx="55.6" cy="25.6" r="25.6"/>
+    <path class="cls-1" d="M111.19,99.32s-10.4-39.15-55.6-39.15S0,99.32,0,99.32c0,0,5.06,7.35,15.26,7.35h80.67s9.55.31,15.26-7.35Z"/>
+  </g>
+</svg>
