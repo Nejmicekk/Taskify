@@ -157,3 +157,118 @@
      70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
      100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
  }
+
+.achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.achievement-slot {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: #f1f3f5; /* Jemně šedé pozadí */
+    border: 2px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 6px; /* Mezera kolem ikonky */
+    overflow: hidden;
+}
+.achievement-slot.unlocked:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background: #e9ecef;
+}
+.achievement-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Zajistí, že se ikonka nedeformuje a je celá vidět */
+}
+.achievement-slot.empty {
+    color: #ddd;
+    font-size: 1.2rem;
+    cursor: default;
+}
+.achievement-slot.all-link {
+    background: #e7f1ff;
+    border-color: #cfe2ff;
+    color: #0d6efd;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+}
+.achievement-slot.all-link:hover {
+    background: #0d6efd;
+    color: white;
+    transform: translateY(-3px);
+}
+
+.rarity-common { border-color: #d1d1d1 !important; }
+.rarity-rare { border-color: #3498db !important; }
+.rarity-epic { border-color: #9b59b6 !important; }
+.rarity-legendary { border-color: #f1c40f !important; box-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
+
+.achievement-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.achievement-detail-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.achievement-overlay-content {
+    background: white;
+    border-radius: 30px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+.achievement-detail-overlay.active .achievement-overlay-content {
+    transform: translateY(0);
+}
+.overlay-icon-wrapper img {
+    width: 120px;
+    height: 120px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+}
+.btn-close-overlay {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.rarity-common.achievement-overlay-content { border-top: 10px solid #d1d1d1; }
+.rarity-rare.achievement-overlay-content { border-top: 10px solid #3498db; }
+.rarity-epic.achievement-overlay-content { border-top: 10px solid #9b59b6; }
+.rarity-legendary.achievement-overlay-content {
+    border-top: 10px solid #f1c40f;
+    box-shadow: 0 0 50px rgba(241, 196, 15, 0.2);
+}
+
+.rarity-badge { font-size: 0.7rem; padding: 0.4em 1em; }
+.rarity-rare .rarity-badge { background: #3498db; }
+.rarity-epic .rarity-badge { background: #9b59b6; }
+.rarity-legendary .rarity-badge { background: #f1c40f; color: black; }
+.rarity-common .rarity-badge { background: #d1d1d1; color: #555; }

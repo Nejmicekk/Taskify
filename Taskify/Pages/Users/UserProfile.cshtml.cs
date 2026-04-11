@@ -23,6 +23,7 @@ namespace Taskify.Pages.Users
         }
 
         public User? DisplayedUser { get; set; }
+        public List<UserAchievement> TopAchievements { get; set; } = new List<UserAchievement>();
         public string UserRole { get; set; } = "Taskify Member";
         public int NextLevelPoints { get; set; }
         public bool IsMe { get; set; }
@@ -36,12 +37,22 @@ namespace Taskify.Pages.Users
         public async Task<IActionResult> OnGetAsync(string username)
         {
             DisplayedUser = await _userManager.Users
+                .Include(u => u.Achievements)
+                    .ThenInclude(ua => ua.Achievement)
                 .FirstOrDefaultAsync(u => u.UserName == username);
 
             if (DisplayedUser == null)
             {
                 return Page();
             }
+
+            // Výběr 6 nejvzácnějších získaných achievementů
+            TopAchievements = DisplayedUser.Achievements
+                .Where(ua => ua.IsUnlocked)
+                .OrderByDescending(ua => ua.Achievement!.Rarity)
+                .ThenByDescending(ua => ua.EarnedAt)
+                .Take(6)
+                .ToList();
 
             IsLockedOut = await _userManager.IsLockedOutAsync(DisplayedUser);
             LockoutEnd = DisplayedUser.LockoutEnd;

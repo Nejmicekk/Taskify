@@ -65,6 +65,33 @@ function copyProfileLink(btn) {
     }
 }
 
+function showAchievementDetail(name, desc, icon, date, rarity) {
+    const overlay = document.getElementById('achievement-overlay');
+    const iconImg = document.getElementById('overlay-icon');
+    const nameEl = document.getElementById('overlay-name');
+    const descEl = document.getElementById('overlay-desc');
+    const dateEl = document.getElementById('overlay-date');
+    const rarityEl = document.getElementById('overlay-rarity');
+    const content = document.querySelector('.achievement-overlay-content');
+
+    iconImg.src = icon;
+    iconImg.onerror = () => iconImg.src = '/images/achievements/placeholder.svg';
+    nameEl.innerText = name;
+    descEl.innerText = desc;
+    dateEl.innerText = 'Získáno: ' + date;
+    rarityEl.innerText = rarity;
+
+    content.className = 'achievement-overlay-content p-5 text-center shadow-lg ' + 'rarity-' + rarity.toLowerCase();
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAchievementDetail() {
+    document.getElementById('achievement-overlay').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     var summary = document.querySelector(".validation-summary-errors");
 

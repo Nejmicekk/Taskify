@@ -46,49 +46,82 @@ else
                     </div>
                     
                     <div class="col-md text-center text-md-start">
-                        <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-1">
-                            <h2 class="fw-bold mb-0">@Model.DisplayedUser.Name</h2>
-                            @if (Model.UserRole.Contains("Admin"))
-                            {
-                                <span class="badge badge-admin rounded-pill px-3 py-2 shadow-sm">
-                                    <i class="bi bi-shield-lock-fill me-1"></i> @Model.UserRole
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-custom-info-light text-info border border-info-subtle rounded-pill px-3 py-2">
-                                    <i class="bi bi-award-fill me-1"></i> Úroveň @Model.DisplayedUser.Level
-                                </span>
-                            }
-                        </div>
-                        <div class="text-muted mb-3 d-flex justify-content-center justify-content-md-start">
-                            <span class="small fw-bold">@@@Model.DisplayedUser.UserName</span>
-                        </div>
-                        
-                        <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 text-muted mb-4">
-                            @if (!Model.UserRole.Contains("Admin"))
-                            {
-                                <span><i class="bi bi-person-circle me-1"></i> @Model.UserRole</span>
-                            }
-                            else
-                            {
-                                <span class="text-danger fw-bold"><i class="bi bi-shield-fill-check"></i> Autorizovaný administrátor</span>
-                            }
-                            
-                            @if (Model.IsLockedOut && Model.LockoutEnd.HasValue)
-                            {
-                                <span class="text-danger fw-bold ms-md-2 border-start ps-md-3">
-                                    <i class="bi bi-lock-fill me-1"></i>
-                                    ZABLOKOVÁN 
-                                    @if (Model.LockoutEnd == DateTimeOffset.MaxValue) {
-                                        <span>(Trvale)</span>
-                                    } else {
-                                        var timeLeft = Model.LockoutEnd.Value - DateTimeOffset.UtcNow;
-                                        int daysLeft = (int)Math.Ceiling(timeLeft.TotalDays);
-                                        <span>do @Model.LockoutEnd.Value.ToString("dd.MM.yyyy HH:mm") (za @daysLeft @(daysLeft == 1 ? "den" : (daysLeft < 5 ? "dny" : "dní")))</span>
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-flex flex-column flex-md-row align-items-center gap-3 mb-1">
+                                    <h2 class="fw-bold mb-0">@Model.DisplayedUser.Name</h2>
+                                    @if (Model.UserRole.Contains("Admin"))
+                                    {
+                                        <span class="badge badge-admin rounded-pill px-3 py-2 shadow-sm">
+                                            <i class="bi bi-shield-lock-fill me-1"></i> @Model.UserRole
+                                        </span>
                                     }
-                                </span>
-                            }
+                                    else
+                                    {
+                                        <span class="badge bg-custom-info-light text-info border border-info-subtle rounded-pill px-3 py-2">
+                                            <i class="bi bi-award-fill me-1"></i> Úroveň @Model.DisplayedUser.Level
+                                        </span>
+                                    }
+                                </div>
+                                <div class="text-muted mb-3 d-flex justify-content-center justify-content-md-start">
+                                    <span class="small fw-bold">@@@Model.DisplayedUser.UserName</span>
+                                </div>
+                                
+                                <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 text-muted mb-4">
+                                    @if (!Model.UserRole.Contains("Admin"))
+                                    {
+                                        <span><i class="bi bi-person-circle me-1"></i> @Model.UserRole</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-danger fw-bold"><i class="bi bi-shield-fill-check"></i> Autorizovaný administrátor</span>
+                                    }
+                                    
+                                    @if (Model.IsLockedOut && Model.LockoutEnd.HasValue)
+                                    {
+                                        <span class="text-danger fw-bold ms-md-2 border-start ps-md-3">
+                                            <i class="bi bi-lock-fill me-1"></i>
+                                            ZABLOKOVÁN 
+                                            @if (Model.LockoutEnd == DateTimeOffset.MaxValue) {
+                                                <span>(Trvale)</span>
+                                            } else {
+                                                var timeLeft = Model.LockoutEnd.Value - DateTimeOffset.UtcNow;
+                                                int daysLeft = (int)Math.Ceiling(timeLeft.TotalDays);
+                                                <span>do @Model.LockoutEnd.Value.ToString("dd.MM.yyyy HH:mm") (za @daysLeft @(daysLeft == 1 ? "den" : (daysLeft < 5 ? "dny" : "dní")))</span>
+                                            }
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            @* Achievement Showcase Grid (3x2) *@
+                            <div class="col-lg-4 text-center text-lg-end mt-3 mt-lg-0">
+                                <div class="achievement-showcase-container d-inline-block p-3 rounded-4 bg-white bg-opacity-50 border border-light">
+                                    <div class="achievement-grid">
+                                        @for (int i = 0; i < 6; i++)
+                                        {
+                                            if (i < Model.TopAchievements.Count)
+                                            {
+                                                var ua = Model.TopAchievements[i];  
+                                                <div class="achievement-slot unlocked rarity-@ua.Achievement!.Rarity.ToString().ToLower()" 
+                                                     onclick="showAchievementDetail('@ua.Achievement.Name', '@ua.Achievement.Description', '@ua.Achievement.IconUrl', '@ua.EarnedAt?.ToString("dd. MM. yyyy")', '@ua.Achievement.Rarity.ToString()')"
+                                                     title="@ua.Achievement.Name">
+                                                    <img src="@ua.Achievement.IconUrl" alt="@ua.Achievement.Name" onerror="this.src='/images/achievements/placeholder.svg'" />
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="achievement-slot empty" title="Zatím neodemčeno">
+                                                    <i class="bi bi-patch-question"></i>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                    <a href="/Achievements" class="btn btn-link btn-sm text-decoration-none text-muted mt-2 p-0 fw-bold">
+                                        Zobrazit vše <i class="bi bi-chevron-right small"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2">
@@ -318,5 +351,21 @@ else
     <script src="~/js/Profile/profile.js" asp-append-version="true"></script>
     <script src="~/js/Tasks/report_modal.js" asp-append-version="true"></script>
 }
+
+@* Achievement Overlay Detail *@
+<div id="achievement-overlay" class="achievement-detail-overlay" onclick="closeAchievementDetail()">
+    <div class="achievement-overlay-content p-5 text-center shadow-lg" onclick="event.stopPropagation()">
+        <button class="btn-close-overlay" onclick="closeAchievementDetail()">&times;</button>
+        <div class="overlay-icon-wrapper mb-4">
+            <img id="overlay-icon" src="" alt="Achievement Icon" />
+        </div>
+        <span id="overlay-rarity" class="badge rounded-pill mb-2 rarity-badge text-uppercase"></span>
+        <h2 id="overlay-name" class="fw-bold mb-3"></h2>
+        <p id="overlay-desc" class="lead mb-4 text-secondary"></p>
+        <div class="border-top pt-3">
+            <span id="overlay-date" class="text-muted small fw-bold"></span>
+        </div>
+    </div>
+</div>
 
 <partial name="_LockUserModal" />

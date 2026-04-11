@@ -11,11 +11,6 @@ public static class AchievementSeeder
         using var context = new ApplicationDbContext(
             serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
 
-        if (await context.Achievements.AnyAsync())
-        {
-            return;
-        }
-
         var achievements = new List<Achievement>();
 
         // A) Počet splněných úkolů
@@ -65,12 +60,52 @@ public static class AchievementSeeder
         achievements.Add(new Achievement { Name = "Paparazzi", Description = "Přidej 10 fotek k jednomu úkolu", Category = AchievementCategory.Special, TargetValue = 10, XpReward = 500, IsSecret = true, Rarity = AchievementRarity.Rare });
         achievements.Add(new Achievement { Name = "Na poslední chvíli", Description = "Splň úkol v den deadline", Category = AchievementCategory.Special, TargetValue = 1, XpReward = 300, IsSecret = true, Rarity = AchievementRarity.Common });
 
+        // Mapa existujících SVG souborů
+        var svgMapping = new Dictionary<string, string>
+        {
+            { "Dobrý skutek", "dobrý_skutek.svg" },
+            { "Pomocná ruka", "pomocná_ruka.svg" },
+            { "Spasitel", "spasitel.svg" },
+            { "Lokální hrdina", "lokální_hrdina.svg" },
+            { "Státní legenda", "státní_legenda.svg" },
+            { "Blesk", "blesk.svg" },
+            { "Sprinter", "sprinter.svg" },
+            { "Expresní doručení", "expresní_doručení.svg" },
+            { "Rychle a zběsile", "rychle_a_zběsile.svg" },
+            { "Teleport", "teleport.svg" },
+            { "Noční hrdina", "night_hero.svg" },
+            { "První krok", "první_krok.svg" }
+        };
+
         foreach (var a in achievements)
         {
-            a.IconUrl = $"/images/achievements/{a.Name.ToLower().Replace(" ", "_")}.png";
+            if (svgMapping.TryGetValue(a.Name, out var svgFile))
+            {
+                a.IconUrl = $"/images/achievements/{svgFile}";
+            }
+            else
+            {
+                a.IconUrl = "/images/achievements/placeholder.svg";
+            }
+
+            var existing = await context.Achievements.FirstOrDefaultAsync(dbA => dbA.Name == a.Name);
+            if (existing == null)
+            {
+                context.Achievements.Add(a);
+            }
+            else
+            {
+                // Aktualizace existujícího (ikonka, reward atd.)
+                existing.IconUrl = a.IconUrl;
+                existing.Description = a.Description;
+                existing.TargetValue = a.TargetValue;
+                existing.XpReward = a.XpReward;
+                existing.Rarity = a.Rarity;
+                existing.IsSecret = a.IsSecret;
+                existing.Category = a.Category;
+            }
         }
 
-        context.Achievements.AddRange(achievements);
         await context.SaveChangesAsync();
     }
 }
