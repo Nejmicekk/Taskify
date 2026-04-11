@@ -26,10 +26,16 @@ public class AchievementService : IAchievementService
 
         if (user == null) return;
 
-        // Načteme všechny achievementy v dané kategorii, které uživatel ještě nemá odemčené
+        // 1. Získáme ID achievementů, které uživatel už má odemčené
+        var unlockedAchievementIds = user.Achievements
+            .Where(ua => ua.IsUnlocked)
+            .Select(ua => ua.AchievementId)
+            .ToList();
+
+        // 2. Načteme všechny achievementy v dané kategorii, které uživatel ještě NEMÁ odemčené
         var lockedAchievements = await _context.Achievements
             .Where(a => a.Category == category)
-            .Where(a => !user.Achievements.Any(ua => ua.AchievementId == a.Id && ua.IsUnlocked))
+            .Where(a => !unlockedAchievementIds.Contains(a.Id))
             .ToListAsync();
 
         foreach (var achievement in lockedAchievements)
@@ -50,6 +56,7 @@ public class AchievementService : IAchievementService
             }
         }
     }
+
 
     public async Task CheckSpecialAchievementAsync(string userId, string internalName)
     {
