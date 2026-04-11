@@ -20,6 +20,12 @@ public class User : IdentityUser
     public int Level { get; set; } = 1;
     public int Points { get; set; } = 0;
     
+    // Čítače pro achievementy
+    public int TotalTasksCompleted { get; set; } = 0;
+    public int TotalTasksCreated { get; set; } = 0;
+    public int CurrentWeeklyStreak { get; set; } = 0;
+    public DateTime? LastStreakUpdate { get; set; }
+    
     public DateTime? LastEmailChangeDate { get; set; }
 
     // E-mailová oznámení
@@ -39,4 +45,7 @@ public class User : IdentityUser
     
     // Co uživatel reportnul
     public virtual ICollection<Report> SentReports { get; set; } = new List<Report>();
-}
+
+    // Achievementy uživatele
+    public virtual ICollection<UserAchievement> Achievements { get; set; } = new List<UserAchievement>();
+    }

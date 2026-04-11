@@ -46,6 +46,8 @@ builder.Services.AddRazorPages(options =>
 // 5. Registrace email senderu
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IAchievementService, AchievementService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -58,6 +60,7 @@ using (var scope = app.Services.CreateScope())
         await RoleSeeder.SeedRolesAsync(services);
         await CategorySeeder.SeedCategoriesAsync(services);
         await DatabaseSeeder.SeedDatabaseAsync(services);
+        await AchievementSeeder.SeedAchievementsAsync(services);
     }
     catch (Exception ex)
     {

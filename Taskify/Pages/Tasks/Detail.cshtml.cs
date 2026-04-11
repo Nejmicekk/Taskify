@@ -13,12 +13,21 @@ namespace Taskify.Pages.Tasks
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly INotificationService _notificationService;
+        private readonly IAchievementService _achievementService;
+        private readonly IUserService _userService;
 
-        public DetailsModel(ApplicationDbContext context, UserManager<User> userManager, INotificationService notificationService)
+        public DetailsModel(
+            ApplicationDbContext context, 
+            UserManager<User> userManager, 
+            INotificationService notificationService,
+            IAchievementService achievementService,
+            IUserService userService)
         {
             _context = context;
             _userManager = userManager;
             _notificationService = notificationService;
+            _achievementService = achievementService;
+            _userService = userService;
         }
 
         public TaskItem TaskItem { get; set; } = null!;
@@ -207,25 +216,40 @@ namespace Taskify.Pages.Tasks
             
             if (taskItem.AssignedTo != null)
             {
-                int oldLvl = taskItem.AssignedTo.Level;
-                int oldRep = taskItem.AssignedTo.Reputation;
-
-                taskItem.AssignedTo.Points += taskItem.RewardPoints;
+                // Inkrementace statistik pro achievementy
+                taskItem.AssignedTo.TotalTasksCompleted++;
                 taskItem.AssignedTo.Reputation += 20;
+
+                // 1. PŘIDÁNÍ XP A LEVEL-UP (vše v jedné metodě)
+                await _userService.AddXpAsync(taskItem.AssignedToId!, taskItem.RewardPoints);
                 
-                int currentLvl = taskItem.AssignedTo.Level;
-                
-                double pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
-                
-                while (taskItem.AssignedTo.Points >= pointsNeededForNext)
+                // 2. KONTROLA STANDARDNÍCH ACHIEVEMENTŮ
+                await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.TasksCompleted);
+                await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.ReputationPoints);
+
+                // 3. KONTROLA RYCHLOSTI (Blesk, Sprinter...)
+                if (taskItem.SubmittedAt.HasValue)
                 {
-                    currentLvl++;
-                    
-                    pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
+                    var timeToComplete = taskItem.SubmittedAt.Value - taskItem.CreatedAt;
+                    if (timeToComplete.TotalHours <= 24)
+                    {
+                        // Zde by bylo potřeba mít čítač pro rychlé úkoly, pro zjednodušení teď kontrolujeme jen základ
+                        await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.CompletionSpeed);
+                    }
                 }
-                
-                taskItem.AssignedTo.Level = currentLvl;
-                
+
+                // 4. KONTROLA SECRET ACHIEVEMENTŮ
+                // Ranní ptáče / Noční hrdina
+                var hour = DateTime.Now.Hour;
+                if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Ranní ptáče");
+                if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Noční hrdina");
+
+                // Na poslední chvíli (splněno v den deadline)
+                if (taskItem.Deadline.HasValue && taskItem.SubmittedAt.HasValue && taskItem.SubmittedAt.Value.Date == taskItem.Deadline.Value.Date)
+                {
+                    await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Na poslední chvíli");
+                }
+
                 string notificationMsg = "Autor schválil vaše řešení úkolu.";
                 if (!string.IsNullOrEmpty(ApprovalComment))
                 {
@@ -240,30 +264,6 @@ namespace Taskify.Pages.Tasks
                     user.Id,
                     targetUrl: $"/Tasks/Detail/{taskItem.Id}",
                     type: Models.Enums.NotificationType.TaskResult);
-                
-                if (taskItem.AssignedTo.Level > oldLvl)
-                {
-                    await _notificationService.SendNotificationAsync(
-                        taskItem.AssignedToId!, 
-                        "Nová úroveň!", 
-                        $"Gratulujeme! Dosáhli jste úrovně {taskItem.AssignedTo.Level}!", 
-                        Models.Enums.NotificationPriority.Success,
-                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}",
-                        type: Models.Enums.NotificationType.Achievement);
-                }
-                
-                int[] milestones = { 100, 500, 1000 };
-                if (milestones.Any(m => oldRep < m && taskItem.AssignedTo.Reputation >= m))
-                {
-                    int reachedMilestone = milestones.First(m => taskItem.AssignedTo.Reputation >= m && oldRep < m);
-                    await _notificationService.SendNotificationAsync(
-                        taskItem.AssignedToId!, 
-                        "Milník reputace", 
-                        $"Skvělé! Dosáhli jste milníku {reachedMilestone} bodů reputace!", 
-                        Models.Enums.NotificationPriority.Info,
-                        targetUrl: $"/u/{taskItem.AssignedTo.UserName}",
-                        type: Models.Enums.NotificationType.Achievement);
-                }
             }
             
             if (taskItem.CreatedBy != null)

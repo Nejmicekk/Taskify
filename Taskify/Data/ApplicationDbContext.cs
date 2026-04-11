@@ -17,6 +17,9 @@ public class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<TaskImage> TaskImages { get; set; }
     
     public DbSet<Report> Reports { get; set; }
+
+    public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<UserAchievement> UserAchievements { get; set; }
     
     protected override void OnModelCreating(ModelBuilder builder)
     {
