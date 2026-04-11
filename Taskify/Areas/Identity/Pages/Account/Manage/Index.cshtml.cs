@@ -30,13 +30,14 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             IWebHostEnvironment webHostEnvironment,
             ILogger<IndexModel> logger,
             IEmailSender emailSender,
-            IAchievementService _achievementService)
+            IAchievementService achievementService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _webHostEnvironment = webHostEnvironment;
             _logger = logger;
             _emailSender = emailSender;
+            _achievementService = achievementService;
         }
         
         public string Username { get; set; }
