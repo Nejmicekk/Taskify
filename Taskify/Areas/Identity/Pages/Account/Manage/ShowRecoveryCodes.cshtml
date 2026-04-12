@@ -1,0 +1,28 @@
+@page
+@model ShowRecoveryCodesModel
+@{
+    ViewData["Title"] = "Obnovovací kódy";
+    ViewData["ActivePage"] = "TwoFactorAuthentication";
+}
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4 p-md-5">
+        <div class="alert alert-warning rounded-4" role="alert">
+            <h5 class="fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Uložte si tyto kódy na bezpečné místo!</h5>
+            <p class="mb-0">Pokud ztratíte přístup ke své autentizační aplikaci, tyto kódy budou jedinou cestou, jak se dostat k vašemu účtu.</p>
+        </div>
+
+        <div class="row g-2 mb-4">
+            @for (var row = 0; row < Model.RecoveryCodes.Length; row++)
+            {
+                <div class="col-6">
+                    <code class="bg-light p-2 d-block border rounded text-center fw-bold fs-5">@Model.RecoveryCodes[row]</code>
+                </div>
+            }
+        </div>
+
+        <div class="text-center">
+            <a asp-page="./Security" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">Rozumím, pokračovat</a>
+        </div>
+    </div>
+</div>

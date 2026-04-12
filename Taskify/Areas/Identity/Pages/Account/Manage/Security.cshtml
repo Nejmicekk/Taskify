@@ -1,0 +1,136 @@
+@page
+@model SecurityModel
+@{
+    ViewData["Title"] = "Zabezpečení a 2FA";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<nav aria-label="breadcrumb" class="mt-4 mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/u/@User.Identity?.Name" class="text-decoration-none text-muted">Profil</a></li>
+        <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Nastavení účtu</a></li>
+        <li class="breadcrumb-item active fw-bold text-dark">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-page="./Index" class="btn btn-outline-secondary rounded-pill shadow-sm btn-sm" title="Zpět do nastavení"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="icon-box bg-primary bg-opacity-10 text-primary me-3 rounded-4 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-shield-check fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Stav zabezpečení</h4>
+                        <p class="text-muted small mb-0">Správa dvoufázového ověření vašeho účtu</p>
+                    </div>
+                </div>
+
+                @if (Model.Is2faEnabled)
+                {
+                    <div class="alert alert-success rounded-4 d-flex align-items-center mb-4 border-0">
+                        <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                        <div>
+                            <strong>Dvoufázové ověření je aktivní.</strong><br/>
+                            Váš účet je nyní chráněn druhou vrstvou zabezpečení.
+                        </div>
+                    </div>
+
+                    @if (Model.RecoveryCodesLeft == 0)
+                    {
+                        <div class="alert alert-danger rounded-4">
+                            <strong><i class="bi bi-exclamation-octagon-fill me-2"></i>Nemáte žádné obnovovací kódy!</strong>
+                            <p class="mb-2">Musíte si vygenerovat nové kódy, abyste se mohli přihlásit v případě ztráty mobilu.</p>
+                            <a asp-page="./GenerateRecoveryCodes" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold">Vygenerovat kódy</a>
+                        </div>
+                    }
+                    else if (Model.RecoveryCodesLeft <= 3)
+                    {
+                        <div class="alert alert-warning rounded-4">
+                            <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Zbývají vám pouze @Model.RecoveryCodesLeft obnovovací kódy.</strong>
+                            <p class="mb-2">Měli byste si vygenerovat novou sadu kódů pro případ nouze.</p>
+                            <a asp-page="./GenerateRecoveryCodes" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold">Vygenerovat nové kódy</a>
+                        </div>
+                    }
+
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-3">Správa autentizační aplikace</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Resetovat autentifikační kódy</a>
+                            <a asp-page="./Disable2fa" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Vypnout 2FA</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-light border rounded-4 mb-4">
+                        <div class="d-flex">
+                            <i class="bi bi-info-circle-fill text-primary me-3 fs-4"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">2FA není nastaveno</h6>
+                                <p class="text-muted small mb-0">Doporučujeme aktivovat dvoufázové ověření pro zvýšení bezpečnosti vašeho účtu.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-sm w-100 w-md-auto">
+                        <i class="bi bi-shield-plus me-2"></i>Nastavit autentizační aplikaci
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="icon-box bg-info bg-opacity-10 text-info me-3 rounded-4 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-key fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Přístupové údaje</h4>
+                        <p class="text-muted small mb-0">Změna hesla a přihlášení</p>
+                    </div>
+                </div>
+                
+                <p class="text-muted mb-4 small">Doporučujeme pravidelně měnit heslo a nepoužívat stejné heslo pro více služeb.</p>
+                
+                <a asp-page="./ChangePassword" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                    <i class="bi bi-pencil-square me-2"></i>Změnit heslo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 rounded-4 h-100 bg-light">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4">Co je to 2FA?</h5>
+                
+                <div class="mb-4">
+                    <h6 class="fw-bold small text-uppercase text-primary mb-2">Druhá vrstva ochrany</h6>
+                    <p class="small text-muted mb-0">Kromě hesla budete při přihlášení potřebovat i unikátní kód, který se generuje přímo ve vašem mobilním telefonu.</p>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold small text-uppercase text-primary mb-2">Jak to funguje?</h6>
+                    <p class="small text-muted mb-0">Stáhnete si <strong>autentizační aplikaci</strong> (např. Google Authenticator), naskenujete náš QR kód a aplikace vám bude každých 30 vteřin ukazovat nový kód.</p>
+                </div>
+
+                <div class="mb-0">
+                    <h6 class="fw-bold small text-uppercase text-primary mb-2">Proč to používat?</h6>
+                    <p class="small text-muted mb-0">I kdyby někdo zjistil vaše heslo, bez vašeho mobilního telefonu se do vašeho účtu Taskify nedostane.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

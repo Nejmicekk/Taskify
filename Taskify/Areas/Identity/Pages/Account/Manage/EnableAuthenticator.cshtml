@@ -1,0 +1,79 @@
+@page
+@model EnableAuthenticatorModel
+@{
+    ViewData["Title"] = "Nastavit autentizační aplikaci";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<nav aria-label="breadcrumb" class="mt-4 mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/u/@User.Identity?.Name" class="text-decoration-none text-muted">Profil</a></li>
+        <li class="breadcrumb-item"><a asp-page="./Index" class="text-decoration-none text-muted">Nastavení účtu</a></li>
+        <li class="breadcrumb-item"><a asp-page="./Security" class="text-decoration-none text-muted">Zabezpečení</a></li>
+        <li class="breadcrumb-item active fw-bold text-dark">Nastavení 2FA</li>
+    </ol>
+</nav>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-page="./Security" class="btn btn-outline-secondary rounded-pill shadow-sm btn-sm" title="Zpět na zabezpečení"><i class="bi bi-arrow-left"></i></a>
+    <h2 class="fw-bold mb-0">@ViewData["Title"]</h2>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4 p-md-5">
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <h5 class="fw-bold mb-4">Instrukce k nastavení</h5>
+                <ol class="list-group list-group-numbered border-0 mb-4 p-0">
+                    <li class="list-group-item border-0 py-3 ps-0">
+                        <p class="mb-0"><strong>Stáhněte si aplikaci.</strong> Do svého mobilu si nainstalujte aplikaci jako <em>Google Authenticator</em> nebo <em>Microsoft Authenticator</em>.</p>
+                    </li>
+                    <li class="list-group-item border-0 py-3 ps-0">
+                        <p class="mb-3"><strong>Naskenujte QR kód.</strong> V aplikaci zvolte možnost "Přidat účet" a naskenujte kód, který vidíte napravo.</p>
+                        <div class="alert alert-light border rounded-3 p-3">
+                            <small class="text-muted d-block mb-1">Pokud nemůžete naskenovat kód, zadejte tento klíč ručně:</small>
+                            <kbd class="bg-primary px-3 py-1 fs-6">@Model.SharedKey</kbd>
+                        </div>
+                    </li>
+                    <li class="list-group-item border-0 py-3 ps-0">
+                        <p class="mb-3"><strong>Zadejte kód.</strong> Aplikace vám vygeneruje 6místný kód, který přepište níže pro potvrzení spárování.</p>
+                        
+                        <form id="send-code" method="post">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Input.Code" class="form-control rounded-pill px-4" autocomplete="off" placeholder="000 000" />
+                                <label asp-for="Input.Code" class="px-4">6místný kód z aplikace</label>
+                                <span asp-validation-for="Input.Code" class="text-danger small ms-3"></span>
+                            </div>
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">
+                                <i class="bi bi-shield-check me-2"></i>Ověřit a aktivovat
+                            </button>
+                            <div asp-validation-summary="ModelOnly" class="text-danger mt-2 small" role="alert"></div>
+                        </form>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-lg-5 text-center d-flex flex-column align-items-center justify-content-center border-start">
+                <div class="p-4 bg-white rounded-4 shadow-sm border mb-3">
+                    <div id="qrCode" class="d-inline-block"></div>
+                </div>
+                <div id="qrCodeData" data-url="@Model.AuthenticatorUri"></div>
+                <p class="text-muted small mt-3">Tento kód naskenujte ve své autentizační aplikaci.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="text/javascript">
+        new QRCode(document.getElementById("qrCode"), {
+            text: "@Html.Raw(Model.AuthenticatorUri)",
+            width: 220,
+            height: 220,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    </script>
+}

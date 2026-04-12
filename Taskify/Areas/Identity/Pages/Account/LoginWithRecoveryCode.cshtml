@@ -1,0 +1,47 @@
+@page
+@model LoginWithRecoveryCodeModel
+@{
+    ViewData["Title"] = "Obnovovací kód";
+    ViewData["HideNavbar"] = true;
+    ViewData["HideFooter"] = true;
+}
+
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+
+    <div class="card border-0 shadow-lg" style="width: 100%; max-width: 450px; border-radius: 1rem;">
+        <div class="card-body p-5">
+
+            <div class="text-center mb-4">
+                <div class="mb-3 text-primary">
+                    <h2 class="d-inline-block align-middle fw-bold ms-2 text-primary">Taskify</h2>
+                </div>
+                <h3 class="fw-bold">@ViewData["Title"]</h3>
+                <p class="text-muted small">Zadejte jeden ze svých 8místných záložních kódů.</p>
+            </div>
+
+            <section>
+                <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3" role="alert"></div>
+
+                    <div class="mb-4 text-start">
+                        <label asp-for="Input.RecoveryCode" class="form-label fw-bold text-dark">Váš záložní kód</label>
+                        <input asp-for="Input.RecoveryCode" class="form-control form-control-lg bg-light fs-6 text-center fw-bold" style="letter-spacing: 2px;" autocomplete="off" placeholder="XXXXXXXX" />
+                        <span asp-validation-for="Input.RecoveryCode" class="text-danger small ms-1"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fs-6 fw-bold">Přihlásit se kódém</button>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a asp-page="./Login" class="text-decoration-none small text-muted">Zpět na přihlášení</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

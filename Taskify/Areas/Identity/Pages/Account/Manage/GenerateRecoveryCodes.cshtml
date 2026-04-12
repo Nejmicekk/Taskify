@@ -1,0 +1,32 @@
+@page
+@model GenerateRecoveryCodesModel
+@{
+    ViewData["Title"] = "Generovat nové obnovovací kódy";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-4 p-md-5 text-center">
+        <div class="icon-box bg-primary bg-opacity-10 text-primary d-inline-flex p-3 rounded-circle mb-3">
+            <i class="bi bi-arrow-repeat fs-1"></i>
+        </div>
+        <h4 class="fw-bold mb-3">@ViewData["Title"]</h4>
+
+        <div class="alert alert-warning rounded-4 mb-4 text-start">
+            <p>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Tato akce zneplatní vaše staré obnovovací kódy.</strong>
+            </p>
+            <p class="mb-0">
+                Pokud ztratíte své zařízení a nebudete mít nové kódy, ztratíte přístup k účtu.
+            </p>
+        </div>
+
+        <form method="post">
+            <div class="d-flex gap-2 justify-content-center">
+                <button class="btn btn-primary rounded-pill px-4 fw-bold" type="submit">Generovat nové kódy</button>
+                <a asp-page="./Security" class="btn btn-light rounded-pill px-4">Zrušit</a>
+            </div>
+        </form>
+    </div>
+</div>
