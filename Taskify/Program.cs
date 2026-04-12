@@ -59,8 +59,8 @@ using (var scope = app.Services.CreateScope())
     {
         await RoleSeeder.SeedRolesAsync(services);
         await CategorySeeder.SeedCategoriesAsync(services);
-        await DatabaseSeeder.SeedDatabaseAsync(services);
         await AchievementSeeder.SeedAchievementsAsync(services);
+        await DatabaseSeeder.SeedDatabaseAsync(services);
     }
     catch (Exception ex)
     {

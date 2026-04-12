@@ -17,20 +17,22 @@ public static class DatabaseSeeder
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
         var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
 
-        if (await context.Tasks.AnyAsync()) 
+        if (await context.Tasks.AnyAsync() && await context.UserAchievements.AnyAsync()) 
         {
-            Console.WriteLine("Úkoly již existují, přeskakuji seedování.");
+            Console.WriteLine("Data již existují, přeskakuji seedování.");
             return;
         }
 
         var faker = new Faker("cz");
+        var allAchievements = await context.Achievements.ToListAsync();
 
         // 1. GENEROVÁNÍ UŽIVATELŮ
         var existingUserCount = await context.Users.CountAsync();
+        var seededUsers = new List<User>();
+
         if (existingUserCount < 10)
         {
-            Console.WriteLine("Generuji 50 nových uživatelů...");
-            var users = new List<User>();
+            Console.WriteLine("Generuji 50 nových uživatelů se smysluplným Bio...");
             for (int i = 0; i < 50; i++)
             {
                 var firstName = faker.Name.FirstName();
@@ -46,49 +48,71 @@ public static class DatabaseSeeder
                     UserName = userName,
                     Email = faker.Internet.Email(firstName, lastName).ToLower(),
                     EmailConfirmed = true,
-                    Bio = faker.Lorem.Sentence(),
+                    Bio = GenerateBio(faker),
                     Reputation = faker.Random.Int(0, 1000),
                     Level = randomLevel,
                     Points = faker.Random.Int(minPoints, Math.Max(minPoints, maxPoints)),
-                    ProfilePictureUrl = $"https://i.pravatar.cc/150?u={userName}"
+                    ProfilePictureUrl = $"https://i.pravatar.cc/150?u={userName}",
+                    TotalTasksCompleted = faker.Random.Int(0, randomLevel * 5),
+                    TotalTasksCreated = faker.Random.Int(0, 10)
                 };
                 user.PasswordHash = passwordHasher.HashPassword(user, "Heslo123!");
-                users.Add(user);
-            }
-            foreach (var user in users)
-            {
+                
                 var result = await userManager.CreateAsync(user);
-                if (result.Succeeded) await userManager.AddToRoleAsync(user, "User");
+                if (result.Succeeded) 
+                {
+                    await userManager.AddToRoleAsync(user, "User");
+                    seededUsers.Add(user);
+                }
             }
         }
+        else
+        {
+            seededUsers = await context.Users.Where(u => u.UserName != "admin").ToListAsync();
+        }
 
-        // 2. GENEROVÁNÍ ÚKOLŮ
+        // 2. GENEROVÁNÍ ACHIEVEMENTŮ
+        Console.WriteLine("Přiřazuji achievementy na základě atributů...");
+        foreach (var user in seededUsers)
+        {
+            var userAchievements = new List<UserAchievement>();
+            
+            AddAchievementIfMet(user, "První krok", allAchievements, userAchievements);
+            
+            if (user.Level >= 2) AddAchievementIfMet(user, "Učeň", allAchievements, userAchievements);
+            if (user.Level >= 5) AddAchievementIfMet(user, "Pokročilý", allAchievements, userAchievements);
+            if (user.Level >= 10) AddAchievementIfMet(user, "Expert", allAchievements, userAchievements);
+            
+            if (user.Reputation >= 100) AddAchievementIfMet(user, "Slušný občan", allAchievements, userAchievements);
+            if (user.Reputation >= 500) AddAchievementIfMet(user, "Známá tvář", allAchievements, userAchievements);
+            
+            if (user.TotalTasksCompleted >= 1) AddAchievementIfMet(user, "Dobrý skutek", allAchievements, userAchievements);
+            if (user.TotalTasksCompleted >= 20) AddAchievementIfMet(user, "Pomocná ruka", allAchievements, userAchievements);
+            
+            if (user.TotalTasksCreated >= 1) AddAchievementIfMet(user, "Iniciátor", allAchievements, userAchievements);
+            if (user.TotalTasksCreated >= 10) AddAchievementIfMet(user, "Organizátor", allAchievements, userAchievements);
+            
+            if (faker.Random.Bool(0.15f)) AddAchievementIfMet(user, "Noční hrdina", allAchievements, userAchievements);
+            if (faker.Random.Bool(0.15f)) AddAchievementIfMet(user, "Ranní ptáče", allAchievements, userAchievements);
+            if (faker.Random.Bool(0.10f)) AddAchievementIfMet(user, "Na poslední chvíli", allAchievements, userAchievements);
+
+            if (userAchievements.Any())
+            {
+                await context.UserAchievements.AddRangeAsync(userAchievements);
+            }
+        }
+        await context.SaveChangesAsync();
+
+        // 3. GENEROVÁNÍ ÚKOLŮ
         var categories = await context.Categories.ToListAsync();
-        var allUsers = await context.Users.Where(u => u.UserName != "admin").ToListAsync();
+        var regionalData = GetRegionalData();
 
-        var regionalData = new[] {
-            new { PostCode = "110 00", Coords = new[] { (50.08, 14.42), (49.97, 14.39), (50.10, 14.58), (50.05, 14.30), (50.12, 14.45) } }, // Praha
-            new { PostCode = "250 01", Coords = new[] { (50.14, 14.10), (50.41, 14.90), (49.69, 14.01), (49.95, 15.26), (50.18, 15.04) } }, // Středočeský
-            new { PostCode = "370 01", Coords = new[] { (48.97, 14.47), (49.41, 14.66), (49.30, 14.14), (49.01, 15.00), (49.12, 13.90) } }, // Jihočeský
-            new { PostCode = "301 01", Coords = new[] { (49.74, 13.37), (49.39, 13.29), (49.44, 12.93), (49.89, 13.51), (49.49, 13.19) } }, // Plzeňský
-            new { PostCode = "360 01", Coords = new[] { (50.23, 12.87), (50.07, 12.37), (50.18, 12.64), (50.03, 12.70), (50.25, 12.19) } }, // Karlovarský
-            new { PostCode = "400 01", Coords = new[] { (50.66, 14.03), (50.50, 13.64), (50.64, 13.82), (50.46, 13.41), (50.53, 14.13) } }, // Ústecký
-            new { PostCode = "460 01", Coords = new[] { (50.76, 15.05), (50.72, 15.17), (50.68, 14.53), (50.91, 15.07), (50.59, 15.34) } }, // Liberecký
-            new { PostCode = "500 01", Coords = new[] { (50.21, 15.83), (50.56, 15.91), (50.43, 15.35), (50.35, 15.19), (50.09, 16.27) } }, // Královéhradecký
-            new { PostCode = "530 01", Coords = new[] { (50.03, 15.77), (49.95, 15.79), (49.75, 16.46), (49.94, 16.15), (50.13, 15.54) } }, // Pardubický
-            new { PostCode = "586 01", Coords = new[] { (49.39, 15.59), (49.21, 15.87), (49.60, 15.58), (49.29, 15.14), (49.36, 16.01) } }, // Vysočina
-            new { PostCode = "602 00", Coords = new[] { (49.19, 16.60), (48.85, 16.05), (48.84, 17.12), (48.81, 16.64), (49.46, 16.59) } }, // Jihomoravský
-            new { PostCode = "779 00", Coords = new[] { (49.59, 17.25), (49.45, 17.45), (49.96, 16.97), (49.53, 17.11), (50.22, 17.20) } }, // Olomoucký
-            new { PostCode = "760 01", Coords = new[] { (49.22, 17.66), (49.06, 17.45), (49.33, 17.99), (49.47, 18.14), (49.02, 17.13) } }, // Zlínský
-            new { PostCode = "702 00", Coords = new[] { (49.82, 18.26), (49.77, 18.43), (49.93, 17.90), (49.84, 18.49), (50.01, 17.66) } }  // Moravskoslezský
-        };
-
-        Console.WriteLine("Generuji 200 úkolů s unikátními Unsplash obrázky...");
+        Console.WriteLine("Generuji 200 úkolů...");
         var tasks = new List<TaskItem>();
 
         for (int i = 0; i < 200; i++)
         {
-            var creator = faker.PickRandom(allUsers);
+            var creator = faker.PickRandom(seededUsers);
             var category = faker.PickRandom(categories);
             var region = faker.PickRandom(regionalData);
             var cityCoords = faker.PickRandom(region.Coords);
@@ -102,7 +126,7 @@ public static class DatabaseSeeder
             };
 
             User? assignedUser = (status != TaskStatus.Open) 
-                ? faker.PickRandom(allUsers.Where(u => u.Id != creator.Id)) 
+                ? faker.PickRandom(seededUsers.Where(u => u.Id != creator.Id)) 
                 : null;
 
             var taskTitle = GenerateTitleForCategory(category.Name, faker);
@@ -137,7 +161,6 @@ public static class DatabaseSeeder
 
             task.Location.FullAddress = $"{task.Location.Street} {task.Location.StreetNumber}, {task.Location.City}";
             
-            // POUŽITÍ PROVĚŘENÝCH UNSPLASH ODKAZŮ
             var photoUrls = GetPhotosForCategory(category.Name);
             int photoCount = faker.Random.Int(1, 2);
             var selectedPhotos = faker.PickRandom(photoUrls, photoCount).ToList();
@@ -152,13 +175,13 @@ public static class DatabaseSeeder
         await context.Tasks.AddRangeAsync(tasks);
         await context.SaveChangesAsync();
 
-        // 3. GENEROVÁNÍ REPORTŮ (15)
+        // 4. GENEROVÁNÍ REPORTŮ (15)
         var reports = new List<Report>();
         var reasons = Enum.GetValues<ReportReason>();
         for (int i = 0; i < 15; i++)
         {
             var reportedTask = faker.PickRandom(tasks);
-            var reporter = faker.PickRandom(allUsers.Where(u => u.Id != reportedTask.CreatedById));
+            var reporter = faker.PickRandom(seededUsers.Where(u => u.Id != reportedTask.CreatedById));
             reports.Add(new Report
             {
                 ReporterId = reporter.Id,
@@ -172,6 +195,65 @@ public static class DatabaseSeeder
         await context.Reports.AddRangeAsync(reports);
         await context.SaveChangesAsync();
         Console.WriteLine("--- DatabaseSeeder: DOKONČENO ---");
+    }
+
+    private static void AddAchievementIfMet(User user, string achievementName, List<Achievement> allAchievements, List<UserAchievement> userAchievements)
+    {
+        var achievement = allAchievements.FirstOrDefault(a => a.Name == achievementName);
+        if (achievement != null)
+        {
+            userAchievements.Add(new UserAchievement
+            {
+                UserId = user.Id,
+                AchievementId = achievement.Id,
+                EarnedAt = DateTime.UtcNow.AddDays(-new Random().Next(1, 30)),
+                IsUnlocked = true,
+                CurrentProgress = achievement.TargetValue
+            });
+        }
+    }
+
+    private static string GenerateBio(Faker faker)
+    {
+        var templates = new[] {
+            "Student {0}, baví mě {1} a ve volném čase rád pomáhám v okolí.",
+            "Nabízím pomoc s {1}. Jsem {2} a spolehlivý.",
+            "Hledám příležitosti k výpomoci s {1}. {2} přístup je pro mě základ.",
+            "Aktivní soused z lokality {3}. Rád pomůžu s {1}.",
+            "Mám volné víkendy a rád je využiju pro {1}. Jsem {2}."
+        };
+
+        var schools = new[] { "VUT", "MUNI", "střední školy", "gymnázia" };
+        var hobbies = new[] { "venčením psů", "doučováním", "drobnými opravami", "nákupy", "zahradničením", "IT technikou" };
+        var traits = new[] { "dochvilný", "přátelský", "pracovitý", "ochotný", "zručný" };
+        var cities = new[] { "Brna", "Prahy", "Plzně", "Ostravy", "Olomouce" };
+
+        var template = faker.PickRandom(templates);
+        return string.Format(template, 
+            faker.PickRandom(schools), 
+            faker.PickRandom(hobbies), 
+            faker.PickRandom(traits), 
+            faker.PickRandom(cities));
+    }
+
+    private static dynamic GetRegionalData()
+    {
+        return new[] {
+            new { PostCode = "110 00", Coords = new[] { (50.08, 14.42), (49.97, 14.39), (50.10, 14.58), (50.05, 14.30), (50.12, 14.45) } }, // Praha
+            new { PostCode = "250 01", Coords = new[] { (50.14, 14.10), (50.41, 14.90), (49.69, 14.01), (49.95, 15.26), (50.18, 15.04) } }, // Středočeský
+            new { PostCode = "370 01", Coords = new[] { (48.97, 14.47), (49.41, 14.66), (49.30, 14.14), (49.01, 15.00), (49.12, 13.90) } }, // Jihočeský
+            new { PostCode = "301 01", Coords = new[] { (49.74, 13.37), (49.39, 13.29), (49.44, 12.93), (49.89, 13.51), (49.49, 13.19) } }, // Plzeňský
+            new { PostCode = "360 01", Coords = new[] { (50.23, 12.87), (50.07, 12.37), (50.18, 12.64), (50.03, 12.70), (50.25, 12.19) } }, // Karlovarský
+            new { PostCode = "400 01", Coords = new[] { (50.66, 14.03), (50.50, 13.64), (50.64, 13.82), (50.46, 13.41), (50.53, 14.13) } }, // Ústecký
+            new { PostCode = "460 01", Coords = new[] { (50.76, 15.05), (50.72, 15.17), (50.68, 14.53), (50.91, 15.07), (50.59, 15.34) } }, // Liberecký
+            new { PostCode = "500 01", Coords = new[] { (50.21, 15.83), (50.56, 15.91), (50.43, 15.35), (50.35, 15.19), (50.09, 16.27) } }, // Královéhradecký
+            new { PostCode = "530 01", Coords = new[] { (50.03, 15.77), (49.95, 15.79), (49.75, 16.46), (49.94, 16.15), (50.13, 15.54) } }, // Pardubický
+            new { PostCode = "586 01", Coords = new[] { (49.39, 15.59), (49.21, 15.87), (49.60, 15.58), (49.29, 15.14), (49.36, 16.01) } }, // Vysočina
+            new { PostCode = "602 00", Coords = new[] { (49.19, 16.60), (48.85, 16.05), (48.84, 17.12), (48.81, 16.64), (49.46, 16.59) } }, // Jihomoravský
+            new { PostCode = "779 00", Coords = new[] { (49.59, 17.25), (49.45, 17.45), (49.96, 16.97), (49.53, 17.11), (50.22, 17.20) } }, // Olomoucký
+            new { PostCode = "760 01", Coords = new[] { (49.22, 17.66), (49.06, 17.45), (49.33, 17.99), (49.47, 18.14), (49.02, 17.13) } }, // Zlínský
+            new { PostCode = "702 00", Coords = new[] { (49.82, 18.26), (49.77, 18.43), (49.93, 17.90), (49.84, 18.49), (50.01, 17.66) } }  // Moravskoslezský
+        };
     }
 
     private static string GenerateTitleForCategory(string categoryName, Faker faker)
@@ -219,14 +301,14 @@ public static class DatabaseSeeder
             "Doučování matematiky" or "Příprava na zkoušku" or "Pomoc s logikou" => "Hledám trpělivého člověka, který by mi pomohl s pochopením látky a přípravou na blížící se test. Termín a místo dle domluvy.",
             "Konverzace v AJ" or "Doučování němčiny" or "Základy španělštiny" => "Rád bych si procvičil mluvení v cizím jazyce. Hledám někoho na nezávaznou konverzaci nad kávou nebo online, abych neztratil slovní zásobu.",
             "Pomoc s PC" or "Instalace tiskárny" or "Nastavení mobilu" => "Potřebuji technickou pomoc s nastavením nového zařízení nebo opravou drobné chyby v systému. Pokud se vyznáš v IT, budu vděčný za tvůj čas.",
-            "Nákup potravin" or "Vyzvednutí léků" or "Týdenní nákup" => "Z důvodu nemoci nebo nedostatku času potřebuji pomoci s nákupem základních potravin nebo vyzvednutím receptu v lékárně. Seznam zašlu předem.",
+            "Nákup potravin" or "Vyzvednutí léky" or "Týdenní nákup" => "Z důvodu nemoci nebo nedostatku času potřebuji pomoci s nákupem základních potravin nebo vyzvednutím receptu v lékárně. Seznam zašlu předem.",
             "Vyzvednutí balíku" or "Cesta na poštu" or "Doručení dopisu" => "Hledám někoho, kdo by za mě zašel na poštu vyzvednout zásilku nebo odeslat důležitý dopis. Průkaz pro vyzvednutí zajistím.",
             "Stěhování skříně" or "Odvoz krabic" or "Pomoc se stěhováním" => "Potřebuji silné ruce na pomoc s přenesením pár kusů nábytku nebo naložením krabic do auta. Práce na cca 2 hodiny, odměna jistá.",
             _ => "Hledáme ochotného dobrovolníka, který by nám pomohl s vyřešením tohoto úkolu. Všechny podrobnosti doladíme po přijetí úkolu."
         };
     }
 
-    private static string[] GetPhotosForCategory(string categoryName)
+private static string[] GetPhotosForCategory(string categoryName)
     {
         return categoryName switch
         {
