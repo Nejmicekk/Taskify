@@ -243,6 +243,18 @@
 .achievement-detail-overlay.active .achievement-overlay-content {
     transform: translateY(0);
 }
+
+.image-overlay-content {
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    z-index: 10000;
+}
+
+.achievement-detail-overlay.active .image-overlay-content {
+    transform: scale(1);
+}
+
 .overlay-icon-wrapper img {
     width: 120px;
     height: 120px;

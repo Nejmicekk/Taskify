@@ -33,7 +33,7 @@ else
                         <div class="profile-avatar-container mx-auto">
                             @if (!string.IsNullOrEmpty(Model.DisplayedUser.ProfilePictureUrl)) 
                             {
-                                <img src="@Model.DisplayedUser.ProfilePictureUrl" alt="Profilovka" class="profile-avatar">
+                                <img src="@Model.DisplayedUser.ProfilePictureUrl" alt="Profilovka" class="profile-avatar shadow" style="cursor: zoom-in;" onclick="showFullImage(this.src, '@Model.DisplayedUser.Name')">
                             }
                             else
                             {
@@ -129,11 +129,10 @@ else
                                 <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-edit-profile">
                                     <i class="bi bi-pencil-square me-2"></i>Nastavení účtu
                                 </a>
-                                
-                                <button type="button" class="btn btn-light rounded-pill px-4 shadow-sm border" onclick="copyProfileLink(this)">
-                                    <i class="bi bi-share me-2"></i>Sdílet profil
-                                </button>
                             }
+                            <button type="button" class="btn btn-light rounded-pill px-4 shadow-sm border" onclick="copyProfileLink(this)">
+                                <i class="bi bi-share me-2"></i>Sdílet profil
+                            </button>
 
                             @if (User.IsInRole("Admin") && !Model.IsMe)
                             {
@@ -345,8 +344,16 @@ else
     </div>
 }
 
+<div id="image-overlay" class="achievement-detail-overlay" onclick="closeFullImage()">
+    <div class="image-overlay-content p-2 text-center" onclick="event.stopPropagation()">
+        <button class="btn-close-overlay" onclick="closeFullImage()" style="color: white; top: -50px; right: 0;">&times;</button>
+        <img id="full-profile-image" src="" alt="Profilovka" class="img-fluid rounded-4 shadow-lg border border-5 border-white" style="max-height: 150vh; max-width: 150vw; min-width: 20vw; min-height: 20vh; width: auto; object-fit: contain;" />
+        <h4 id="full-image-name" class="text-white mt-3 fw-bold fs-3"></h4>
+    </div>
+</div>
+
 <div id="achievement-overlay" class="achievement-detail-overlay" onclick="closeAchievementDetail()">
-    <div class="achievement-overlay-content p-5 text-center shadow-lg" onclick="event.stopPropagation()">
+    <div id="achievement-content" class="achievement-overlay-content p-5 text-center shadow-lg" onclick="event.stopPropagation()">
         <button class="btn-close-overlay" onclick="closeAchievementDetail()">&times;</button>
         <div class="overlay-icon-wrapper mb-4">
             <img id="overlay-icon" src="" alt="Achievement Icon" />
