@@ -16,6 +16,22 @@
 
 <h2 class="fw-bold mb-4">@ViewData["Title"]</h2>
 
+@if (!Model.AreNotificationsEnabled)
+{
+    <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center p-4">
+        <div class="icon-box bg-info bg-opacity-10 text-info me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; flex-shrink: 0;">
+            <i class="bi bi-bell-slash fs-4"></i>
+        </div>
+        <div class="flex-grow-1">
+            <h6 class="fw-bold mb-1">E-mailová oznámení jsou vypnutá</h6>
+            <p class="small mb-0 text-muted">Pro plnohodnotný zážitek z aplikace Taskify doporučujeme zapnout oznámení. Budete tak vědět o nových úkolech a zprávách.</p>
+        </div>
+        <div class="ms-3">
+            <a asp-page="./Notifications" class="btn btn-info btn-sm rounded-pill px-3 fw-bold text-white">Zapnout</a>
+        </div>
+    </div>
+}
+
 <div class="row justify-content-center">
     <div class="col-md-11 col-lg-9">
         <div class="card shadow-sm border-0 rounded-4">
@@ -80,6 +96,7 @@
                     <div class="form-floating mb-4">
                         <input asp-for="Input.PhoneNumber" class="form-control" disabled id="input-phone"/>
                         <label asp-for="Input.PhoneNumber">Telefonní číslo</label>
+                        <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
                     </div>
 
                     <div id="save-actions" class="d-none border-top pt-4">

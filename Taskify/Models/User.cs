@@ -29,10 +29,10 @@ public class User : IdentityUser
     public DateTime? LastEmailChangeDate { get; set; }
 
     // E-mailová oznámení
-    public bool EnableEmailNotifications { get; set; } = true;
-    public bool EmailOnTaskUpdates { get; set; } = true; // Přijetí, dokončení, zrušení úkolu
-    public bool EmailOnTaskResults { get; set; } = true;  // Schválení, smazání
-    public bool EmailOnAccountSecurity { get; set; } = true; // Pozastavení účtu, změny hesla
+    public bool EnableEmailNotifications { get; set; } = false;
+    public bool EmailOnTaskUpdates { get; set; } = false; // Přijetí, dokončení, zrušení úkolu
+    public bool EmailOnTaskResults { get; set; } = false;  // Schválení, smazání
+    public bool EmailOnAccountSecurity { get; set; } = false; // Pozastavení účtu, změny hesla
 
     // -- VAZBY --
     // Seznam úkolů, které uživatel založil

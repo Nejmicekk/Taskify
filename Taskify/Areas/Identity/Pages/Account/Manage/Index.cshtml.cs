@@ -47,6 +47,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         public int NextLevelPoints { get; set; } 
         public string UserRole { get; set; }
         public string ProfilePictureUrl { get; set; }
+        public bool AreNotificationsEnabled { get; set; }
         
         [TempData]
         public string StatusMessage { get; set; }
@@ -95,6 +96,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             Reputation = user.Reputation;
             Points = user.Points;
             ProfilePictureUrl = user.ProfilePictureUrl;
+            AreNotificationsEnabled = user.EnableEmailNotifications;
             
             NextLevelPoints = (int)(100 * Math.Pow(1.1, Level - 1));
             
