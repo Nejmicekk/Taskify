@@ -164,7 +164,8 @@ public class AchievementService : IAchievementService
             NotificationPriority.Success,
             null,
             "/Achievements",
-            NotificationType.General
+            NotificationType.Achievement,
+            achievement.IconUrl
         );
     }
 }

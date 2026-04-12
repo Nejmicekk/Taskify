@@ -14,7 +14,15 @@
              style="cursor: pointer; transition: background 0.2s;">
             <div class="d-flex align-items-start">
                 <div class="position-relative me-3 flex-shrink-0">
-                    @if (notification.SenderId != null)
+                    @if (!string.IsNullOrEmpty(notification.IconUrl))
+                    {
+                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm bg-white" 
+                             style="width: 48px; height: 48px; border: 2px solid white; padding: 6px;">
+                            <img src="@notification.IconUrl" class="w-100 h-100 object-fit-contain" alt="Icon" 
+                                 onerror="this.src='/images/achievements/default.png'" />
+                        </div>
+                    }
+                    else if (notification.SenderId != null)
                     {
                         var sender = notification.Sender;
                         

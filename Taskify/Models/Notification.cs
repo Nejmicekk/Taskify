@@ -30,6 +30,9 @@ public class Notification
 
     public string? TargetUrl { get; set; }
 
+    [StringLength(255)]
+    public string? IconUrl { get; set; }
+
     public bool IsRead { get; set; } = false;
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;

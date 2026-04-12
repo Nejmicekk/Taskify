@@ -27,7 +27,7 @@ public class NotificationService : INotificationService
         _scopeFactory = scopeFactory;
     }
 
-    public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null, NotificationType type = NotificationType.General)
+    public async Task SendNotificationAsync(string userId, string title, string message, NotificationPriority priority, string? senderId = null, string? targetUrl = null, NotificationType type = NotificationType.General, string? iconUrl = null)
     {
         var notification = new Notification
         {
@@ -38,6 +38,7 @@ public class NotificationService : INotificationService
             Priority = priority,
             TargetUrl = targetUrl,
             Type = type,
+            IconUrl = iconUrl,
             CreatedAt = DateTime.Now,
             IsRead = false
         };
