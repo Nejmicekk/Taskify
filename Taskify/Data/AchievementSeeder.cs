@@ -21,11 +21,9 @@ public static class AchievementSeeder
         achievements.Add(new Achievement { Name = "Státní legenda", Description = "Splň 250 úkolů", Category = AchievementCategory.TasksCompleted, TargetValue = 250, XpReward = 2500, Rarity = AchievementRarity.Legendary });
 
         // B) Rychlost (do 24h)
-        achievements.Add(new Achievement { Name = "Blesk", Description = "Splň úkol do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 1, XpReward = 100, Rarity = AchievementRarity.Common });
-        achievements.Add(new Achievement { Name = "Sprinter", Description = "Splň 5 úkolů do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 5, XpReward = 300, Rarity = AchievementRarity.Common });
-        achievements.Add(new Achievement { Name = "Expresní doručení", Description = "Splň 20 úkolů do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 20, XpReward = 800, Rarity = AchievementRarity.Rare });
-        achievements.Add(new Achievement { Name = "Rychle a zběsile", Description = "Splň 50 úkolů do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 50, XpReward = 1500, Rarity = AchievementRarity.Epic });
-        achievements.Add(new Achievement { Name = "Teleport", Description = "Splň 100 úkolů do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 100, XpReward = 3000, Rarity = AchievementRarity.Legendary });
+        achievements.Add(new Achievement { Name = "Blesk", Description = "Splň úkol do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 1, XpReward = 500, Rarity = AchievementRarity.Rare });
+        achievements.Add(new Achievement { Name = "Sprinter", Description = "Splň 5 úkolů do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 5, XpReward = 2000, Rarity = AchievementRarity.Epic });
+        achievements.Add(new Achievement { Name = "Teleport", Description = "Splň 20 úkolů do 24 hodin", Category = AchievementCategory.CompletionSpeed, TargetValue = 20, XpReward = 5000, Rarity = AchievementRarity.Legendary });
 
         // C) Streak (1 úkol týdně)
         achievements.Add(new Achievement { Name = "Vytrvalec", Description = "Udrž si streak aspoň jeden úkol týdně po dobu 2 týdnů", Category = AchievementCategory.WeeklyStreak, TargetValue = 2, XpReward = 150, Rarity = AchievementRarity.Common });
@@ -41,7 +39,7 @@ public static class AchievementSeeder
 
         // F) Level milník
         achievements.Add(new Achievement { Name = "Učeň", Description = "Dosáhni Levelu 2", Category = AchievementCategory.LevelReached, TargetValue = 2, XpReward = 100, Rarity = AchievementRarity.Common });
-        achievements.Add(new Achievement { Name = "Pokročilý", Description = "Dosáhni Levelu 5", Category = AchievementCategory.LevelReached, TargetValue = 5, XpReward = 300, Rarity = AchievementRarity.Common });
+        achievements.Add(new Achievement { Name = "Pokroč   ilý", Description = "Dosáhni Levelu 5", Category = AchievementCategory.LevelReached, TargetValue = 5, XpReward = 300, Rarity = AchievementRarity.Common });
         achievements.Add(new Achievement { Name = "Expert", Description = "Dosáhni Levelu 10", Category = AchievementCategory.LevelReached, TargetValue = 10, XpReward = 700, Rarity = AchievementRarity.Rare });
         achievements.Add(new Achievement { Name = "Mistr", Description = "Dosáhni Levelu 25", Category = AchievementCategory.LevelReached, TargetValue = 25, XpReward = 2000, Rarity = AchievementRarity.Epic });
         achievements.Add(new Achievement { Name = "Velmistr", Description = "Dosáhni Levelu 50", Category = AchievementCategory.LevelReached, TargetValue = 50, XpReward = 5000, Rarity = AchievementRarity.Legendary });
