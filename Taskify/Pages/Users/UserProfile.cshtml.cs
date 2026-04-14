@@ -156,7 +156,19 @@ namespace Taskify.Pages.Users
                 DateTimeOffset? end = days.Value == 0 ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays(days.Value);
                 await _userManager.SetLockoutEndDateAsync(userToLock, end);
                 
+                await UnassignTasksFromUser(userId);
+                
                 string timeMsg = days.Value == 0 ? "trvale" : $"na {days.Value} dní";
+                
+                await _notificationService.SendNotificationAsync(
+                    userId, 
+                    "Váš účet byl pozastaven", 
+                    "Váš účet byl dočasně zablokován. Podívejte se na detaily v nastavení.", 
+                    NotificationPriority.Important,
+                    currentUser?.Id,
+                    targetUrl: "/Identity/Account/Manage/Index",
+                    type: NotificationType.Security);
+                
                 TempData["StatusMessage"] = $"Účet uživatele {userToLock.UserName} byl zablokován {timeMsg}.";
             }
             else
@@ -166,6 +178,24 @@ namespace Taskify.Pages.Users
             }
 
             return RedirectToPage(new { username = userToLock.UserName });
+        }
+        
+        private async Task UnassignTasksFromUser(string userId)
+        {
+            var tasksToRelease = await _context.Tasks
+                .Where(t => t.AssignedToId == userId && t.Status == Models.Enums.TaskStatus.InProgress)
+                .ToListAsync();
+
+            foreach (var task in tasksToRelease)
+            {
+                task.AssignedToId = null;
+                task.Status = Models.Enums.TaskStatus.Open;
+            }
+
+            if (tasksToRelease.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
