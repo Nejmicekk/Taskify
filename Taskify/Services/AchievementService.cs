@@ -10,11 +10,13 @@ public class AchievementService : IAchievementService
 {
     private readonly ApplicationDbContext _context;
     private readonly INotificationService _notificationService;
+    private readonly ILevelingService _levelingService;
 
-    public AchievementService(ApplicationDbContext context, INotificationService notificationService)
+    public AchievementService(ApplicationDbContext context, INotificationService notificationService, ILevelingService levelingService)
     {
         _context = context;
         _notificationService = notificationService;
+        _levelingService = levelingService;
     }
 
     public async Task CheckAchievementsAsync(string userId, AchievementCategory category)
@@ -121,22 +123,9 @@ public class AchievementService : IAchievementService
         userAchievement.IsUnlocked = true;
         userAchievement.EarnedAt = DateTime.UtcNow;
         userAchievement.CurrentProgress = achievement.TargetValue;
-        
-        user.Points += achievement.XpReward;
-        
-        int currentLvl = user.Level;
-        double pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
-        bool leveledUp = false;
-        while (user.Points >= pointsNeededForNext)
-        {
-            currentLvl++;
-            pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
-            leveledUp = true;
-        }
 
-        if (leveledUp)
+        if (_levelingService.AddExperience(user, achievement.XpReward))
         {
-            user.Level = currentLvl;
             await _notificationService.SendNotificationAsync(
                 user.Id,
                 "Level Up! ✨",
@@ -145,16 +134,11 @@ public class AchievementService : IAchievementService
                 null,
                 "/Profile",
                 NotificationType.General
-            );
+            );   
+            await CheckAchievementsAsync(user.Id, AchievementCategory.LevelReached);
         }
 
         await _context.SaveChangesAsync();
-
-        // Pokud došlo k level-upu, zkontrolujeme hned další achievementy pro LevelReached
-        if (leveledUp)
-        {
-            await CheckAchievementsAsync(user.Id, AchievementCategory.LevelReached);
-        }
 
         // Notifikace o achievementu
         await _notificationService.SendNotificationAsync(

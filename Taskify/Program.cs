@@ -43,11 +43,12 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AuthorizeFolder("/");
 });
 
-// 5. Registrace email senderu
+// 5. Registrace seederu
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IAchievementService, AchievementService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILevelingService, LevelingService>();
 
 var app = builder.Build();
 

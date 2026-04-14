@@ -23,6 +23,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
         private readonly ILogger<IndexModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IAchievementService _achievementService;
+        private readonly ILevelingService _levelingService;
 
         public IndexModel(
             UserManager<User> userManager,
@@ -30,7 +31,8 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             IWebHostEnvironment webHostEnvironment,
             ILogger<IndexModel> logger,
             IEmailSender emailSender,
-            IAchievementService achievementService)
+            IAchievementService achievementService,
+            ILevelingService levelingService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -38,6 +40,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             _logger = logger;
             _emailSender = emailSender;
             _achievementService = achievementService;
+            _levelingService = levelingService;
         }
         
         public string Username { get; set; }
@@ -98,7 +101,7 @@ namespace Taskify.Areas.Identity.Pages.Account.Manage
             ProfilePictureUrl = user.ProfilePictureUrl;
             AreNotificationsEnabled = user.EnableEmailNotifications;
             
-            NextLevelPoints = (int)(100 * Math.Pow(1.1, Level - 1));
+            NextLevelPoints = _levelingService.GetExperienceRequiredForLevel(user.Level);
             
             var roles = await _userManager.GetRolesAsync(user);
             var mainRole = roles.FirstOrDefault() ?? "Member";

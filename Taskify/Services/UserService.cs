@@ -12,15 +12,18 @@ public class UserService : IUserService
     private readonly ApplicationDbContext _context;
     private readonly INotificationService _notificationService;
     private readonly IAchievementService _achievementService;
+    private readonly ILevelingService _levelingService;
 
     public UserService(
         ApplicationDbContext context, 
         INotificationService notificationService,
-        IAchievementService achievementService)
+        IAchievementService achievementService,
+        ILevelingService levelingService)
     {
         _context = context;
         _notificationService = notificationService;
         _achievementService = achievementService;
+        _levelingService = levelingService;
     }
 
     public async Task AddXpAsync(string userId, int xpAmount)
@@ -30,42 +33,18 @@ public class UserService : IUserService
 
         if (user == null) return;
 
-        user.Points += xpAmount;
-        await UpdateLevelAsync(user);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task UpdateLevelAsync(User user)
-    {
-        int currentLvl = user.Level;
-        double pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
-
-        bool leveledUp = false;
-        while (user.Points >= pointsNeededForNext)
+        if (_levelingService.AddExperience(user, xpAmount))
         {
-            currentLvl++;
-            pointsNeededForNext = 100 * Math.Pow(1.1, currentLvl - 1);
-            leveledUp = true;
-        }
-
-        if (leveledUp)
-        {
-            user.Level = currentLvl;
-
-            // Odeslání notifikace o level-upu
-            await _notificationService.SendNotificationAsync(
-                user.Id,
+            await _notificationService.SendNotificationAsync(user.Id,
                 "Level Up! ✨",
                 $"Gratulujeme! Dosáhl jsi levelu {user.Level}.",
                 NotificationPriority.Success,
                 null,
                 "/Profile",
-                NotificationType.General
-            );
-
-            // Zkontrolujeme achievementy za level-up
+                NotificationType.General);
             await _achievementService.CheckAchievementsAsync(user.Id, AchievementCategory.LevelReached);
         }
+        await _context.SaveChangesAsync();
     }
 
     public async Task ChangeReputationAsync(string userId, int amount)
