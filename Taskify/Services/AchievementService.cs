@@ -132,7 +132,7 @@ public class AchievementService : IAchievementService
                 $"Gratulujeme! Dosáhl jsi levelu {user.Level}.",
                 NotificationPriority.Success,
                 null,
-                "/Profile",
+                $"/u/{user.UserName}",
                 NotificationType.General
             );   
             await CheckAchievementsAsync(user.Id, AchievementCategory.LevelReached);
