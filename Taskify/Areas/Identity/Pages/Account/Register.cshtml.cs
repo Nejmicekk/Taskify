@@ -106,11 +106,11 @@ namespace Taskify.Areas.Identity.Pages.Account
                         protocol: Request.Scheme);
                     
                     string htmlBody = EmailTemplates.GetHtmlTemplate(
-                        title: "Vítejte v Taskify! 👋",
+                        title: "Vítejte v Taskify!",
                         message: "Děkujeme za registraci. Pro aktivaci vašeho účtu prosím klikněte na tlačítko níže:",
                         buttonText: "Aktivovat účet",
                         buttonUrl: callbackUrl,
-                        icon: "✉️"
+                        icon: "👋"
                     );
 
                     if (callbackUrl != null)
