@@ -32,11 +32,12 @@ public class CreateModel : PageModel
     public class TaskInputModel
     {
         [Required(ErrorMessage = "Nadpis je povinný.")]
-        [StringLength(100, ErrorMessage = "Nadpis může mít maximálně 100 znaků.")]
+        [StringLength(25, ErrorMessage = "Nadpis může mít maximálně 25 znaků.")]
         [Display(Name = "Název úkolu")]
         public string Title { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Popis je povinný, aby ostatní věděli, co přesně dělat.")]
+        [StringLength(200, ErrorMessage = "Popis může mít maximálně 200 znaků.")]
         [Display(Name = "Popis problému")]
         public string Description { get; set; } = string.Empty;
 
