@@ -237,7 +237,7 @@
                                         }
                                         else
                                         {
-                                            @(Model.TaskItem.CreatedBy.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                            @(string.IsNullOrEmpty(Model.TaskItem.CreatedBy.Name) ? "U" : Model.TaskItem.CreatedBy.Name[0].ToString().ToUpper())
                                         }
                                     </a>
                                     <div class="d-flex flex-column text-truncate">
@@ -267,7 +267,7 @@
                                             }
                                             else
                                             {
-                                                @(Model.TaskItem.AssignedTo.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                                @(string.IsNullOrEmpty(Model.TaskItem.AssignedTo.Name) ? "U" : Model.TaskItem.AssignedTo.Name[0].ToString().ToUpper())
                                             }
                                         </a>
                                         <div class="d-flex flex-column text-truncate">

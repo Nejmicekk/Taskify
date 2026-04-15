@@ -33,6 +33,7 @@ namespace Taskify.Pages.Users
         public IList<TaskItem> CreatedTasks { get; set; } = new List<TaskItem>();
         public IList<TaskItem> AssignedTasks { get; set; } = new List<TaskItem>();
         public IList<TaskItem> ExpiredTasks { get; set; } = new List<TaskItem>();
+        public IList<TaskItem> ManagedTasks { get; set; } = new List<TaskItem>();
 
         public async Task<IActionResult> OnGetAsync(string username)
         {
@@ -124,6 +125,16 @@ namespace Taskify.Pages.Users
             
             if (IsMe)
             {
+                ManagedTasks = await _context.Tasks
+                    .Include(t => t.Category)
+                    .Include(t => t.Images)
+                    .Include(t => t.Location)
+                    .Where(t => t.CreatedById == DisplayedUser.Id && 
+                                (t.Deadline == null || t.Deadline > DateTime.UtcNow))
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Take(3)
+                    .ToListAsync();
+                
                 AssignedTasks = await _context.Tasks
                     .Include(t => t.Category)
                     .Include(t => t.Images)
