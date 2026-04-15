@@ -234,6 +234,7 @@ namespace Taskify.Pages.Tasks
                     var timeToComplete = taskItem.SubmittedAt.Value - taskItem.CreatedAt;
                     if (timeToComplete.TotalHours <= 24)
                     {
+                        taskItem.AssignedTo.QuickCompletionsCount++;
                         await _achievementService.CheckAchievementsAsync(taskItem.AssignedToId!, Models.Enums.Achievements.AchievementCategory.CompletionSpeed);
                     }
                 }

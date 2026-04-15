@@ -24,6 +24,7 @@ public class User : IdentityUser
     public int TotalTasksCompleted { get; set; } = 0;
     public int TotalTasksCreated { get; set; } = 0;
     public int CurrentWeeklyStreak { get; set; } = 0;
+    public int QuickCompletionsCount { get; set; } = 0;
     public DateTime? LastStreakUpdate { get; set; }
     
     public DateTime? LastEmailChangeDate { get; set; }

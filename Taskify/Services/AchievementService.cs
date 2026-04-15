@@ -76,6 +76,7 @@ public class AchievementService : IAchievementService
                 AchievementCategory.LevelReached => user.Level >= achievement.TargetValue,
                 AchievementCategory.ReputationPoints => user.Reputation >= achievement.TargetValue,
                 AchievementCategory.WeeklyStreak => user.CurrentWeeklyStreak >= achievement.TargetValue,
+                AchievementCategory.CompletionSpeed => user.QuickCompletionsCount >= achievement.TargetValue,
                 _ => false
             };
 
