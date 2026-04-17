@@ -39,7 +39,7 @@ public static class AchievementSeeder
 
         // F) Level milník
         achievements.Add(new Achievement { Name = "Učeň", Description = "Dosáhni Levelu 2", Category = AchievementCategory.LevelReached, TargetValue = 2, XpReward = 100, Rarity = AchievementRarity.Common });
-        achievements.Add(new Achievement { Name = "Pokroč   ilý", Description = "Dosáhni Levelu 5", Category = AchievementCategory.LevelReached, TargetValue = 5, XpReward = 300, Rarity = AchievementRarity.Common });
+        achievements.Add(new Achievement { Name = "Pokročilý", Description = "Dosáhni Levelu 5", Category = AchievementCategory.LevelReached, TargetValue = 5, XpReward = 300, Rarity = AchievementRarity.Common });
         achievements.Add(new Achievement { Name = "Expert", Description = "Dosáhni Levelu 10", Category = AchievementCategory.LevelReached, TargetValue = 10, XpReward = 700, Rarity = AchievementRarity.Rare });
         achievements.Add(new Achievement { Name = "Mistr", Description = "Dosáhni Levelu 25", Category = AchievementCategory.LevelReached, TargetValue = 25, XpReward = 2000, Rarity = AchievementRarity.Epic });
         achievements.Add(new Achievement { Name = "Velmistr", Description = "Dosáhni Levelu 50", Category = AchievementCategory.LevelReached, TargetValue = 50, XpReward = 5000, Rarity = AchievementRarity.Legendary });
