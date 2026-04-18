@@ -19,15 +19,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 3. Registrace Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
     {
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 4;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
+        options.Password.RequireDigit = true; // musí obsahovat aspoň 1 číslo
+        options.Password.RequiredLength = 8; // minimum je 8 znaků (NÚKIB doporučuje 12, ale tohle staci)
+        options.Password.RequireNonAlphanumeric = true;// musí obsahovat speciální znak
+        options.Password.RequireUppercase = true; // musi obsahovat velke písmeno
+        options.Password.RequireLowercase = true; // musi obsahovat male písmeno
         
-        options.SignIn.RequireConfirmedAccount = true;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // Na jak dlouho se účet zamkne
+        options.Lockout.MaxFailedAccessAttempts = 5;                       // Po kolika špatných pokusech
+        options.Lockout.AllowedForNewUsers = true;                         // Platí i pro nově registrované
         
-        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedAccount = true; // overeni uctu povinne
+        options.User.RequireUniqueEmail = true; // 1 email jen 1x v db
     })
     .AddRoles<IdentityRole>()
     .AddErrorDescriber<Taskify.Services.CzechIdentityErrorDescriber>()
