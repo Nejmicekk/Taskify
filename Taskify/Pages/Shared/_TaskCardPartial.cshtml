@@ -19,7 +19,7 @@
     <div class="position-relative @(isMini ? "mb-2" : "mb-4")" style="height: @imageHeight;">
         @{
             var images = Model.Images?.ToList();
-            var firstImage = images?.FirstOrDefault()?.Url ?? "/images/placeholder-task.png";
+            var firstImage = images?.FirstOrDefault()?.Url ?? "/images/achievements/placeholder.svg";
         }
         <div class="task-image-container h-100 w-100 rounded-4 overflow-hidden shadow-sm">
             <img src="@firstImage" 
@@ -114,8 +114,6 @@
             <div class="p-1 z-3">
                 <a href="" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold t-link">Detail</a>
             </div>
-        </div>
-    </div>
-</div>
-
-<partial name="_ReportModalPartial" />
+            </div>
+            </div>
+            </div>
