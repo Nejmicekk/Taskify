@@ -5,6 +5,7 @@ using Taskify.Data;
 using Taskify.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Taskify.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,16 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILevelingService, LevelingService>();
 
 var app = builder.Build();
+
+// 1. Povolení Forwarded Headers pro správné generování odkazů za proxy
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedOptions.KnownNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
+
 
 // 5. SEEDOVÁNÍ
 using (var scope = app.Services.CreateScope())
