@@ -95,13 +95,9 @@ public class CreateModel : PageModel
             }
         }
         
-        if (!isLatOk || lat < -90 || lat > 90)
+        if (!isLatOk || !isLngOk || lat == 0 || lng == 0 || string.IsNullOrWhiteSpace(Input.FullAddress))
         {
-            ModelState.AddModelError("Input.LocationLatitude", "Neplatná šířka (lat).");
-        }
-        if (!isLngOk || lng < -180 || lng > 180)
-        {
-            ModelState.AddModelError("Input.LocationLongitude", "Neplatná délka (lng).");
+            ModelState.AddModelError("Input.LocationLatitude", "Musíte vybrat přesné místo na mapě nebo vyhledat adresu pomocí tlačítka 'Najít'.");
         }
         
         const int MaxFileCount = 10;

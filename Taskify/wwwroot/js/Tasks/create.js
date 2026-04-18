@@ -33,6 +33,15 @@
             });
         });
     }
+    
+    form.addEventListener('submit', function (e) {
+        if (!latInput.value || !document.getElementById('lng-input').value) {
+            e.preventDefault();
+            alert('Prosím vyberte přesné místo na mapě nebo klikněte na tlačítko "Najít" u adresy.');
+            document.getElementById('map').style.border = "2px solid red";
+            document.getElementById('map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
 
     const latInput = document.getElementById('lat-input');
     const cityInput = document.getElementById('city-input');
@@ -99,32 +108,40 @@
         document.getElementById('map').style.border = "none";
     }
 
+    function updateAddressInputs(data) {
+        if (!data || !data.address) return;
+        
+        const addr = data.address;
+        const displayName = data.display_name;
+        
+        addressSearchInput.value = displayName;
+        document.getElementById('full-address-input').value = displayName;
+        document.getElementById('region-input').value = addr.state || "";
+        document.getElementById('city-input').value = addr.city || addr.town || addr.village || "";
+        document.getElementById('street-input').value = addr.road || "";
+        document.getElementById('street-number-input').value = addr.house_number || "";
+        document.getElementById('postcode-input').value = addr.postcode || "";
+        
+        document.getElementById('current-address-text').innerText = displayName;
+    }
+
     map.on('click', function (e) {
         setLocation(e.latlng.lat, e.latlng.lng);
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
             .then(res => res.json())
-            .then(data => {
-                if (data && data.address) {
-                    const addr = data.address;
-                    addressSearchInput.value = data.display_name;
-                    document.getElementById('full-address-input').value = data.display_name;
-                    document.getElementById('region-input').value = addr.state || "";
-                    document.getElementById('city-input').value = addr.city || addr.town || addr.village || "";
-                    document.getElementById('street-input').value = addr.road || "";
-                    document.getElementById('street-number-input').value = addr.house_number || "";
-                    document.getElementById('postcode-input').value = addr.postcode || "";
-                }
-            });
+            .then(data => updateAddressInputs(data));
     });
     
     document.getElementById('btn-search').addEventListener('click', function() {
         if (!addressSearchInput.value) return;
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressSearchInput.value)}&countrycodes=cz`)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressSearchInput.value)}&countrycodes=cz&addressdetails=1`)
             .then(res => res.json())
             .then(data => {
                 if (data.length > 0) {
-                    map.setView([data[0].lat, data[0].lon], 16);
-                    setLocation(data[0].lat, data[0].lon);
+                    const result = data[0];
+                    map.setView([result.lat, result.lon], 16);
+                    setLocation(result.lat, result.lon);
+                    updateAddressInputs(result);
                 } else alert('Adresa nenalezena.');
             });
     });
