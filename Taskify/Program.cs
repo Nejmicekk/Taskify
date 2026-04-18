@@ -90,8 +90,8 @@ app.Use(async (context, next) =>
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net; " +
         "style-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
         "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
-        "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org https://images.unsplash.com https://*.basemaps.cartocdn.com; " +
-        "connect-src 'self' https://nominatim.openstreetmap.org https://unpkg.com;");
+        "img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org https://images.unsplash.com https://*.basemaps.cartocdn.com https://i.pravatar.cc; " +
+        "connect-src 'self' https://nominatim.openstreetmap.org https://unpkg.com https://cdn.jsdelivr.net;");
     await next();
 });
 
