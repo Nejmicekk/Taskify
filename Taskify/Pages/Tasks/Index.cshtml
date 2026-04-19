@@ -112,6 +112,7 @@
                     
                     <div class="col-12 col-lg-3">
                         <div class="dropdown w-100 h-100">
+                            <input type="hidden" name="SelectedRegion" value="@Model.SelectedRegion">
                             <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 shadow-none" 
                                     type="button" data-bs-toggle="dropdown">
                                 <i class="bi bi-geo-alt-fill text-danger me-2 ms-2 ms-lg-0"></i>
@@ -123,19 +124,17 @@
 
                             <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
                                 <li>
-                                    <a class="dropdown-item px-3 @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" 
-                                       href="?SelectedRegion=&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
+                                    <div class="dropdown-item px-3 category-item cursor-pointer @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" data-id="" data-name="Celá ČR">
                                         Celá ČR
-                                    </a>
+                                    </div>
                                 </li>
                                 <li><hr class="dropdown-divider opacity-50"></li>
                                 @foreach (var region in Model.AvailableRegions)
                                 {
                                     <li>
-                                        <a class="dropdown-item px-3 @(Model.SelectedRegion == region ? "active" : "")" 
-                                           href="?SelectedRegion=@region&SearchQuery=@Model.SearchQuery&SelectedCategoryId=@Model.SelectedCategoryId">
+                                        <div class="dropdown-item px-3 category-item cursor-pointer @(Model.SelectedRegion == region ? "active" : "")" data-id="@region" data-name="@region">
                                             @region
-                                        </a>
+                                        </div>
                                     </li>
                                 }
                             </ul>
