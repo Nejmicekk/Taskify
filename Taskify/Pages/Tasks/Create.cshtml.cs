@@ -196,10 +196,6 @@ public class CreateModel : PageModel
         currentUser.TotalTasksCreated++;
         await _achievementService.CheckAchievementsAsync(currentUser.Id, Models.Enums.Achievements.AchievementCategory.TasksCreated);
         
-        var hour = DateTime.Now.Hour;
-        if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(currentUser.Id, "Ranní ptáče");
-        if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(currentUser.Id, "Noční hrdina");
-        
         if (imageUploads.Count == 10)
         {
             await _achievementService.CheckSpecialAchievementAsync(currentUser.Id, "Paparazzi");

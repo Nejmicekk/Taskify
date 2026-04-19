@@ -239,10 +239,6 @@ namespace Taskify.Pages.Tasks
                     }
                 }
                 
-                var hour = DateTime.Now.Hour;
-                if (hour >= 4 && hour <= 7) await _achievementService.CheckSpecialAchievementAsync(user.Id, "Ranní ptáče");
-                if (hour >= 0 && hour <= 3) await _achievementService.CheckSpecialAchievementAsync(user.Id, "Noční hrdina");
-                
                 if (taskItem.Deadline.HasValue && taskItem.SubmittedAt.HasValue && taskItem.SubmittedAt.Value.Date == taskItem.Deadline.Value.Date)
                 {
                     await _achievementService.CheckSpecialAchievementAsync(taskItem.AssignedToId!, "Na poslední chvíli");
