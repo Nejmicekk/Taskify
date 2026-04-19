@@ -22,7 +22,7 @@
         wrapper.querySelector('.t-category').textContent = t.category || 'Bez kategorie';
 
         const imgEl = wrapper.querySelector('.t-img');
-        imgEl.src = t.isGuest ? '/images/placeholder-task.png' : (t.imageUrl || '/images/placeholder-task.png');
+        imgEl.src = t.isGuest ? '/images/task-placeholder.svg' : (t.imageUrl || '/images/task-placeholder.svg');
 
         const link = wrapper.querySelector('.t-link');
         if (t.isGuest) {

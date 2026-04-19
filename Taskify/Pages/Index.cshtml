@@ -36,7 +36,7 @@
                                  lng = User.Identity.IsAuthenticated ? t.Location.Longitude : t.Location.Longitude + (new Random().NextDouble() * 0.002),
                                  category = User.Identity.IsAuthenticated ? t.Category?.Name : "???",
                                  xp = User.Identity.IsAuthenticated ? t.RewardPoints : 0,
-                                 imageUrl = t.Images?.FirstOrDefault()?.Url ?? "/images/placeholder-task.png",
+                                 imageUrl = t.Images?.FirstOrDefault()?.Url ?? "/images/task-placeholder.svg",
                                  isGuest = !User.Identity.IsAuthenticated
                              })))'>
             </div>

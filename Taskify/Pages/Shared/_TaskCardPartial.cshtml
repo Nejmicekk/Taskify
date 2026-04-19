@@ -19,7 +19,7 @@
     <div class="position-relative @(isMini ? "mb-2" : "mb-4")" style="height: @imageHeight;">
         @{
             var images = Model.Images?.ToList();
-            var firstImage = images?.FirstOrDefault()?.Url ?? "/images/achievements/placeholder.svg";
+            var firstImage = images?.FirstOrDefault()?.Url ?? "/images/task-placeholder.svg";
         }
         <div class="task-image-container h-100 w-100 rounded-4 overflow-hidden shadow-sm">
             <img src="@firstImage" 
