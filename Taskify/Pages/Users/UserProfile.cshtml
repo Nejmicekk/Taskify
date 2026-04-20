@@ -272,8 +272,8 @@ else
                     </div>
                     @if (Model.ManagedTasks.Count > 0)
                     {
-                        <a asp-page="/Tasks/Index" asp-route-AssignedToId="@Model.DisplayedUser.Id" asp-route-FromProfile="@Model.DisplayedUser.UserName" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
-                            Zobrazit vše <i class="bi bi-arrow-right ms-2"></i>
+                        <a asp-page="/Tasks/Index" asp-route-AssignedToId="@Model.DisplayedUser.Id" asp-route-OnlyOpen="true" asp-route-FromProfile="@Model.DisplayedUser.UserName" class="btn btn-outline-primary rounded-pill px-4 fw-bold">
+                            Zobrazit vše <i class="bi bi-arrow-right ms-2"></i> 
                         </a>
                     }
                     

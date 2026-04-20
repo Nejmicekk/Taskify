@@ -34,6 +34,8 @@ namespace Taskify.Pages.Tasks
         
         [BindProperty(SupportsGet = true)]
         public string? FromProfile { get; set; }
+        [BindProperty(SupportsGet = true)]
+        public bool OnlyOpen { get; set; } = false;
     
         public async Task OnGetAsync()
         {
@@ -53,7 +55,7 @@ namespace Taskify.Pages.Tasks
                 .AsQueryable();
             
             // Pokud filtrujeme podle uživatele, nezobrazujeme jen "Open"
-            if (string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
+            if (OnlyOpen || string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
             {
                 query = query.Where(t => t.Status == Models.Enums.TaskStatus.Open && (t.Deadline == null || t.Deadline > DateTime.UtcNow));
             }
