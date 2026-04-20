@@ -5,6 +5,7 @@ using Taskify.Models;
 using Taskify.Models.Enums.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using TaskStatus = Taskify.Models.Enums.TaskStatus;
 
 namespace Taskify.Pages.Users
 {
@@ -130,7 +131,7 @@ namespace Taskify.Pages.Users
                     .Include(t => t.Images)
                     .Include(t => t.Location)
                     .Where(t => t.CreatedById == DisplayedUser.Id && 
-                                (t.Deadline == null || t.Deadline > DateTime.UtcNow))
+                                (t.Deadline == null || t.Deadline > DateTime.UtcNow) && t.Status != TaskStatus.Completed)
                     .OrderByDescending(t => t.CreatedAt)
                     .Take(3)
                     .ToListAsync();
@@ -139,7 +140,7 @@ namespace Taskify.Pages.Users
                     .Include(t => t.Category)
                     .Include(t => t.Images)
                     .Include(t => t.Location)
-                    .Where(t => t.AssignedToId == DisplayedUser.Id && t.Status != Models.Enums.TaskStatus.Completed)
+                    .Where(t => t.AssignedToId == DisplayedUser.Id && t.Status != TaskStatus.Completed)
                     .OrderBy(t => t.Deadline ?? DateTime.MaxValue)
                     .Take(3)
                     .ToListAsync();
