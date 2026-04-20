@@ -139,7 +139,7 @@ public class CreateModel : PageModel
             Description = Input.Description,
             CategoryId = Input.CategoryId.Value,
             RewardPoints = 50,
-            Deadline = Input.Deadline,
+            Deadline = Input.Deadline?.ToUniversalTime(),
             Location = new AddressInfo
             {
                 Latitude = lat,

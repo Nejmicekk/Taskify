@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
+using TaskStatus = Taskify.Models.Enums.TaskStatus;
 
 namespace Taskify.Pages.Tasks
 {
@@ -35,7 +36,7 @@ namespace Taskify.Pages.Tasks
         [BindProperty(SupportsGet = true)]
         public string? FromProfile { get; set; }
         [BindProperty(SupportsGet = true)]
-        public bool OnlyOpen { get; set; } = false;
+        public bool OnlyActive { get; set; } = false;
     
         public async Task OnGetAsync()
         {
@@ -55,9 +56,11 @@ namespace Taskify.Pages.Tasks
                 .AsQueryable();
             
             // Pokud filtrujeme podle uživatele, nezobrazujeme jen "Open"
-            if (OnlyOpen || string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
+            if (OnlyActive || string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
             {
-                query = query.Where(t => t.Status == Models.Enums.TaskStatus.Open && (t.Deadline == null || t.Deadline > DateTime.UtcNow));
+                query = query.Where(t => t.Status != TaskStatus.Completed &&
+                        t.Status != TaskStatus.Archived &&
+                        (t.Deadline == null || t.Deadline > DateTime.UtcNow));
             }
             
             if (!string.IsNullOrEmpty(CreatedById))
