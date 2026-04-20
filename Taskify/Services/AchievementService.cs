@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
@@ -11,12 +12,18 @@ public class AchievementService : IAchievementService
     private readonly ApplicationDbContext _context;
     private readonly INotificationService _notificationService;
     private readonly ILevelingService _levelingService;
+    private readonly UserManager<User> _userManager;
 
-    public AchievementService(ApplicationDbContext context, INotificationService notificationService, ILevelingService levelingService)
+    public AchievementService(
+        ApplicationDbContext context, 
+        INotificationService notificationService, 
+        ILevelingService levelingService,
+        UserManager<User> userManager)
     {
         _context = context;
         _notificationService = notificationService;
         _levelingService = levelingService;
+        _userManager = userManager;
     }
 
     public async Task CheckAchievementsAsync(string userId, AchievementCategory category)
@@ -26,6 +33,8 @@ public class AchievementService : IAchievementService
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user == null) return;
+        
+        if (await _userManager.IsInRoleAsync(user, "Admin")) return;
 
         // streaky
         if (category == AchievementCategory.TasksCompleted)
@@ -95,6 +104,9 @@ public class AchievementService : IAchievementService
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user == null) return;
+
+        // Administrátoři nedostávají achievementy
+        if (await _userManager.IsInRoleAsync(user, "Admin")) return;
         
         var achievement = await _context.Achievements
             .Where(a => a.Category == AchievementCategory.Special && a.Name == internalName)

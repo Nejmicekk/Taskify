@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Taskify.Data;
 using Taskify.Models;
@@ -13,17 +14,20 @@ public class UserService : IUserService
     private readonly INotificationService _notificationService;
     private readonly IAchievementService _achievementService;
     private readonly ILevelingService _levelingService;
+    private readonly UserManager<User> _userManager;
 
     public UserService(
         ApplicationDbContext context, 
         INotificationService notificationService,
         IAchievementService achievementService,
-        ILevelingService levelingService)
+        ILevelingService levelingService,
+        UserManager<User> userManager)
     {
         _context = context;
         _notificationService = notificationService;
         _achievementService = achievementService;
         _levelingService = levelingService;
+        _userManager = userManager;
     }
 
     public async Task AddXpAsync(string userId, int xpAmount)
@@ -32,6 +36,8 @@ public class UserService : IUserService
             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user == null) return;
+        
+        if (await _userManager.IsInRoleAsync(user, "Admin")) return;
 
         if (_levelingService.AddExperience(user, xpAmount))
         {
