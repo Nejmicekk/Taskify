@@ -55,12 +55,15 @@ namespace Taskify.Pages.Tasks
                 .Include(t => t.Location)
                 .AsQueryable();
             
-            // Pokud filtrujeme podle uživatele, nezobrazujeme jen "Open"
-            if (OnlyActive || string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId))
+            bool noUserFilter = string.IsNullOrEmpty(CreatedById) && string.IsNullOrEmpty(AssignedToId);
+            
+            if (noUserFilter)
             {
-                query = query.Where(t => t.Status != TaskStatus.Completed &&
-                        t.Status != TaskStatus.Archived &&
-                        (t.Deadline == null || t.Deadline > DateTime.UtcNow));
+                query = query.Where(t => t.Status == TaskStatus.Open && (t.Deadline == null || t.Deadline > DateTime.UtcNow));
+            }
+            else if (OnlyActive)
+            {
+                query = query.Where(t => t.Status != TaskStatus.Completed && t.Status != Models.Enums.TaskStatus.Archived);
             }
             
             if (!string.IsNullOrEmpty(CreatedById))

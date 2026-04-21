@@ -97,7 +97,7 @@ namespace Taskify.Areas.Identity.Pages.Account
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("Uživatelský účet byl dočasně uzamčen kvůli příliš mnoha pokusům o přihlášení.");
-                    ModelState.AddModelError(string.Empty, "Z bezpečnostních důvodů byl váš účet na 15 minut uzamčen.");
+                    ModelState.AddModelError(string.Empty, "Váš úkol je momentálně zablokovaný.");
                     return Page();
                 }
                 else
