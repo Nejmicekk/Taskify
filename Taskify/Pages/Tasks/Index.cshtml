@@ -1,6 +1,8 @@
 ﻿@page
 @model Taskify.Pages.Tasks.IndexModel
 @{
+    bool isAuth = User.Identity is { IsAuthenticated: true };
+    
     ViewData["Title"] = "Úkoly";
 }
 
@@ -110,36 +112,39 @@
                     <div class="d-none d-lg-block border-start" style="height: 30px; width: 1px;"></div>
                     <div class="d-lg-none border-top mx-3 opacity-25" style="height: 1px;"></div>
                     
-                    <div class="col-12 col-lg-3">
-                        <div class="dropdown w-100 h-100">
-                            <input type="hidden" name="SelectedRegion" value="@Model.SelectedRegion">
-                            <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 shadow-none" 
-                                    type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-geo-alt-fill text-danger me-2 ms-2 ms-lg-0"></i>
-                                <span class="text-truncate">
-                                    @(string.IsNullOrEmpty(Model.SelectedRegion) ? "Celá ČR" : Model.SelectedRegion)
-                                </span>
-                                <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
-                            </button>
+                    @if (isAuth)
+                    {
+                        <div class="col-12 col-lg-3">
+                            <div class="dropdown w-100 h-100">
+                                <input type="hidden" name="SelectedRegion" value="@Model.SelectedRegion">
+                                <button class="btn btn-lg btn-transparent w-100 text-start border-0 d-flex align-items-center fs-6 shadow-none" 
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2 ms-2 ms-lg-0"></i>
+                                    <span class="text-truncate">
+                                        @(string.IsNullOrEmpty(Model.SelectedRegion) ? "Celá ČR" : Model.SelectedRegion)
+                                    </span>
+                                    <i class="bi bi-chevron-down ms-auto small opacity-50"></i>
+                                </button>
 
-                            <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
-                                <li>
-                                    <div class="dropdown-item px-3 category-item cursor-pointer @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" data-id="" data-name="Celá ČR">
-                                        Celá ČR
-                                    </div>
-                                </li>
-                                <li><hr class="dropdown-divider opacity-50"></li>
-                                @foreach (var region in Model.AvailableRegions)
-                                {
+                                <ul class="dropdown-menu shadow-lg border-0 rounded-4 py-2 mt-2 w-100 overflow-auto" style="max-height: 350px;">
                                     <li>
-                                        <div class="dropdown-item px-3 category-item cursor-pointer @(Model.SelectedRegion == region ? "active" : "")" data-id="@region" data-name="@region">
-                                            @region
+                                        <div class="dropdown-item px-3 category-item cursor-pointer @(string.IsNullOrEmpty(Model.SelectedRegion) ? "active" : "")" data-id="" data-name="Celá ČR">
+                                            Celá ČR
                                         </div>
                                     </li>
-                                }
-                            </ul>
+                                    <li><hr class="dropdown-divider opacity-50"></li>
+                                    @foreach (var region in Model.AvailableRegions)
+                                    {
+                                        <li>
+                                            <div class="dropdown-item px-3 category-item cursor-pointer @(Model.SelectedRegion == region ? "active" : "")" data-id="@region" data-name="@region">
+                                                @region
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
                         </div>
-                    </div>
+                    }
                     
                     <div class="col-12 col-lg-auto ms-lg-auto p-2 pe-lg-2">
                         <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 w-100 d-flex align-items-center justify-content-center shadow-sm border-0 no-anim">
@@ -153,13 +158,28 @@
     </form>
         
 
-        <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+        @if (Model.Tasks.Count > 0)
+        {
+            <h3 class="fw-bold mb-4">@ViewData["Title"]</h3>
+        }
     }
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="tasks-container">
-        @foreach (var task in Model.Tasks) {
-            <div class="col task-item-wrapper" data-category="@task.CategoryId">
-                <partial name="_TaskCardPartial" model="task" />
+        @if (Model.Tasks.Count > 0)
+        {
+            @foreach (var task in Model.Tasks)
+            {
+                <div class="col task-item-wrapper" data-category="@task.CategoryId">
+                    <partial name="_TaskCardPartial" model="task"/>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="container py-5 text-center">
+                <i class="bi bi-bookmark text-muted display-1"></i>
+                <h2 class="fw-bold mt-4">Úkoly nenalezeny</h2>
+                <p class="text-muted lead">Bohužel jsme nanašli žádné úkoly. Je nám to moc líto.</p>
             </div>
         }
     </div>
