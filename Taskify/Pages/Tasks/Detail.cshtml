@@ -314,10 +314,16 @@
                                 <p class="small text-muted mb-0">Máte oprávnění tento úkol trvale odstranit ze systému nebo ho upravit.</p>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#deleteTaskModal">
-                            <i class="bi bi-trash3 me-2"></i>
-                            <span style="white-space: nowrap;">Smazat úkol</span>
-                        </button>
+                        <div class="d-flex gap-2 flex-wrap justify-content-center justify-content-sm-end">
+                            <a asp-page="/Tasks/Edit" asp-route-id="@Model.TaskItem.Id" class="btn btn-outline-danger rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center">
+                                <i class="bi bi-pencil-square me-2"></i>
+                                <span style="white-space: nowrap;">Upravit</span>
+                            </a>
+                            <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#deleteTaskModal">
+                                <i class="bi bi-trash3 me-2"></i>
+                                <span style="white-space: nowrap;">Smazat</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
