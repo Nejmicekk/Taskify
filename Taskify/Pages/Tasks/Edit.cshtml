@@ -17,6 +17,7 @@
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css">
 <link rel="stylesheet" href="~/css/Tasks/create.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/Tasks/air-datepicker.css" asp-append-version="true">
 
 <div class="container mt-4 mb-5">
     
@@ -102,14 +103,14 @@
                         </div>
 
                         <div class="form-floating mb-4 dropdown" id="categoryDropdownWrapper">
-                            <input type="text" id="categorySearch" class="form-control bg-white"
+                            <input type="text" id="categorySearchInput" class="form-control bg-white"
                                    data-bs-toggle="dropdown" data-bs-auto-close="outside"
                                    autocomplete="off" value="@selectedCatName" readonly style="cursor: pointer;">
                             <label asp-for="Input.CategoryId">Kategorie</label>
                             <input type="hidden" asp-for="Input.CategoryId" id="hiddenCategoryId">
                             <span asp-validation-for="Input.CategoryId" class="text-danger small fw-bold"></span>
 
-                            <ul class="dropdown-menu w-100 p-0 shadow-lg category-dropdown-menu">
+                            <ul class="dropdown-menu w-100 p-0 shadow-lg category-dropdown-menu scroll-y" style="max-height: 400px;">
                                 @foreach (var l1 in Model.Categories.Where(c => c.LevelNumber == 1).OrderBy(c => c.Name))
                                 {
                                     <li class="parent-li border-bottom">
@@ -126,25 +127,25 @@
                                         <ul class="collapse list-unstyled mb-0" id="cat-@l1.Id">
                                             @foreach (var l2 in Model.Categories.Where(c => c.ParentId == l1.Id).OrderBy(c => c.Name))
                                             {
-                                                var hasL3 = Model.Categories.Any(c => c.ParentId == l2.Id);
+                                                var l3Cats = Model.Categories.Where(c => c.ParentId == l2.Id).OrderBy(c => c.Name).ToList();
                                                 <li class="parent-li border-top">
                                                     <div class="d-flex align-items-center category-header p-0">
-                                                        <div class="p-2 ps-4 flex-grow-1 category-item cursor-pointer text-muted" data-id="@l2.Id" data-name="@l2.Name">
+                                                        <div class="p-2 ps-4 flex-grow-1 category-item @(!l3Cats.Any() ? "category-leaf-li" : "") cursor-pointer text-muted" data-id="@l2.Id" data-name="@l2.Name" data-search="@l1.Name @l2.Name">
                                                             <i class="bi @l2.IconUrl me-2 text-secondary"></i> @l2.Name
                                                         </div>
-                                                        @if (hasL3)
+                                                        @if (l3Cats.Any())
                                                         {
                                                             <div class="p-2 border-start" data-bs-toggle="collapse" data-bs-target="#cat-@l2.Id" style="cursor:pointer">
                                                                 <i class="bi bi-chevron-down text-muted chevron-icon" style="font-size: 0.8rem;"></i>
                                                             </div>
                                                         }
                                                     </div>
-                                                    @if (hasL3)
+                                                    @if (l3Cats.Any())
                                                     {
                                                         <ul class="collapse list-unstyled mb-0 bg-white" id="cat-@l2.Id">
-                                                            @foreach (var l3 in Model.Categories.Where(c => c.ParentId == l2.Id).OrderBy(c => c.Name))
+                                                            @foreach (var l3 in l3Cats)
                                                             {
-                                                                <li class="category-item border-top p-2 ps-5 text-muted cursor-pointer" data-id="@l3.Id" data-name="@l3.Name">
+                                                                <li class="category-item category-leaf-li border-top p-2 ps-5 text-muted cursor-pointer" data-id="@l3.Id" data-name="@l3.Name" data-search="@l1.Name @l2.Name @l3.Name">
                                                                     <i class="bi @l3.IconUrl me-2"></i> @l3.Name
                                                                 </li>
                                                             }
@@ -166,9 +167,9 @@
 
                         <div class="form-floating mb-4">
                             @{
-                                var dateString = Model.Input.Deadline.HasValue ? Model.Input.Deadline.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm") : "";
+                                var dateString = Model.Input.Deadline.HasValue ? Model.Input.Deadline.Value.ToString("dd.MM.yyyy HH:mm") : "";
                             }
-                            <input type="text" id="deadline-display" class="form-control bg-white" value="@dateString" />
+                            <input type="text" id="deadline-display" class="form-control bg-white" readonly style="cursor: pointer;" placeholder="Termín splnění" value="@dateString" />
                             <label for="deadline-display">Termín splnění (volitelné)</label>
 
                             <input type="hidden" asp-for="Input.Deadline" id="deadline-picker" value="@(Model.Input.Deadline?.ToString("yyyy-MM-ddTHH:mm"))" />
@@ -228,7 +229,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
     
+    <script src="~/js/Tasks/_localeCs.js" asp-append-version="true"></script>
     <script src="~/js/Tasks/detail.js" asp-append-version="true"></script>
-    <script src="~/js/Tasks/create.js" asp-append-version="true"></script>
+    <script src="~/js/Tasks/edit.js" asp-append-version="true"></script>
     <script src="~/js/categories-dropdown.js" asp-append-version="true"></script>
 }

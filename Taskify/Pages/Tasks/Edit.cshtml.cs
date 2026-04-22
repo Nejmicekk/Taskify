@@ -82,7 +82,7 @@ public class EditModel : PageModel
             Title = taskItem.Title,
             Description = taskItem.Description,
             CategoryId = taskItem.CategoryId,
-            Deadline = taskItem.Deadline
+            Deadline = taskItem.Deadline?.ToLocalTime()
         };
 
         await LoadCategoriesAsync();
@@ -123,7 +123,7 @@ public class EditModel : PageModel
         taskToUpdate.Title = Input.Title;
         taskToUpdate.Description = Input.Description;
         taskToUpdate.CategoryId = Input.CategoryId;
-        taskToUpdate.Deadline = Input.Deadline;
+        taskToUpdate.Deadline = Input.Deadline?.ToUniversalTime();
 
         await _context.SaveChangesAsync();
         TempData["StatusMessage"] = "Úkol byl úspěšně upraven!";

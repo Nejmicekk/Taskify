@@ -63,12 +63,6 @@
                                     <span asp-validation-for="Input.CategoryId" class="text-danger small"></span>
 
                                     <ul class="dropdown-menu w-100 p-0 shadow-lg border-0 rounded-4 category-dropdown-menu scroll-y" style="max-height: 400px;">
-                                        <li class="p-3 bg-light border-bottom sticky-top">
-                                            <div class="input-group input-group-sm">
-                                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                                                <input type="text" id="categorySearch" class="form-control border-start-0" placeholder="Hledat kategorii...">
-                                            </div>
-                                        </li>
                                         @foreach (var l1 in Model.Categories.Where(c => c.ParentId == null))
                                         {
                                             <li class="parent-li border-bottom">
